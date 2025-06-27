@@ -1,13 +1,12 @@
-// ✅ src/pages/CategoriasSecciones.jsx
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Button, Spinner } from 'flowbite-react';
-import axios from 'axios';
 import {
   HiArrowLeft,
   HiCheckCircle,
   HiOutlineExclamationCircle,
 } from 'react-icons/hi';
+import axios from 'axios';
 
 function CategoriasSecciones() {
   const navigate = useNavigate();
@@ -36,11 +35,17 @@ function CategoriasSecciones() {
     fetchAllSections();
   }, []);
 
+  const normalize = (text) => (text || '').toLowerCase().trim();
+
   const countByTitle = (title) =>
-    allSections.filter((s) => s.title.includes(title)).length;
+    allSections.filter((s) =>
+      normalize(s.title).includes(normalize(title))
+    ).length;
 
   const untrainedCount = allSections.filter(
-    (s) => !entrenadas.some((ent) => s.title.includes(ent))
+    (s) => !entrenadas.some((ent) =>
+      normalize(s.title).includes(normalize(ent))
+    )
   ).length;
 
   if (loading) {
