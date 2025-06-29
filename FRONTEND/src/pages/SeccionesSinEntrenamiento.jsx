@@ -1,118 +1,109 @@
-// ✅ src/pages/SeccionesSinEntrenamiento.jsx
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Card, Button, Spinner } from 'flowbite-react';
+import { HiArrowLeft, HiPlus } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
-import { HiArrowLeft, HiPencil, HiTrash, HiX } from 'react-icons/hi';
+import SeccionModal from '../components/SeccionModal';
 
-function SeccionesSinEntrenamiento() {
+const entrenadas = [
+  'Guía Turístico',
+  'Tipo de Cambio',
+  'Preguntas Frecuentes',
+  'Nosotros',
+  'Contacto'
+];
+
+export default function SeccionesSinEntrenamiento() {
   const navigate = useNavigate();
-  const [sections, setSections] = useState([]);
+  const [secciones, setSecciones] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewModal, setViewModal] = useState(false);
-  const [selected, setSelected] = useState(null);
-
-  const entrenadas = [
-    'Guía Turístico',
-    'Tipo de cambio',
-    'Preguntas Frecuentes',
-    'Nosotros',
-    'Contacto',
-  ];
-
-  const fetchSections = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get('http://localhost:5000/api/secciones');
-      const sin = res.data.filter(
-        (s) => !entrenadas.some((e) => s.title.includes(e))
-      );
-      setSections(sin);
-    } catch (err) {
-      console.error('Error cargando secciones:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [showModal, setShowModal] = useState(false);
+  const [selectedSeccion, setSelectedSeccion] = useState(null);
 
   useEffect(() => {
-    fetchSections();
+    async function fetchSecciones() {
+      try {
+        const { data } = await axios.get('http://localhost:5000/api/secciones');
+        const filtradas = data.filter(
+          (s) => !entrenadas.includes(s.title.replace(/\s*📚|\s*📘/, '').trim())
+        );
+        setSecciones(filtradas);
+      } catch (err) {
+        console.error('Error al traer secciones:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSecciones();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner size="xl" />
-      </div>
-    );
-  }
+  const handleSuccess = () => {
+    setShowModal(false);
+    setSelectedSeccion(null);
+    setLoading(true);
+    axios.get('http://localhost:5000/api/secciones')
+      .then(res => {
+        const filtradas = res.data.filter(
+          (s) => !entrenadas.includes(s.title.replace(/\s*📚|\s*📘/, '').trim())
+        );
+        setSecciones(filtradas);
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Secciones Sin Entrenamiento</h1>
-        <div className="flex space-x-2">
-          <Button
-            outline
-            color="light"
-            onClick={() => navigate('/categorias-secciones')}
-            className="flex items-center text-blue-600 hover:text-blue-800"
-          >
-            <HiArrowLeft className="mr-2" size={20} /> Volver
+        <h1 className="text-3xl font-bold">Secciones sin Entrenamiento</h1>
+        <div className="flex gap-2">
+          <Button outline onClick={() => navigate('/categorias-secciones')} className="flex items-center text-blue-600 hover:text-blue-800">
+            <HiArrowLeft size={20} className="mr-2 self-center" /> Volver
+          </Button>
+          <Button color="green" onClick={() => setShowModal(true)} className="flex items-center">
+            <HiPlus className="mr-2" /> Nueva Sección
           </Button>
         </div>
       </div>
 
-      {sections.length === 0 ? (
-        <p>No hay secciones sin entrenamiento.</p>
+      {loading ? (
+        <div className="min-h-[200px] flex justify-center items-center">
+          <Spinner size="xl" />
+        </div>
+      ) : secciones.length === 0 ? (
+        <p className="text-gray-500">No hay secciones sin entrenamiento por el momento.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {sections.map((sec) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {secciones.map((s) => (
             <Card
-              key={sec._id}
-              className="relative cursor-pointer shadow-sm hover:shadow-md transition rounded-lg bg-white"
+              key={s._id}
+              className="cursor-pointer hover:shadow-lg transition"
               onClick={() => {
-                setSelected(sec);
-                setViewModal(true);
+                setSelectedSeccion(s);
+                setShowModal(true);
               }}
             >
-              <h2 className="text-xl font-semibold mb-2">{sec.title}</h2>
-              <p className="text-gray-700 mb-1 truncate">{sec.description}</p>
+              <h2 className="text-xl font-semibold">{s.title}</h2>
+              <p>{s.menuItems?.length || 0} ítems</p>
             </Card>
           ))}
         </div>
       )}
 
-      <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
-        <div className="p-6 relative">
-          <HiX className="absolute top-4 right-4 cursor-pointer" size={24} onClick={() => setViewModal(false)} />
-          {selected && (
-            <>
-              <h2 className="text-2xl font-bold mb-4">{selected.title}</h2>
-              <p className="text-gray-700 mb-4">{selected.description}</p>
-              {selected.menuItems?.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-2">Opciones:</h3>
-                  <ul className="list-disc list-inside">
-                    {selected.menuItems.map((item, idx) => (
-                      <li key={idx}>
-                        <strong>{item.title}:</strong> {item.detail}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div className="mt-4">
-                <a href={selected.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                  Ver enlace
-                </a>
-              </div>
-            </>
-          )}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white rounded-lg shadow-lg p-4 max-w-3xl w-full">
+            <SeccionModal
+              seccion={selectedSeccion}
+              onClose={() => {
+                setShowModal(false);
+                setSelectedSeccion(null);
+              }}
+              onSuccess={handleSuccess}
+            />
+          </div>
         </div>
-      </Modal>
+      )}
     </div>
   );
 }
-
-export default SeccionesSinEntrenamiento;

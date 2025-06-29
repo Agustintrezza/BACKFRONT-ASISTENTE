@@ -1,10 +1,9 @@
-// src/pages/ProductosSinEntrenamiento.jsx
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
 import { HiArrowLeft, HiPencil, HiTrash, HiX } from 'react-icons/hi';
+import ProductoModal from '../components/ProductoModal';
 
 function ProductosSinEntrenamiento() {
   const navigate = useNavigate();
@@ -12,15 +11,21 @@ function ProductosSinEntrenamiento() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewModal, setViewModal] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
   const [selected, setSelected] = useState(null);
 
   const fetchProductos = async () => {
     setLoading(true);
     try {
       const res = await axios.get('http://localhost:5000/api/productos');
-      // Filtramos sólo los que NO pertenecen a categorías entrenadas
-      const entrenadas = ['Tours y Excursiones', 'Alojamiento', 'Shows de Tango', 'Programas', 'Traslados'];
-      const sin = res.data.filter(p => !entrenadas.includes(p.category));
+      const entrenadas = [
+        'Tours y Excursiones',
+        'Alojamiento',
+        'Shows de Tango',
+        'Programas',
+        'Traslados',
+      ];
+      const sin = res.data.filter((p) => !entrenadas.includes(p.category));
       setProductos(sin);
     } catch (err) {
       console.error('Error cargando productos:', err);
@@ -43,7 +48,7 @@ function ProductosSinEntrenamiento() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      {/* Encabezado superior: título + botones */}
+      {/* Encabezado superior */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Productos Sin Entrenamiento</h1>
         <div className="flex space-x-2">
@@ -58,7 +63,10 @@ function ProductosSinEntrenamiento() {
           </Button>
           <Button
             gradientDuoTone="greenToBlue"
-            onClick={() => navigate('/productos-sin-entrenamiento/nuevo')}
+            onClick={() => {
+              setSelected(null);
+              setShowFormModal(true);
+            }}
           >
             + Crear nuevo
           </Button>
@@ -70,7 +78,7 @@ function ProductosSinEntrenamiento() {
         <p>No hay productos sin entrenamiento.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {productos.map(p => (
+          {productos.map((p) => (
             <Card
               key={p._id}
               className="relative cursor-pointer shadow-sm hover:shadow-md transition rounded-lg bg-white"
@@ -89,15 +97,16 @@ function ProductosSinEntrenamiento() {
                 <HiPencil
                   className="text-yellow-500 hover:text-yellow-700"
                   size={20}
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/productos-sin-entrenamiento/${p._id}/editar`);
+                    setSelected(p);
+                    setShowFormModal(true);
                   }}
                 />
                 <HiTrash
                   className="text-red-500 hover:text-red-700"
                   size={20}
-                  onClick={async e => {
+                  onClick={async (e) => {
                     e.stopPropagation();
                     if (confirm('¿Eliminar este producto?')) {
                       try {
@@ -116,7 +125,7 @@ function ProductosSinEntrenamiento() {
         </div>
       )}
 
-      {/* Modal para ver detalle */}
+      {/* Modal de vista rápida */}
       <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
         <div className="p-6 relative">
           <HiX
@@ -152,6 +161,19 @@ function ProductosSinEntrenamiento() {
             </>
           )}
         </div>
+      </Modal>
+
+      {/* Modal de creación / edición */}
+      <Modal show={showFormModal} size="lg" onClose={() => setShowFormModal(false)}>
+        <ProductoModal
+          producto={selected}
+          category={selected?.category || 'Sin Entrenamiento'}
+          onClose={() => setShowFormModal(false)}
+          onSuccess={() => {
+            setShowFormModal(false);
+            fetchProductos();
+          }}
+        />
       </Modal>
     </div>
   );

@@ -1,53 +1,54 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Label, TextInput, Textarea, Button, Select } from 'flowbite-react';
-
-const TITULOS_FIJOS = [
-  'Guía Turístico',
-  'Tipo de Cambio',
-  'Preguntas Frecuentes 📚',
-  'Contacto 📚',
-  'Nosotros 📚'
-];
+import { Label, TextInput, Textarea, Button } from 'flowbite-react';
 
 function SeccionModal({ seccion, onClose, onSuccess }) {
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [link, setLink] = useState('');
-  const [menuItemsRaw, setMenuItemsRaw] = useState('');
+  const [menuItems, setMenuItems] = useState([{ title: '', detail: '', link: '' }]);
 
   useEffect(() => {
     if (seccion) {
       setTitle(seccion.title || '');
+      setDescription(seccion.description || '');
       setLink(seccion.link || '');
-      setMenuItemsRaw(
-        (seccion.menuItems || [])
-          .map((i) => `${i.title}|${i.detail}|${i.link || ''}`)
-          .join('\n')
-      );
+      setMenuItems(seccion.menuItems?.length ? seccion.menuItems : [{ title: '', detail: '', link: '' }]);
     } else {
       setTitle('');
+      setDescription('');
       setLink('');
-      setMenuItemsRaw('');
+      setMenuItems([{ title: '', detail: '', link: '' }]);
     }
   }, [seccion]);
+
+  const handleMenuItemChange = (index, field, value) => {
+    const updated = [...menuItems];
+    updated[index][field] = value;
+    setMenuItems(updated);
+  };
+
+  const addMenuItem = () => {
+    setMenuItems([...menuItems, { title: '', detail: '', link: '' }]);
+  };
+
+  const removeMenuItem = (index) => {
+    const updated = menuItems.filter((_, i) => i !== index);
+    setMenuItems(updated);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!title.trim() || !description.trim()) {
+      return alert('Título y descripción son obligatorios.');
+    }
+
     const payload = {
       title,
+      description,
       link,
-      menuItems: menuItemsRaw
-        .split('\n')
-        .map((line) => {
-          const [title, detail, link] = line.split('|');
-          return {
-            title: title?.trim(),
-            detail: detail?.trim(),
-            link: link?.trim(),
-          };
-        })
-        .filter((item) => item.title && item.detail),
+      menuItems: menuItems.filter(item => item.title.trim() || item.detail.trim() || item.link.trim()),
     };
 
     const url = seccion
@@ -59,9 +60,9 @@ function SeccionModal({ seccion, onClose, onSuccess }) {
         ? await axios.put(url, payload)
         : await axios.post(url, payload);
       onSuccess();
-    } catch (err) {
-      console.error('Error al guardar sección:', err);
-      alert('No se pudo guardar la sección.');
+    } catch (e) {
+      console.error('Error guardando sección', e);
+      alert('Ocurrió un error.');
     }
   };
 
@@ -72,48 +73,54 @@ function SeccionModal({ seccion, onClose, onSuccess }) {
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <Label value="Título" />
+          <TextInput value={title} onChange={e => setTitle(e.target.value)} required />
+        </div>
+        <div>
+          <Label value="Link principal" />
+          <TextInput value={link} onChange={e => setLink(e.target.value)} />
+        </div>
         <div className="sm:col-span-2">
-          <Label value="Título (no editable)" />
-          {seccion ? (
-            <TextInput value={title} disabled />
-          ) : (
-            <Select
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            >
-              <option value="">Seleccionar sección...</option>
-              {TITULOS_FIJOS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </Select>
-          )}
+          <Label value="Descripción" />
+          <Textarea value={description} onChange={e => setDescription(e.target.value)} required rows={2} />
         </div>
 
         <div className="sm:col-span-2">
-          <Label value="Link (opcional)" />
-          <TextInput value={link} onChange={(e) => setLink(e.target.value)} />
-        </div>
-
-        <div className="sm:col-span-2">
-          <Label value="Ítems del menú (uno por línea, formato: título | detalle | link)" />
-          <Textarea
-            rows={6}
-            value={menuItemsRaw}
-            onChange={(e) => setMenuItemsRaw(e.target.value)}
-          />
+          <Label value="Ítems del menú interno" />
+          {menuItems.map((item, index) => (
+            <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+              <TextInput
+                placeholder="Título"
+                value={item.title}
+                onChange={(e) => handleMenuItemChange(index, 'title', e.target.value)}
+              />
+              <TextInput
+                placeholder="Detalle"
+                value={item.detail}
+                onChange={(e) => handleMenuItemChange(index, 'detail', e.target.value)}
+              />
+              <TextInput
+                placeholder="Link"
+                value={item.link}
+                onChange={(e) => handleMenuItemChange(index, 'link', e.target.value)}
+              />
+              <div className="sm:col-span-3 text-right">
+                <Button color="red" size="xs" onClick={() => removeMenuItem(index)}>
+                  Eliminar ítem
+                </Button>
+              </div>
+            </div>
+          ))}
+          <Button color="gray" size="xs" onClick={addMenuItem}>
+            + Agregar ítem
+          </Button>
         </div>
       </div>
 
       <div className="flex justify-end gap-2 mt-4">
-        <Button color="gray" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button type="submit" className="bg-green-600 hover:bg-green-700">
-          Guardar
-        </Button>
+        <Button color="gray" onClick={onClose}>Cancelar</Button>
+        <Button type="submit" className="bg-green-600 hover:bg-green-700">Guardar</Button>
       </div>
     </form>
   );
