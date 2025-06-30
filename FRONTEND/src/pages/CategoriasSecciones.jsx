@@ -1,3 +1,4 @@
+// src/pages/CategoriasSecciones.jsx
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Button, Spinner } from 'flowbite-react';
@@ -50,21 +51,19 @@ function CategoriasSecciones() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner size="xl" />
+      <div className="min-h-screen flex items-center justify-center bg-neutral-900">
+        <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6"/>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen p-8 bg-black text-white">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestión de Secciones</h1>
         <Button
-          outline
-          color="light"
           onClick={() => navigate('/dashboard')}
-          className="flex items-center text-blue-600 hover:text-blue-800"
+          className="flex items-center font-medium px-4 py-2 buttom-custom-yellow"
         >
           <HiArrowLeft size={20} className="mr-2 self-center" />
           Volver
@@ -74,7 +73,7 @@ function CategoriasSecciones() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Secciones Entrenadas */}
         <div
-          className="cursor-pointer bg-white p-6 rounded-lg shadow hover:shadow-lg transition"
+          className="cursor-pointer p-6 rounded-lg shadow hover:shadow-lg transition bg-neutral-900 card-custom"
           onClick={() => navigate('/secciones-entrenadas')}
         >
           <div className="flex items-center mb-4">
@@ -84,7 +83,7 @@ function CategoriasSecciones() {
           <p className="mb-4">
             Administrá las secciones que están vinculadas a intents.
           </p>
-          <ul className="list-disc list-inside mb-4">
+          <ul className="list-disc list-inside mb-4 text-gray-300">
             {entrenadas.map((title) => (
               <li key={title}>
                 {title} ({countByTitle(title)})
@@ -96,7 +95,7 @@ function CategoriasSecciones() {
 
         {/* Secciones Sin Entrenamiento */}
         <div
-          className="cursor-pointer bg-white p-6 rounded-lg shadow hover:shadow-lg transition"
+          className="cursor-pointer p-6 rounded-lg shadow hover:shadow-lg transition bg-neutral-900 card-custom"
           onClick={() => navigate('/secciones-sin-entrenamiento')}
         >
           <div className="flex items-center mb-4">

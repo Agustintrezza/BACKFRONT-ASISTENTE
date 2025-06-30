@@ -4,3 +4,60 @@
 @tailwind utilities;
 
 
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: #000;
+    color: white;
+  }
+
+.card-custom {
+    transition: all ease-in-out .3s;
+    /* box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75);
+-webkit-box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75);
+-moz-box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75); */
+}
+.card-custom:hover {
+    transform: scale(1.01);
+    box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75);
+-webkit-box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75);
+-moz-box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75)!important;
+}
+
+.buttom-custom-yellow {
+    background-color: gold!important;
+    color: black!important;
+    font-weight: 500!important;
+    transition: all ease-in-out .3s;
+}
+.buttom-custom-yellow:hover {
+    background-color: rgb(219, 186, 1)!important;
+    color: black!important;
+    font-weight: 500!important;
+    transform: scale(1.02);
+}
+
+.boton-azul{
+    background-color: rgb(56, 93, 255)!important;
+    color: white!important;
+    font-weight: 500!important;
+    transition: all ease-in-out .3s;
+}
+.boton-azul:hover {
+    background-color: rgb(39, 78, 255)!important;
+    color: rgb(224, 224, 224)!important;
+    font-weight: 500!important;
+    transform: scale(1.02);
+}
+
+.card-productos {
+    border: 1px solid transparent!important;
+    transition: box-shadow 0.3s ease-in-out;
+  }
+  
+  .card-productos:hover {
+    /* box-shadow: 0px 0px 16px 3px rgba(240, 238, 238, 0.7); */
+    transform: scale(1.009);
+    /* border: 1px solid rgb(62, 62, 62)!important */
+    /* color: rgb(39, 78, 255)!important; */
+  }

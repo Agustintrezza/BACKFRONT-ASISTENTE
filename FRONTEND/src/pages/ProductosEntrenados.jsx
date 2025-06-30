@@ -4,6 +4,7 @@ import { Card, Button, Spinner } from 'flowbite-react';
 import { HiArrowLeft } from 'react-icons/hi';
 import axios from 'axios';
 
+// Categorías entrenadas
 const entrenadas = [
   'Tours y Excursiones',
   'Alojamiento',
@@ -11,6 +12,15 @@ const entrenadas = [
   'Programas',
   'Traslados'
 ];
+
+// Emojis por categoría
+const emojis = {
+  'Tours y Excursiones': '🗺️',
+  'Alojamiento': '🏨',
+  'Shows de Tango': '💃',
+  'Programas': '📝',
+  'Traslados': '🚐',
+};
 
 function ProductosEntrenados() {
   const navigate = useNavigate();
@@ -41,21 +51,19 @@ function ProductosEntrenados() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Spinner size="xl" />
+        <Spinner size="xl" className="w-16 h-16 mb-6 text-purple-600"/>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      {/* 📌 Título y botón en el mismo renglón, extremos opuestos */}
+    <div className="min-h-screen p-8">
+      {/* Título y botón */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Productos Entrenados</h1>
         <Button
-          outline
-          color="light"
           onClick={() => navigate('/productos')}
-          className="flex items-center text-blue-600 hover:text-blue-800"
+          className="flex items-center buttom-custom-yellow font-medium px-4 py-2"
         >
           <HiArrowLeft size={20} className="mr-2 self-center" />
           Volver
@@ -66,33 +74,18 @@ function ProductosEntrenados() {
         {entrenadas.map(cat => (
           <Card
             key={cat}
-            className="cursor-pointer hover:shadow-lg transition"
+            className="cursor-pointer bg-neutral-900 card-productos"
             onClick={() => navigate(`/productos/${encodeURIComponent(cat)}`)}
           >
-            <h2 className="text-xl font-semibold">{cat}</h2>
-            <p className="mt-2 mb-4 text-gray-600">
-              Total de productos: {counts[cat] || 0}
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">{cat}</h2>
+              <span className="text-4xl">{emojis[cat]}</span>
+            </div>
+            <p className="mt-2 mb-4 text-gray-400">
+              Total de productos: <span className="text-blue-500">{counts[cat] || 0}</span>
             </p>
             <div className="flex justify-between">
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/productos/${encodeURIComponent(cat)}`);
-                }}
-              >
-                Ver productos
-              </Button>
-              <Button
-                size="sm"
-                gradientDuoTone="greenToBlue"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/productos/${encodeURIComponent(cat)}/nuevo`);
-                }}
-              >
-                + Crear
-              </Button>
+              {/* Botones opcionales */}
             </div>
           </Card>
         ))}

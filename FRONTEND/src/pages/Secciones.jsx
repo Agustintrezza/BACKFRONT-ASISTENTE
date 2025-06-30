@@ -16,12 +16,11 @@ function Secciones() {
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
 
-  // 🔧 Función para limpiar texto de emojis, acentos y caracteres especiales
   const clean = (str) =>
     (str || '')
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Elimina tildes
-      .replace(/[^\w\s]/gi, '')        // Elimina emojis y símbolos
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s]/gi, '')
       .toLowerCase()
       .trim();
 
@@ -46,27 +45,26 @@ function Secciones() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner size="xl" />
+      <div className="min-h-screen flex items-center justify-center bg-neutral-900">
+        <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen p-8 bg-black text-white">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{decodeURIComponent(categoria)}</h1>
         <div className="flex space-x-2">
           <Button
-            outline
-            color="light"
+            className="flex items-center buttom-custom-yellow font-medium px-4 py-2"
             onClick={() => navigate('/secciones-entrenadas')}
-            className="flex items-center text-blue-600 hover:text-blue-800"
           >
-            <HiArrowLeft className="mr-2" size={20} /> Volver
+            <HiArrowLeft className="mr-2 self-center" size={20} />
+            Volver
           </Button>
           <Button
-            gradientDuoTone="greenToBlue"
+            className="boton-azul py-2"
             onClick={() => {
               setEditingSection(null);
               setShowFormModal(true);
@@ -82,18 +80,18 @@ function Secciones() {
         {secciones.map((s) => (
           <Card
             key={s._id}
-            className="relative cursor-pointer shadow-sm hover:shadow-md transition rounded-lg bg-white"
+            className="relative cursor-pointer bg-neutral-900 card-productos"
             onClick={() => {
               setSelected(s);
               setViewModal(true);
             }}
           >
-            <h2 className="text-xl font-semibold mb-2">{s.title}</h2>
-            <p className="text-gray-700 mb-1 truncate">{s.description}</p>
+            <h2 className="text-xl font-semibold mb-2 text-white">{s.title}</h2>
+            <p className="text-gray-400 mb-1 truncate">{s.description}</p>
 
             <div className="absolute bottom-2 right-2 flex space-x-2">
               <HiPencil
-                className="text-yellow-500 hover:text-yellow-700"
+                className="text-yellow-400 hover:text-yellow-600"
                 size={20}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -102,7 +100,7 @@ function Secciones() {
                 }}
               />
               <HiTrash
-                className="text-red-500 hover:text-red-700"
+                className="text-red-400 hover:text-red-600"
                 size={20}
                 onClick={async (e) => {
                   e.stopPropagation();
@@ -124,7 +122,7 @@ function Secciones() {
 
       {/* Modal de detalle */}
       <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
-        <div className="p-6 relative">
+        <div className="p-6 relative bg-white rounded-lg">
           <HiX
             className="absolute top-4 right-4 cursor-pointer"
             size={24}

@@ -1,9 +1,11 @@
+// src/pages/Productos.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, Button, Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
 import { HiArrowLeft, HiPencil, HiTrash, HiX } from 'react-icons/hi';
-import ProductoModal from '../components/ProductoModal'; // Asegurate que el path sea correcto
+import ProductoModal from '../components/ProductoModal';
+// import '../components/styles/Productos.css'; // Asegurate que este CSS exista
 
 function Productos() {
   const { categoria } = useParams();
@@ -13,7 +15,7 @@ function Productos() {
   const [loading, setLoading] = useState(true);
   const [viewModal, setViewModal] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [showFormModal, setShowFormModal] = useState(false); // ← Modal de creación
+  const [showFormModal, setShowFormModal] = useState(false);
 
   const fetchProductos = async () => {
     setLoading(true);
@@ -36,30 +38,29 @@ function Productos() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Spinner size="xl" />
+        <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6"/>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen p-8">
       {/* Encabezado superior */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{decodeURIComponent(categoria)}</h1>
         <div className="flex space-x-2">
-          <Button
-            outline
-            color="light"
-            onClick={() => navigate('/productos-entrenados')}
-            className="flex items-center text-blue-600 hover:text-blue-800"
-          >
-            <HiArrowLeft className="mr-2" size={20} /> Volver
-          </Button>
-          <Button
-            gradientDuoTone="greenToBlue"
+        <Button
+            className="boton-azul py-2"
             onClick={() => setShowFormModal(true)}
           >
             + Crear nuevo
+          </Button>
+          <Button
+            onClick={() => navigate('/productos-entrenados')}
+            className="flex items-center buttom-custom-yellow font-medium px-4 py-2"
+          >
+            <HiArrowLeft className="mr-2 self-center" size={20} />
+            Volver
           </Button>
         </div>
       </div>
@@ -69,20 +70,20 @@ function Productos() {
         {productos.map((p) => (
           <Card
             key={p._id}
-            className="relative cursor-pointer shadow-sm hover:shadow-md transition rounded-lg bg-white"
+            className="relative cursor-pointer bg-neutral-900 card-productos"
             onClick={() => {
               setSelected(p);
               setViewModal(true);
             }}
           >
-            <h2 className="text-xl font-semibold mb-2">{p.title}</h2>
-            <p className="text-gray-700 mb-1">Precio: ${p.price}</p>
-            <p className="text-gray-700 mb-1">Stock: {p.stock}</p>
-            <p className="text-gray-700">Duración: {p.duration}</p>
+            <h2 className="text-xl font-semibold mb-2 text-white">{p.title}</h2>
+            <p className="text-gray-400 mb-1">Precio: ${p.price}</p>
+            <p className="text-gray-400 mb-1">Stock: {p.stock}</p>
+            <p className="text-gray-400">Duración: {p.duration}</p>
 
             <div className="absolute bottom-2 right-2 flex space-x-2">
               <HiPencil
-                className="text-yellow-500 hover:text-yellow-700"
+                className="text-yellow-400 hover:text-yellow-600"
                 size={20}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -92,7 +93,7 @@ function Productos() {
                 }}
               />
               <HiTrash
-                className="text-red-500 hover:text-red-700"
+                className="text-red-400 hover:text-red-600"
                 size={20}
                 onClick={async (e) => {
                   e.stopPropagation();
@@ -116,7 +117,7 @@ function Productos() {
 
       {/* Modal de vista rápida del producto */}
       <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
-        <div className="p-6 relative">
+        <div className="p-6 relative bg-white rounded-lg">
           <HiX
             className="absolute top-4 right-4 cursor-pointer"
             size={24}
