@@ -5,7 +5,6 @@ import { Card, Button, Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
 import { HiArrowLeft, HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import ProductoModal from '../components/ProductoModal';
-// import '../components/styles/Productos.css'; // Asegurate que este CSS exista
 
 function Productos() {
   const { categoria } = useParams();
@@ -38,21 +37,20 @@ function Productos() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6"/>
+        <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen p-8">
-      {/* Encabezado superior */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{decodeURIComponent(categoria)}</h1>
         <div className="flex space-x-2">
-        <Button
-            className="boton-azul py-2"
-            onClick={() => setShowFormModal(true)}
-          >
+          <Button className="boton-azul py-2" onClick={() => {
+            setSelected(null);
+            setShowFormModal(true);
+          }}>
             + Crear nuevo
           </Button>
           <Button
@@ -65,7 +63,6 @@ function Productos() {
         </div>
       </div>
 
-      {/* Cards de productos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {productos.map((p) => (
           <Card
@@ -87,9 +84,8 @@ function Productos() {
                 size={20}
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(
-                    `/productos/${encodeURIComponent(categoria)}/${p._id}/editar`
-                  );
+                  setSelected(p);
+                  setShowFormModal(true);
                 }}
               />
               <HiTrash
@@ -99,9 +95,7 @@ function Productos() {
                   e.stopPropagation();
                   if (confirm('¿Eliminar este producto?')) {
                     try {
-                      await axios.delete(
-                        `http://localhost:5000/api/productos/${p._id}`
-                      );
+                      await axios.delete(`http://localhost:5000/api/productos/${p._id}`);
                       fetchProductos();
                     } catch (err) {
                       console.error('Error eliminando:', err);
@@ -115,7 +109,6 @@ function Productos() {
         ))}
       </div>
 
-      {/* Modal de vista rápida del producto */}
       <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
         <div className="p-6 relative bg-white rounded-lg">
           <HiX
@@ -145,17 +138,18 @@ function Productos() {
         </div>
       </Modal>
 
-      {/* Modal de creación/edición */}
-      <Modal show={showFormModal} size="lg" onClose={() => setShowFormModal(false)}>
-        <ProductoModal
-          producto={null}
-          category={categoria}
-          onClose={() => setShowFormModal(false)}
-          onSuccess={() => {
-            setShowFormModal(false);
-            fetchProductos();
-          }}
-        />
+      <Modal show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
+        <div className="bg-black text-white p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+          <ProductoModal
+            producto={selected}
+            category={categoria}
+            onClose={() => setShowFormModal(false)}
+            onSuccess={() => {
+              setShowFormModal(false);
+              fetchProductos();
+            }}
+          />
+        </div>
       </Modal>
     </div>
   );

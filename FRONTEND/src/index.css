@@ -61,3 +61,17 @@ html, body {
     /* border: 1px solid rgb(62, 62, 62)!important */
     /* color: rgb(39, 78, 255)!important; */
   }
+
+  .input-bg {
+    background-color: #171717 !important;
+    color: white;
+    border: none !important;
+    border-bottom: 1px solid gray !important;
+    border-radius: 0 !important;
+  }
+  
+  .input-bg:focus {
+    border-bottom: 2px solid gold !important; /* verde tailwind (emerald-400) */
+    outline: none !important;
+    box-shadow: none !important;
+  }

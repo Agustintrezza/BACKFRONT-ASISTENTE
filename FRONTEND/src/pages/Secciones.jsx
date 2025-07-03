@@ -172,16 +172,19 @@ function Secciones() {
       </Modal>
 
       {/* Modal de creación / edición */}
-      <Modal show={showFormModal} size="lg" onClose={() => setShowFormModal(false)}>
-        <SeccionModal
-          seccion={editingSection}
-          onClose={() => setShowFormModal(false)}
-          onSuccess={() => {
-            setShowFormModal(false);
-            fetchSecciones();
-          }}
-        />
-      </Modal>
+      <Modal show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
+  <div className="bg-black text-white p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+    <SeccionModal
+      seccion={editingSection}
+      category={decodeURIComponent(categoria)}
+      onClose={() => setShowFormModal(false)}
+      onSuccess={() => {
+        setShowFormModal(false);
+        fetchSecciones();
+      }}
+    />
+  </div>
+</Modal>
     </div>
   );
 }

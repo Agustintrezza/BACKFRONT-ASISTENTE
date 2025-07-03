@@ -155,16 +155,18 @@ function ProductosSinEntrenamiento() {
       </Modal>
 
       {/* Modal de creación / edición */}
-      <Modal show={showFormModal} size="lg" onClose={() => setShowFormModal(false)}>
-        <ProductoModal
-          producto={selected}
-          category={selected?.category || 'Sin Entrenamiento'}
-          onClose={() => setShowFormModal(false)}
-          onSuccess={() => {
-            setShowFormModal(false);
-            fetchProductos();
-          }}
-        />
+      <Modal show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
+        <div className="bg-black text-white p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+          <ProductoModal
+            producto={selected}
+            // category={categoria}
+            onClose={() => setShowFormModal(false)}
+            onSuccess={() => {
+              setShowFormModal(false);
+              fetchProductos();
+            }}
+          />
+        </div>
       </Modal>
     </div>
   );

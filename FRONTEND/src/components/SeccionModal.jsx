@@ -1,26 +1,41 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Label, TextInput, Textarea, Button } from 'flowbite-react';
+import { HiX } from 'react-icons/hi';
 
-function SeccionModal({ seccion, onClose, onSuccess }) {
+const entrenadas = [
+  'Guía Turístico',
+  'Tipo de Cambio',
+  'Preguntas Frecuentes',
+  'Nosotros',
+  'Contacto',
+];
+
+function SeccionModal({ seccion, category, onClose, onSuccess }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [link, setLink] = useState('');
   const [menuItems, setMenuItems] = useState([{ title: '', detail: '', link: '' }]);
+
+  const isEntrenada =
+    !!category || (seccion && entrenadas.includes(seccion.title?.trim()));
 
   useEffect(() => {
     if (seccion) {
       setTitle(seccion.title || '');
       setDescription(seccion.description || '');
       setLink(seccion.link || '');
-      setMenuItems(seccion.menuItems?.length ? seccion.menuItems : [{ title: '', detail: '', link: '' }]);
+      setMenuItems(
+        seccion.menuItems?.length
+          ? seccion.menuItems
+          : [{ title: '', detail: '', link: '' }]
+      );
     } else {
-      setTitle('');
+      setTitle(category || '');
       setDescription('');
       setLink('');
       setMenuItems([{ title: '', detail: '', link: '' }]);
     }
-  }, [seccion]);
+  }, [seccion, category]);
 
   const handleMenuItemChange = (index, field, value) => {
     const updated = [...menuItems];
@@ -48,7 +63,10 @@ function SeccionModal({ seccion, onClose, onSuccess }) {
       title,
       description,
       link,
-      menuItems: menuItems.filter(item => item.title.trim() || item.detail.trim() || item.link.trim()),
+      menuItems: menuItems.filter(
+        (item) =>
+          item.title.trim() || item.detail.trim() || item.link.trim()
+      ),
     };
 
     const url = seccion
@@ -67,60 +85,129 @@ function SeccionModal({ seccion, onClose, onSuccess }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 space-y-4 w-full max-w-2xl">
-      <h2 className="text-lg font-semibold mb-2">
-        {seccion ? 'Editar Sección' : 'Nueva Sección'}
-      </h2>
+    <form
+      onSubmit={handleSubmit}
+      className="bg-black text-white p-6 w-full max-w-6xl rounded-lg shadow-xl"
+    >
+      {/* Encabezado */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">
+          {seccion
+            ? 'Editar Sección'
+            : category
+            ? `Nueva Sección (${category})`
+            : 'Nueva Sección'}
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-red-500 hover:text-red-700 text-3xl font-bold"
+        >
+          <HiX />
+        </button>
+      </div>
 
+      {/* Título y Link */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label value="Título" />
-          <TextInput value={title} onChange={e => setTitle(e.target.value)} required />
+          <label className="block mb-1">Título</label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            disabled={isEntrenada}
+            className="w-full bg-neutral-900 border-b border-yellow-400 text-white px-3 py-2 focus:outline-none"
+          />
         </div>
         <div>
-          <Label value="Link principal" />
-          <TextInput value={link} onChange={e => setLink(e.target.value)} />
-        </div>
-        <div className="sm:col-span-2">
-          <Label value="Descripción" />
-          <Textarea value={description} onChange={e => setDescription(e.target.value)} required rows={2} />
-        </div>
-
-        <div className="sm:col-span-2">
-          <Label value="Ítems del menú interno" />
-          {menuItems.map((item, index) => (
-            <div key={index} className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
-              <TextInput
-                placeholder="Título"
-                value={item.title}
-                onChange={(e) => handleMenuItemChange(index, 'title', e.target.value)}
-              />
-              <TextInput
-                placeholder="Detalle"
-                value={item.detail}
-                onChange={(e) => handleMenuItemChange(index, 'detail', e.target.value)}
-              />
-              <TextInput
-                placeholder="Link"
-                value={item.link}
-                onChange={(e) => handleMenuItemChange(index, 'link', e.target.value)}
-              />
-              <div className="sm:col-span-3 text-right">
-                <Button color="red" size="xs" onClick={() => removeMenuItem(index)}>
-                  Eliminar ítem
-                </Button>
-              </div>
-            </div>
-          ))}
-          <Button color="gray" size="xs" onClick={addMenuItem}>
-            + Agregar ítem
-          </Button>
+          <label className="block mb-1">Link principal</label>
+          <input
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            className="w-full bg-neutral-900 border-b border-yellow-400 text-white px-3 py-2 focus:outline-none"
+          />
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 mt-4">
-        <Button color="gray" onClick={onClose}>Cancelar</Button>
-        <Button type="submit" className="bg-green-600 hover:bg-green-700">Guardar</Button>
+      {/* Descripción */}
+      <div className="mt-4">
+        <label className="block mb-1">Descripción</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+          rows={3}
+          className="w-full bg-neutral-900 border-b border-yellow-400 text-white px-3 py-2 focus:outline-none"
+        />
+      </div>
+
+      {/* Ítems del menú interno */}
+      <div className="mt-6">
+        <label className="block mb-2">Ítems del menú interno</label>
+        {menuItems.map((item, index) => (
+          <div
+            key={index}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2"
+          >
+            <input
+              placeholder="Título"
+              value={item.title}
+              onChange={(e) =>
+                handleMenuItemChange(index, 'title', e.target.value)
+              }
+              className="bg-neutral-900 border-b border-yellow-400 text-white px-3 py-2 focus:outline-none"
+            />
+            <input
+              placeholder="Detalle"
+              value={item.detail}
+              onChange={(e) =>
+                handleMenuItemChange(index, 'detail', e.target.value)
+              }
+              className="bg-neutral-900 border-b border-yellow-400 text-white px-3 py-2 focus:outline-none"
+            />
+            <input
+              placeholder="Link"
+              value={item.link}
+              onChange={(e) =>
+                handleMenuItemChange(index, 'link', e.target.value)
+              }
+              className="bg-neutral-900 border-b border-yellow-400 text-white px-3 py-2 focus:outline-none"
+            />
+            <div className="sm:col-span-3 text-right">
+              <button
+                type="button"
+                onClick={() => removeMenuItem(index)}
+                className="text-sm text-red-500 hover:text-red-700"
+              >
+                Eliminar ítem
+              </button>
+            </div>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addMenuItem}
+          className="text-sm text-yellow-400 hover:text-yellow-500 mt-2"
+        >
+          + Agregar ítem
+        </button>
+      </div>
+
+      {/* Botones */}
+      <div className="flex justify-end gap-3 mt-6">
+        <button
+          type="button"
+          onClick={onClose}
+          className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+        >
+          Guardar
+        </button>
       </div>
     </form>
   );
