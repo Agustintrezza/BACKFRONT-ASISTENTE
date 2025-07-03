@@ -12,30 +12,46 @@ function Navbar() {
   };
 
   return (
-    <FlowbiteNavbar fluid rounded className="shadow-md navbar-container">
+    <FlowbiteNavbar fluid rounded className="shadow-md navbar-container bg-neutral-900">
       <FlowbiteNavbar.Brand href="/">
         <img
           src="/asistente-logo.png"
-          className="mr-3 h-10 sm:h-10"
+          className="mr-2 h-16 sm:h-10"
           alt="Chatbot Logo"
         />
-        <span className="self-center navbar-title whitespace-nowrap font-semibold">
-          Chatbot Admin
-        </span>
+        <span
+  className="self-center whitespace-nowrap font-semibold text-2xl tracking-wide text-white"
+  style={{
+    background: 'linear-gradient(to right, #8b5cf6, #ffffff)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+  }}
+>
+  CHATBOT ADMIN
+</span>
       </FlowbiteNavbar.Brand>
 
       <FlowbiteNavbar.Toggle />
 
       <FlowbiteNavbar.Collapse>
-        <div className="flex items-center text-md gap-5">
-          <FlowbiteNavbar.Link className="navbar-navlink" onClick={() => navigate('/productos')}>
-            Productos
+        <div className="flex items-center text-md gap-5 font-medium">
+          <FlowbiteNavbar.Link
+            className="navbar-navlink text-white hover:text-yellow-300 transition font-medium"
+            onClick={() => navigate('/productos')}
+          >
+            📦 Productos
           </FlowbiteNavbar.Link>
-          <FlowbiteNavbar.Link className="navbar-navlink" onClick={() => navigate('/categorias-secciones')}>
-            Secciones
+          <FlowbiteNavbar.Link
+            className="navbar-navlink text-white hover:text-yellow-300 transition font-medium"
+            onClick={() => navigate('/categorias-secciones')}
+          >
+            🧩 Secciones
           </FlowbiteNavbar.Link>
-          <FlowbiteNavbar.Link className="navbar-navlink" onClick={() => navigate('/reservas')}>
-            Reservas
+          <FlowbiteNavbar.Link
+            className="navbar-navlink text-white hover:text-yellow-300 transition font-medium"
+            onClick={() => navigate('/reservas')}
+          >
+            📅 Reservas
           </FlowbiteNavbar.Link>
           <Button
             onClick={handleLogout}

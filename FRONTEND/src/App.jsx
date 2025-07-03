@@ -4,15 +4,13 @@ import { useEffect, useState } from "react";
 
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
-import CategoriasProductos from "./pages/CategoriasProductos";
 import ProductosEntrenados from "./pages/ProductosEntrenados";
 import Productos from "./pages/Productos";
 import ProductosSinEntrenamiento from "./pages/ProductosSinEntrenamiento";
 import Login from "./pages/Login";
-import SeccionesPorCategoria from "./pages/Secciones";           // Listado/edición por categoría
-import CategoriasSecciones from "./pages/CategoriasSecciones";    // Pantalla con “Entrenadas / Sin Entrenamiento” para Secciones
+import SeccionesPorCategoria from "./pages/Secciones"; // Listado por categoría
 import SeccionesSinEntrenamiento from './pages/SeccionesSinEntrenamiento';
-import SeccionesEntrenadas from "./pages/SeccionesEntrenadas"
+import SeccionesEntrenadas from "./pages/SeccionesEntrenadas";
 
 import "./index.css";
 import "flowbite/dist/flowbite.css";
@@ -33,13 +31,13 @@ function App() {
         <Route
           path="/login"
           element={
-            isAuthenticated 
+            isAuthenticated
               ? <Navigate to="/dashboard" replace />
               : <Login />
           }
         />
 
-        {/* Dashboard */}
+        {/* Dashboard principal */}
         <Route
           path="/dashboard"
           element={
@@ -50,14 +48,6 @@ function App() {
         />
 
         {/* Gestión Productos */}
-        <Route
-          path="/productos"
-          element={
-            isAuthenticated 
-              ? <CategoriasProductos />
-              : <Navigate to="/login" replace />
-          }
-        />
         <Route
           path="/productos-entrenados"
           element={
@@ -85,10 +75,18 @@ function App() {
 
         {/* Gestión Secciones */}
         <Route
-          path="/categorias-secciones"
+          path="/secciones-entrenadas"
           element={
             isAuthenticated
-              ? <CategoriasSecciones />
+              ? <SeccionesEntrenadas />
+              : <Navigate to="/login" replace />
+          }
+        />
+        <Route
+          path="/secciones-sin-entrenamiento"
+          element={
+            isAuthenticated
+              ? <SeccionesSinEntrenamiento />
               : <Navigate to="/login" replace />
           }
         />
@@ -100,36 +98,6 @@ function App() {
               : <Navigate to="/login" replace />
           }
         />
-
-        {/* Otras pantallas */}
-        {/* <Route
-          path="/reservas"
-          element={
-            isAuthenticated
-              ? <Reservas />
-              : <Navigate to="/login" replace />
-          }
-        /> */}
-
-        <Route
-          path="/secciones-sin-entrenamiento"
-          element={
-            isAuthenticated
-              ? <SeccionesSinEntrenamiento />
-              : <Navigate to="/login" replace />
-          }
-        />
-
-        <Route
-          path="/secciones-entrenadas"
-          element={
-            isAuthenticated
-              ? <SeccionesEntrenadas />
-              : <Navigate to="/login" replace />
-          }
-        />
-
-      {/* <Route path="/secciones-entrenadas/:seccion/*" element={isAuthenticated ? <SeccionDetalle /> : <Navigate to="/login" replace />} /> */}
 
         {/* Fallback */}
         <Route

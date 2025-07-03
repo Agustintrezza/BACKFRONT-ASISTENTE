@@ -19,9 +19,9 @@ html, body {
 }
 .card-custom:hover {
     transform: scale(1.01);
-    box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75);
+    /* box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75);
 -webkit-box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75);
--moz-box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75)!important;
+-moz-box-shadow: 0px 0px 13px 2px rgba(161,161,161,0.75)!important; */
 }
 
 .buttom-custom-yellow {
@@ -33,6 +33,19 @@ html, body {
 .buttom-custom-yellow:hover {
     background-color: rgb(219, 186, 1)!important;
     color: black!important;
+    font-weight: 500!important;
+    transform: scale(1.02);
+}
+
+.buttom-custom-red {
+    background-color: #ff5c43!important;
+    color: rgb(255, 255, 255)!important;
+    font-weight: 500!important;
+    transition: all ease-in-out .3s;
+}
+.buttom-custom-red:hover {
+    background-color: #fa4e33!important;
+    color: rgb(255, 255, 255)!important;
     font-weight: 500!important;
     transform: scale(1.02);
 }
@@ -68,6 +81,7 @@ html, body {
     border: none !important;
     border-bottom: 1px solid gray !important;
     border-radius: 0 !important;
+    border-radius: 5px!important;
   }
   
   .input-bg:focus {
@@ -75,3 +89,35 @@ html, body {
     outline: none !important;
     box-shadow: none !important;
   }
+
+  .label-inputs {
+    color: white!important
+  }
+  .mde-header {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    /* border-bottom: 1px solid #ffffff; */
+    /* border-radius: 2px 2px 0 0; */
+    border: none!important;
+    background: #000000!important;
+    color: white !important;
+}
+.mde-header .svg-icon {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    font-size: inherit;
+    overflow: visible;
+    vertical-align: -.125em;
+    color: rgb(0, 119, 255)!important;
+}
+.react-mde {
+    /* border: 1px solid #c8ccd0; */
+    /* border-radius: 2px; */
+    border: none!important;
+}
+.card-shadow {
+    box-shadow: #fa4e33!important;
+}

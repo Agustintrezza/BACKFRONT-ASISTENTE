@@ -1,4 +1,3 @@
-// src/pages/Productos.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, Button, Modal, Spinner } from 'flowbite-react';
@@ -36,32 +35,42 @@ function Productos() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-900">
         <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-8 bg-black text-white">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{decodeURIComponent(categoria)}</h1>
         <div className="flex space-x-2">
-          <Button className="boton-azul py-2" onClick={() => {
-            setSelected(null);
-            setShowFormModal(true);
-          }}>
-            + Crear nuevo
-          </Button>
           <Button
-            onClick={() => navigate('/productos-entrenados')}
             className="flex items-center buttom-custom-yellow font-medium px-4 py-2"
+            onClick={() => navigate('/productos-entrenados')}
           >
             <HiArrowLeft className="mr-2 self-center" size={20} />
             Volver
           </Button>
+          <Button
+            className="boton-azul py-2"
+            onClick={() => {
+              setSelected(null);
+              setShowFormModal(true);
+            }}
+          >
+            + Crear nuevo
+          </Button>
         </div>
       </div>
+
+      {productos.length === 0 && (
+        <div className="bg-yellow-800/30 text-yellow-400 text-center py-4 mb-6 rounded">
+          ⚠️ Aún no hay productos cargados para la categoría{' '}
+          <strong className="text-white">{decodeURIComponent(categoria)}</strong>.
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {productos.map((p) => (
@@ -74,9 +83,9 @@ function Productos() {
             }}
           >
             <h2 className="text-xl font-semibold mb-2 text-white">{p.title}</h2>
-            <p className="text-gray-400 mb-1">Precio: ${p.price}</p>
-            <p className="text-gray-400 mb-1">Stock: {p.stock}</p>
-            <p className="text-gray-400">Duración: {p.duration}</p>
+            <p className="text-gray-400 mb-1 truncate">Precio: ${p.price}</p>
+            <p className="text-gray-400 mb-1 truncate">Stock: {p.stock}</p>
+            <p className="text-gray-400 truncate">Duración: {p.duration}</p>
 
             <div className="absolute bottom-2 right-2 flex space-x-2">
               <HiPencil
@@ -109,40 +118,62 @@ function Productos() {
         ))}
       </div>
 
-      <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
-        <div className="p-6 relative bg-white rounded-lg">
-          <HiX
-            className="absolute top-4 right-4 cursor-pointer"
-            size={24}
-            onClick={() => setViewModal(false)}
-          />
-          {selected && (
-            <>
-              <h2 className="text-2xl font-bold mb-4">{selected.title}</h2>
-              {selected.image && (
-                <img
-                  src={selected.image}
-                  alt={selected.title}
-                  className="w-full h-64 object-cover rounded-lg mb-4"
-                />
-              )}
-              <p className="text-gray-700 mb-4">{selected.description}</p>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><strong>Precio:</strong> ${selected.price}</div>
-                <div><strong>Stock:</strong> {selected.stock}</div>
-                <div><strong>Duración:</strong> {selected.duration}</div>
-                <div><strong>Categoría:</strong> {selected.category}</div>
-              </div>
-            </>
+      {/* Modal de detalle */}
+      <Modal show={viewModal} size="6xl" className="bg-black" onClose={() => setViewModal(false)}>
+        <div className="p-6 relative bg-neutral-900 text-white rounded-lg w-full max-h-[90vh] overflow-y-auto border border-neutral-700">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">{selected?.title}</h2>
+            <HiX
+              className="text-red-500 hover:text-red-700 cursor-pointer"
+              size={32}
+              onClick={() => setViewModal(false)}
+            />
+          </div>
+
+          {selected?.image && (
+            <img
+              src={selected.image}
+              alt={selected.title}
+              className="w-full h-64 object-cover rounded-lg mb-6"
+            />
           )}
+
+          {selected?.description && (
+            <p className="text-gray-300 text-base mb-6">{selected.description}</p>
+          )}
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>💰 Precio:</strong> ${selected?.price}
+            </div>
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>📦 Stock:</strong> {selected?.stock}
+            </div>
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>⏳ Duración:</strong> {selected?.duration}
+            </div>
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>📍 Ubicación:</strong> {selected?.location || 'No especificada'}
+            </div>
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>📂 Categoría:</strong> {selected?.category}
+            </div>
+            {selected?.availableDates?.length > 0 && (
+              <div className="border-b border-yellow-400 pb-2 col-span-2">
+                <strong>📅 Fechas disponibles:</strong>{' '}
+                {selected.availableDates.join(', ')}
+              </div>
+            )}
+          </div>
         </div>
       </Modal>
 
-      <Modal show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
-        <div className="bg-black text-white p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+      {/* Modal de creación/edición */}
+      <Modal show={showFormModal} size="7xl" className="bg-black" onClose={() => setShowFormModal(false)}>
+        <div className="bg-neutral-900 text-white p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
           <ProductoModal
             producto={selected}
-            category={categoria}
+            category={decodeURIComponent(categoria)}
             onClose={() => setShowFormModal(false)}
             onSuccess={() => {
               setShowFormModal(false);
