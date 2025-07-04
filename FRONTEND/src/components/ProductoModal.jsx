@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Label, Button } from 'flowbite-react';
 import { HiX } from 'react-icons/hi';
+import Swal from 'sweetalert2';
 import InputWithEmoji from './InputWithEmoji';
 import TextareaWithEditor from '../components/TextAreaWithEditor';
 
@@ -44,7 +45,12 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
     e.preventDefault();
 
     if (!title.trim() || !description.trim()) {
-      return alert('Título y descripción son obligatorios.');
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        text: 'El título y la descripción son obligatorios.',
+        confirmButtonColor: '#facc15',
+      });
     }
 
     const payload = {
@@ -69,10 +75,23 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
       producto
         ? await axios.put(url, payload)
         : await axios.post(url, payload);
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡Guardado!',
+        text: 'El producto fue guardado correctamente.',
+        confirmButtonColor: '#3b82f6',
+      });
+
       onSuccess();
     } catch (e) {
       console.error('Error guardando producto', e);
-      alert('Ocurrió un error.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al guardar el producto.',
+        confirmButtonColor: '#ef4444',
+      });
     }
   };
 

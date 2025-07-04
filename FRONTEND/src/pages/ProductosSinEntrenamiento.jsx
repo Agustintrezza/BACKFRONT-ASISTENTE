@@ -1,10 +1,13 @@
-// src/pages/ProductosSinEntrenamiento.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
 import { HiArrowLeft, HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import ProductoModal from '../components/ProductoModal';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 function ProductosSinEntrenamiento() {
   const navigate = useNavigate();
@@ -39,17 +42,65 @@ function ProductosSinEntrenamiento() {
     fetchProductos();
   }, []);
 
+  const handleDelete = async (producto) => {
+    const confirm = await MySwal.fire({
+      title: `¿Eliminar "${producto.title}"?`,
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#171717',
+      color: '#f3f4f6',
+      iconColor: '#facc15',
+      customClass: {
+        popup: 'rounded-lg',
+        title: 'text-lg font-semibold',
+        confirmButton: 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700',
+        cancelButton: 'bg-blue-600 text-white px-4 py-2 rounded hover:bg-gray-700'
+      }
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:5000/api/productos/${producto._id}`);
+        fetchProductos();
+        MySwal.fire({
+          title: 'Eliminado',
+          text: `"${producto.title}" fue eliminado correctamente.`,
+          icon: 'success',
+          background: '#171717',
+          color: '#f3f4f6',
+          iconColor: '#4ade80',
+          confirmButtonColor: '#3b82f6'
+        });
+      } catch (err) {
+        console.error('Error eliminando:', err);
+        MySwal.fire({
+          title: 'Error',
+          text: 'No se pudo eliminar el producto.',
+          icon: 'error',
+          background: '#111827',
+          color: '#f3f4f6',
+          iconColor: '#f87171',
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-900">
-        <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6"/>
+        <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen p-8 bg-black text-white">
-      {/* Encabezado superior */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Productos Sin Entrenamiento</h1>
         <div className="flex space-x-2">
@@ -72,7 +123,6 @@ function ProductosSinEntrenamiento() {
         </div>
       </div>
 
-      {/* Grid de productos sin entrenamiento */}
       {productos.length === 0 ? (
         <p className="text-gray-400">No hay productos sin entrenamiento.</p>
       ) : (
@@ -91,7 +141,6 @@ function ProductosSinEntrenamiento() {
               <p className="text-gray-400 mb-1">Stock: {p.stock}</p>
               <p className="text-gray-400">Duración: {p.duration}</p>
 
-              {/* Iconos editar / eliminar */}
               <div className="absolute bottom-2 right-2 flex space-x-2">
                 <HiPencil
                   className="text-yellow-400 hover:text-yellow-600"
@@ -105,17 +154,9 @@ function ProductosSinEntrenamiento() {
                 <HiTrash
                   className="text-red-400 hover:text-red-600"
                   size={20}
-                  onClick={async (e) => {
+                  onClick={(e) => {
                     e.stopPropagation();
-                    if (confirm('¿Eliminar este producto?')) {
-                      try {
-                        await axios.delete(`http://localhost:5000/api/productos/${p._id}`);
-                        fetchProductos();
-                      } catch (err) {
-                        console.error('Error eliminando:', err);
-                        alert('No se pudo eliminar.');
-                      }
-                    }
+                    handleDelete(p);
                   }}
                 />
               </div>
@@ -124,7 +165,7 @@ function ProductosSinEntrenamiento() {
         </div>
       )}
 
-      {/* Modal de vista rápida */}
+      {/* Modal detalle */}
       <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
         <div className="p-6 relative bg-white rounded-lg">
           <HiX
@@ -154,12 +195,11 @@ function ProductosSinEntrenamiento() {
         </div>
       </Modal>
 
-      {/* Modal de creación / edición */}
+      {/* Modal creación / edición */}
       <Modal show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
         <div className="bg-black text-white p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
           <ProductoModal
             producto={selected}
-            // category={categoria}
             onClose={() => setShowFormModal(false)}
             onSuccess={() => {
               setShowFormModal(false);

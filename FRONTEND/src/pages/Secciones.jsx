@@ -4,6 +4,10 @@ import { Card, Button, Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
 import { HiArrowLeft, HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import SeccionModal from '../components/SeccionModal';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 function Secciones() {
   const { categoria } = useParams();
@@ -43,6 +47,55 @@ function Secciones() {
     fetchSecciones();
   }, [categoria]);
 
+  const handleDelete = async (seccion) => {
+    const confirm = await MySwal.fire({
+      title: `¿Eliminar esta sección?`,
+      text: `"${seccion.title}" será eliminada permanentemente.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#171717',
+      color: '#f3f4f6',
+      iconColor: '#facc15',
+      customClass: {
+        popup: 'rounded-lg',
+        title: 'text-lg font-semibold',
+        confirmButton: 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700',
+        cancelButton: 'bg-blue-600 text-white px-4 py-2 rounded hover:bg-gray-700'
+      }
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:5000/api/secciones/${seccion._id}`);
+        fetchSecciones();
+        MySwal.fire({
+          title: 'Eliminado',
+          text: `"${seccion.title}" fue eliminado correctamente.`,
+          icon: 'success',
+          background: '#171717',
+          color: '#f3f4f6',
+          iconColor: '#4ade80',
+          confirmButtonColor: '#3b82f6'
+        });
+      } catch (err) {
+        console.error('Error eliminando:', err);
+        MySwal.fire({
+          title: 'Error',
+          text: 'No se pudo eliminar la sección.',
+          icon: 'error',
+          background: '#111827',
+          color: '#f3f4f6',
+          iconColor: '#f87171',
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-900">
@@ -76,12 +129,11 @@ function Secciones() {
       </div>
 
       {secciones.length === 0 && (
-  <div className="bg-yellow-800/30 text-yellow-400 text-center py-4 mb-6 rounded">
-    ⚠️ Aún no hay ninguna sección cargada para la categoría <strong className="text-white">{decodeURIComponent(categoria)}</strong>.
-  </div>
-)}
+        <div className="bg-yellow-800/30 text-yellow-400 text-center py-4 mb-6 rounded">
+          ⚠️ Aún no hay ninguna sección cargada para la categoría <strong className="text-white">{decodeURIComponent(categoria)}</strong>.
+        </div>
+      )}
 
-      {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {secciones.map((s) => (
           <Card
@@ -108,17 +160,9 @@ function Secciones() {
               <HiTrash
                 className="text-red-400 hover:text-red-600"
                 size={20}
-                onClick={async (e) => {
+                onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm('¿Eliminar esta sección?')) {
-                    try {
-                      await axios.delete(`http://localhost:5000/api/secciones/${s._id}`);
-                      fetchSecciones();
-                    } catch (err) {
-                      console.error('Error eliminando:', err);
-                      alert('No se pudo eliminar.');
-                    }
-                  }
+                  handleDelete(s);
                 }}
               />
             </div>

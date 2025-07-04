@@ -4,6 +4,7 @@ import { Card, Button, Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
 import { HiArrowLeft, HiPencil, HiTrash, HiX } from 'react-icons/hi';
 import ProductoModal from '../components/ProductoModal';
+import Swal from 'sweetalert2';
 
 function Productos() {
   const { categoria } = useParams();
@@ -32,6 +33,55 @@ function Productos() {
   useEffect(() => {
     fetchProductos();
   }, [categoria]);
+
+  const handleDelete = async (producto) => {
+    const confirm = await Swal.fire({
+      title: `¿Eliminar "${producto.title}"?`,
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#171717', // fondo negro (tailwind gray-900)
+      color: '#f3f4f6',       // texto gris claro (tailwind gray-100)
+      iconColor: '#facc15',   // amarillo (warning)
+      customClass: {
+        popup: 'rounded-lg',
+        title: 'text-lg font-semibold',
+        confirmButton: 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700',
+        cancelButton: 'bg-blue-600 text-white px-4 py-2 rounded hover:bg-gray-700'
+      }
+    });
+  
+    if (confirm.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:5000/api/productos/${producto._id}`);
+        fetchProductos();
+        Swal.fire({
+          title: 'Eliminado',
+          text: `"${producto.title}" fue eliminado correctamente.`,
+          icon: 'success',
+          background: '#171717',
+          color: '#f3f4f6',
+          iconColor: '#4ade80', // verde
+          confirmButtonColor: '#3b82f6'
+        });
+      } catch (err) {
+        console.error('Error eliminando:', err);
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudo eliminar el producto.',
+          icon: 'error',
+          background: '#111827',
+          color: '#f3f4f6',
+          iconColor: '#f87171', // rojo
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -100,17 +150,9 @@ function Productos() {
               <HiTrash
                 className="text-red-400 hover:text-red-600"
                 size={20}
-                onClick={async (e) => {
+                onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm('¿Eliminar este producto?')) {
-                    try {
-                      await axios.delete(`http://localhost:5000/api/productos/${p._id}`);
-                      fetchProductos();
-                    } catch (err) {
-                      console.error('Error eliminando:', err);
-                      alert('No se pudo eliminar.');
-                    }
-                  }
+                  handleDelete(p);
                 }}
               />
             </div>

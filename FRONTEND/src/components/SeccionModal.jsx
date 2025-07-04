@@ -1,8 +1,10 @@
+// src/pages/SeccionModal.jsx
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { HiX } from 'react-icons/hi';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
+import Swal from 'sweetalert2';
 import TextareaWithEditor from '../components/TextAreaWithEditor';
 
 const entrenadas = [
@@ -57,7 +59,12 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
     e.preventDefault();
 
     if (!title.trim()) {
-      return alert('El título es obligatorio.');
+      return Swal.fire({
+        icon: 'warning',
+        title: 'Campo obligatorio',
+        text: 'El título es obligatorio.',
+        confirmButtonColor: '#facc15'
+      });
     }
 
     const payload = {
@@ -75,10 +82,23 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
       seccion
         ? await axios.put(url, payload)
         : await axios.post(url, payload);
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡Guardado!',
+        text: 'La sección fue guardada correctamente.',
+        confirmButtonColor: '#3b82f6'
+      });
+
       onSuccess();
     } catch (e) {
       console.error('Error guardando sección', e);
-      alert('Ocurrió un error.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al guardar la sección.',
+        confirmButtonColor: '#ef4444'
+      });
     }
   };
 

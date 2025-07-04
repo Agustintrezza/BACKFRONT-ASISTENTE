@@ -49,16 +49,16 @@ function Dashboard() {
       (s.title || '').toLowerCase().trim().includes(title.toLowerCase().trim())
     ).length;
 
-  const productosSinEntrenar = allProducts.filter(
+  const productosSinEntrenarItems = allProducts.filter(
     (p) => !productosEntrenadas.includes(p.category)
-  ).length;
+  );
 
-  const seccionesSinEntrenar = allSections.filter(
+  const seccionesSinEntrenarItems = allSections.filter(
     (s) =>
       !seccionesEntrenadas.some((ent) =>
         (s.title || '').toLowerCase().includes(ent.toLowerCase())
       )
-  ).length;
+  );
 
   return (
     <div className="min-h-screen bg-black text-white p-8">
@@ -99,9 +99,11 @@ function Dashboard() {
               <h3 className="text-lg font-semibold mb-2 flex items-center">
                 ⚙️ Productos Sin Entrenamiento
               </h3>
-              <p className="text-sm text-gray-300">
-                Total: <span className="text-red-400 font-bold">{productosSinEntrenar}</span>
-              </p>
+              <ul className="list-disc list-inside text-sm text-gray-300">
+                {productosSinEntrenarItems.map((p) => (
+                  <li key={p._id}>{p.title}</li>
+                ))}
+              </ul>
             </div>
           </div>
 
@@ -148,9 +150,11 @@ function Dashboard() {
               <h3 className="text-lg font-semibold mb-2 flex items-center">
                 🧪 Secciones Sin Entrenamiento
               </h3>
-              <p className="text-sm text-gray-300">
-                Total: <span className="text-red-400 font-bold">{seccionesSinEntrenar}</span>
-              </p>
+              <ul className="list-disc list-inside text-sm text-gray-300">
+                {seccionesSinEntrenarItems.map((s) => (
+                  <li key={s._id}>{s.title || 'Sin título'}</li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
