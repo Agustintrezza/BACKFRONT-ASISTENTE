@@ -76,6 +76,12 @@ function Navbar() {
           >
             📅 Reservas
           </FlowbiteNavbar.Link>
+          <FlowbiteNavbar.Link
+            className="navbar-navlink text-white hover:text-yellow-300 transition font-medium"
+            onClick={() => navigate('/chat')}
+          >
+            💬 Chat
+          </FlowbiteNavbar.Link>
           <Button
             onClick={handleLogout}
             color="failure"

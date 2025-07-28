@@ -1,4 +1,3 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -8,9 +7,10 @@ import ProductosEntrenados from "./pages/ProductosEntrenados";
 import Productos from "./pages/Productos";
 import ProductosSinEntrenamiento from "./pages/ProductosSinEntrenamiento";
 import Login from "./pages/Login";
-import SeccionesPorCategoria from "./pages/Secciones"; // Listado por categoría
-import SeccionesSinEntrenamiento from './pages/SeccionesSinEntrenamiento';
+import SeccionesPorCategoria from "./pages/Secciones";
+import SeccionesSinEntrenamiento from "./pages/SeccionesSinEntrenamiento";
 import SeccionesEntrenadas from "./pages/SeccionesEntrenadas";
+import ChatPage from "./pages/ChatPage"; // ✅ NUEVA IMPORTACIÓN
 
 import "./index.css";
 import "flowbite/dist/flowbite.css";
@@ -37,7 +37,7 @@ function App() {
           }
         />
 
-        {/* Dashboard principal */}
+        {/* Dashboard */}
         <Route
           path="/dashboard"
           element={
@@ -47,7 +47,7 @@ function App() {
           }
         />
 
-        {/* Gestión Productos */}
+        {/* Productos */}
         <Route
           path="/productos-entrenados"
           element={
@@ -73,7 +73,7 @@ function App() {
           }
         />
 
-        {/* Gestión Secciones */}
+        {/* Secciones */}
         <Route
           path="/secciones-entrenadas"
           element={
@@ -95,6 +95,16 @@ function App() {
           element={
             isAuthenticated
               ? <SeccionesPorCategoria />
+              : <Navigate to="/login" replace />
+          }
+        />
+
+        {/* ✅ Chat con el asistente */}
+        <Route
+          path="/chat"
+          element={
+            isAuthenticated
+              ? <ChatPage />
               : <Navigate to="/login" replace />
           }
         />
