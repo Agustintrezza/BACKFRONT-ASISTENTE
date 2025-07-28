@@ -10,7 +10,7 @@ import Login from "./pages/Login";
 import SeccionesPorCategoria from "./pages/Secciones";
 import SeccionesSinEntrenamiento from "./pages/SeccionesSinEntrenamiento";
 import SeccionesEntrenadas from "./pages/SeccionesEntrenadas";
-import ChatPage from "./pages/ChatPage"; // ✅ NUEVA IMPORTACIÓN
+import ChatPage from "./pages/ChatPage";
 
 import "./index.css";
 import "flowbite/dist/flowbite.css";
