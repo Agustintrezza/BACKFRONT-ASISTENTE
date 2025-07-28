@@ -7,7 +7,7 @@
 html, body {
     height: 100%;
     margin: 0;
-    background-color: #000;
+    /* background-color: #000; */
     color: white;
   }
 
@@ -93,17 +93,17 @@ html, body {
   .label-inputs {
     color: white!important
   }
-  .mde-header {
+  /* .mde-header {
     flex-shrink: 0;
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
     /* border-bottom: 1px solid #ffffff; */
     /* border-radius: 2px 2px 0 0; */
-    border: none!important;
+    /* border: none!important;
     background: #000000!important;
     color: white !important;
-}
+} */ */
 .mde-header .svg-icon {
     width: 1em;
     height: 1em;
@@ -111,7 +111,7 @@ html, body {
     font-size: inherit;
     overflow: visible;
     vertical-align: -.125em;
-    color: rgb(0, 119, 255)!important;
+    /* color: rgb(0, 119, 255)!important; */
 }
 .react-mde {
     /* border: 1px solid #c8ccd0; */

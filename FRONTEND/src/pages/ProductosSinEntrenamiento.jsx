@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Modal, Spinner } from 'flowbite-react';
+import { Card, Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
-import { HiArrowLeft, HiPencil, HiTrash, HiX } from 'react-icons/hi';
+import { HiX } from 'react-icons/hi';
 import ProductoModal from '../components/ProductoModal';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
+import { FaPlusCircle } from 'react-icons/fa';
 
 const MySwal = withReactContent(Swal);
 
@@ -93,79 +96,120 @@ function ProductosSinEntrenamiento() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-violet-200 text-gray-900">
         <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8 bg-black text-white">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Productos Sin Entrenamiento</h1>
-        <div className="flex space-x-2">
-          <Button
-            className="boton-azul py-2"
-            onClick={() => {
-              setSelected(null);
-              setShowFormModal(true);
-            }}
+    <div className="min-h-screen p-8 bg-gradient-to-br from-white to-violet-200 text-gray-900">
+      <div className="flex justify-between items-center mb-8 flex-wrap gap-2">
+        <motion.h1
+          className="text-4xl font-extrabold"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+            Productos Sin Entrenamiento
+          </span>
+        </motion.h1>
+
+        <div className="flex flex-wrap gap-2">
+          <motion.button
+            onClick={() => setShowFormModal(true)}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
           >
-            + Crear nuevo
-          </Button>
-          <Button
-            onClick={() => navigate(-1)}
-            className="flex items-center buttom-custom-yellow font-medium px-4 py-2"
+            <FaPlusCircle className="text-yellow-300 text-2xl" />
+            <span className="text-sm">Crear producto</span>
+          </motion.button>
+
+          <motion.button
+            onClick={() => navigate('/productos-entrenados')}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-violet-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
           >
-            <HiArrowLeft className="mr-2 self-center" size={20} />
-            Volver
-          </Button>
+            <span className="text-xl">🧠</span>
+            <span className="text-sm">Ir a entrenados</span>
+          </motion.button>
+
+          <motion.button
+            onClick={() => navigate('/dashboard')}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
+          >
+            <span className="text-xl">⬅️</span>
+            <span className="text-sm">Volver</span>
+          </motion.button>
         </div>
       </div>
 
       {productos.length === 0 ? (
-        <p className="text-gray-400">No hay productos sin entrenamiento.</p>
+        <p className="text-gray-600">No hay productos sin entrenamiento.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {productos.map((p) => (
-            <Card
+          {productos.map((p, i) => (
+            <motion.div
               key={p._id}
-              className="relative cursor-pointer bg-neutral-900 card-productos"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.5 }}
+              className="cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
               onClick={() => {
                 setSelected(p);
                 setViewModal(true);
               }}
             >
-              <h2 className="text-xl font-semibold mb-2 text-white">{p.title}</h2>
-              <p className="text-gray-400 mb-1">Precio: ${p.price}</p>
-              <p className="text-gray-400 mb-1">Stock: {p.stock}</p>
-              <p className="text-gray-400">Duración: {p.duration}</p>
-
-              <div className="absolute bottom-2 right-2 flex space-x-2">
-                <HiPencil
-                  className="text-yellow-400 hover:text-yellow-600"
-                  size={20}
+              <h2 className="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+                {p.title}
+              </h2>
+              <div className="text-sm space-y-1">
+                <p>💰 <strong>Precio:</strong> ${p.price}</p>
+                <p>📦 <strong>Stock:</strong> {p.stock}</p>
+                <p>🕒 <strong>Duración:</strong> {p.duration}</p>
+              </div>
+              <div className="flex justify-end gap-4 mt-4 text-xl">
+                <span
+                  role="button"
+                  className="hover:text-yellow-600"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelected(p);
                     setShowFormModal(true);
                   }}
-                />
-                <HiTrash
-                  className="text-red-400 hover:text-red-600"
-                  size={20}
+                >
+                  ✏️
+                </span>
+                <span
+                  role="button"
+                  className="hover:text-red-600"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDelete(p);
                   }}
-                />
+                >
+                  🔥
+                </span>
               </div>
-            </Card>
+            </motion.div>
           ))}
         </div>
       )}
 
-      {/* Modal detalle */}
       <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
         <div className="p-6 relative bg-white rounded-lg">
           <HiX
@@ -195,9 +239,8 @@ function ProductosSinEntrenamiento() {
         </div>
       </Modal>
 
-      {/* Modal creación / edición */}
       <Modal show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
-        <div className="bg-black text-white p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
           <ProductoModal
             producto={selected}
             onClose={() => setShowFormModal(false)}

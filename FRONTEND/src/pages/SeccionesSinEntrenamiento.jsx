@@ -1,40 +1,44 @@
-import { useEffect, useState } from 'react';
-import { Card, Button, Spinner, Modal } from 'flowbite-react';
-import { HiArrowLeft, HiPlus, HiTrash, HiPencil, HiX } from 'react-icons/hi';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Card, Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
+import { HiX } from 'react-icons/hi';
 import SeccionModal from '../components/SeccionModal';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-
-const entrenadas = [
-  'Guía Turístico',
-  'Tipo de Cambio',
-  'Preguntas Frecuentes',
-  'Nosotros',
-  'Contacto',
-];
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
+import { FaPlusCircle } from 'react-icons/fa';
 
 const MySwal = withReactContent(Swal);
 
-export default function SeccionesSinEntrenamiento() {
+function SeccionesSinEntrenamiento() {
   const navigate = useNavigate();
+
   const [secciones, setSecciones] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showFormModal, setShowFormModal] = useState(false);
-  const [selectedSeccion, setSelectedSeccion] = useState(null);
   const [viewModal, setViewModal] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [selected, setSelected] = useState(null);
+
+  const entrenadas = [
+    'Guía Turístico',
+    'Tipo de Cambio',
+    'Preguntas Frecuentes',
+    'Nosotros',
+    'Contacto',
+  ];
 
   const fetchSecciones = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('http://localhost:5000/api/secciones');
-      const filtradas = data.filter(
+      const res = await axios.get('http://localhost:5000/api/secciones');
+      const sin = res.data.filter(
         (s) => !entrenadas.includes(s.title.replace(/\s*📚|\s*📘/, '').trim())
       );
-      setSecciones(filtradas);
+      setSecciones(sin);
     } catch (err) {
-      console.error('Error al traer secciones:', err);
+      console.error('Error cargando secciones:', err);
     } finally {
       setLoading(false);
     }
@@ -44,15 +48,10 @@ export default function SeccionesSinEntrenamiento() {
     fetchSecciones();
   }, []);
 
-  const openModal = (seccion = null) => {
-    setSelectedSeccion(seccion);
-    setShowFormModal(true);
-  };
-
   const handleDelete = async (seccion) => {
     const confirm = await MySwal.fire({
-      title: `¿Eliminar esta sección?`,
-      text: `"${seccion.title}" será eliminada permanentemente.`,
+      title: `¿Eliminar "${seccion.title}"?`,
+      text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
@@ -76,7 +75,7 @@ export default function SeccionesSinEntrenamiento() {
         fetchSecciones();
         MySwal.fire({
           title: 'Eliminado',
-          text: `"${seccion.title}" fue eliminado correctamente.`,
+          text: `"${seccion.title}" fue eliminada correctamente.`,
           icon: 'success',
           background: '#171717',
           color: '#f3f4f6',
@@ -98,131 +97,173 @@ export default function SeccionesSinEntrenamiento() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-violet-200 text-gray-900">
+        <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen p-8 bg-black text-white">
-      {/* Encabezado */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Secciones Sin Entrenamiento</h1>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => navigate('/categorias-secciones')}
-            className="flex items-center buttom-custom-yellow font-medium px-4 py-2"
+    <div className="min-h-screen p-8 bg-gradient-to-br from-white to-violet-200 text-gray-900">
+      <div className="flex justify-between items-center mb-8 flex-wrap gap-2">
+        <motion.h1
+          className="text-4xl font-extrabold"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+            Secciones Sin Entrenamiento
+          </span>
+        </motion.h1>
+
+        <div className="flex flex-wrap gap-2">
+          <motion.button
+            onClick={() => setShowFormModal(true)}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
           >
-            <HiArrowLeft size={20} className="mr-2 self-center" />
-            Volver
-          </Button>
-          <Button
-            className="boton-azul flex items-center"
-            onClick={() => openModal()}
+            <FaPlusCircle className="text-yellow-300 text-2xl" />
+            <span className="text-sm">Crear sección</span>
+          </motion.button>
+
+          <motion.button
+            onClick={() => navigate('/secciones-entrenadas')}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-violet-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
           >
-            <HiPlus className="mr-2" />
-            Nueva Sección
-          </Button>
+            <span className="text-xl">🧠</span>
+            <span className="text-sm">Ir a entrenadas</span>
+          </motion.button>
+
+          <motion.button
+            onClick={() => navigate('/dashboard')}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
+          >
+            <span className="text-xl">⬅️</span>
+            <span className="text-sm">Volver</span>
+          </motion.button>
         </div>
       </div>
 
-      {/* Contenido */}
-      {loading ? (
-        <div className="min-h-[200px] flex justify-center items-center">
-          <Spinner size="xl" className="w-16 h-16 text-purple-600" />
-        </div>
-      ) : secciones.length === 0 ? (
-        <p className="text-gray-400">No hay secciones sin entrenamiento por el momento.</p>
+      {secciones.length === 0 ? (
+        <p className="text-gray-600">No hay secciones sin entrenamiento.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {secciones.map((s) => (
-            <Card
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {secciones.map((s, i) => (
+            <motion.div
               key={s._id}
-              className="relative bg-neutral-900 text-white card-productos cursor-pointer"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.5 }}
+              className="cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
               onClick={() => {
-                setSelectedSeccion(s);
+                setSelected(s);
                 setViewModal(true);
               }}
             >
-              <h2 className="text-xl font-semibold mb-2">{s.title}</h2>
-              <p className="text-gray-400">{s.menuItems?.length || 0} ítems</p>
-              <div className="absolute top-2 right-2 flex gap-2 z-10">
-                <HiPencil
-                  className="text-yellow-400 hover:text-yellow-600 cursor-pointer"
-                  size={20}
+              <h2 className="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+                {s.title}
+              </h2>
+              <div className="text-sm space-y-1">
+                <p>🧾 <strong>Ítems:</strong> {s.menuItems?.length || 0}</p>
+              </div>
+              <div className="flex justify-end gap-4 mt-4 text-xl">
+                <span
+                  role="button"
+                  className="hover:text-yellow-600"
                   onClick={(e) => {
                     e.stopPropagation();
-                    openModal(s);
+                    setSelected(s);
+                    setShowFormModal(true);
                   }}
-                />
-                <HiTrash
-                  className="text-red-400 hover:text-red-600 cursor-pointer"
-                  size={20}
+                >
+                  ✏️
+                </span>
+                <span
+                  role="button"
+                  className="hover:text-red-600"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDelete(s);
                   }}
-                />
+                >
+                  🔥
+                </span>
               </div>
-            </Card>
+            </motion.div>
           ))}
         </div>
       )}
 
-      {/* Modal de detalle */}
-      <Modal show={viewModal} size="2xl" className="bg-black" onClose={() => setViewModal(false)}>
-        <div className="p-6 relative bg-neutral-900 text-white rounded-lg w-full max-h-[90vh] overflow-y-auto border border-neutral-700">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">{selectedSeccion?.title}</h2>
-            <HiX
-              className="text-red-500 hover:text-red-700 cursor-pointer"
-              size={32}
-              onClick={() => setViewModal(false)}
-            />
-          </div>
-
-          {selectedSeccion?.description && (
-            <p className="text-gray-300 text-base mb-6">{selectedSeccion.description}</p>
-          )}
-
-          {selectedSeccion?.menuItems?.length > 0 && (
-            <div className="mb-6">
-              <h3 className="font-semibold mb-2">Opciones:</h3>
-              <ul className="list-disc list-inside space-y-1">
-                {selectedSeccion.menuItems.map((item, idx) => (
-                  <li key={idx} className="text-gray-300">
-                    <strong className="text-white">{item.title}:</strong> {item.detail}
-                    {item.link && (
-                      <a
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:underline ml-1"
-                      >
-                        (enlace)
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {selectedSeccion?.link && (
-            <div className="mt-4">
-              <a
-                href={selectedSeccion.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:underline"
-              >
-                Ver enlace
-              </a>
-            </div>
+      <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
+        <div className="p-6 relative bg-white rounded-lg">
+          <HiX
+            className="absolute top-4 right-4 cursor-pointer"
+            size={24}
+            onClick={() => setViewModal(false)}
+          />
+          {selected && (
+            <>
+              <h2 className="text-2xl font-bold mb-4">{selected.title}</h2>
+              {selected.description && (
+                <p className="text-gray-700 mb-4">{selected.description}</p>
+              )}
+              {selected.menuItems?.length > 0 && (
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {selected.menuItems.map((item, idx) => (
+                    <li key={idx}>
+                      <strong>{item.title}:</strong> {item.detail}
+                      {item.link && (
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-1 text-blue-500 hover:underline"
+                        >
+                          (enlace)
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {selected.link && (
+                <div className="mt-4">
+                  <a
+                    href={selected.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Ver enlace
+                  </a>
+                </div>
+              )}
+            </>
           )}
         </div>
       </Modal>
 
-      {/* Modal de creación/edición */}
-      <Modal className="bg-black" show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
-        <div className="bg-neutral-900 text-white p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+      <Modal show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
+        <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
           <SeccionModal
-            seccion={selectedSeccion}
+            seccion={selected}
             onClose={() => setShowFormModal(false)}
             onSuccess={() => {
               setShowFormModal(false);
@@ -234,3 +275,5 @@ export default function SeccionesSinEntrenamiento() {
     </div>
   );
 }
+
+export default SeccionesSinEntrenamiento;

@@ -17,6 +17,7 @@
     "emoji-mart": "^5.6.0",
     "flowbite": "^2.5.2",
     "flowbite-react": "^0.10.1",
+    "framer-motion": "^12.23.9",
     "postcss": "^8.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

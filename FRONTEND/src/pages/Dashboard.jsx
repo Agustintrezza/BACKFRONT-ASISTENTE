@@ -1,7 +1,25 @@
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { Button, Spinner } from 'flowbite-react';
-import axios from 'axios';
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Spinner } from "flowbite-react";
+import axios from "axios";
+// eslint-disable-next-line no-unused-vars
+import { motion } from "framer-motion";
+
+const productosEntrenadas = [
+  "Tours y Excursiones",
+  "Alojamiento",
+  "Shows de Tango",
+  "Programas",
+  "Traslados",
+];
+
+const seccionesEntrenadas = [
+  "Guía Turístico",
+  "Tipo de cambio",
+  "Preguntas Frecuentes",
+  "Nosotros",
+  "Contacto",
+];
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -9,31 +27,15 @@ function Dashboard() {
   const [allProducts, setAllProducts] = useState([]);
   const [allSections, setAllSections] = useState([]);
 
-  const productosEntrenadas = [
-    'Tours y Excursiones',
-    'Alojamiento',
-    'Shows de Tango',
-    'Programas',
-    'Traslados',
-  ];
-
-  const seccionesEntrenadas = [
-    'Guía Turístico',
-    'Tipo de cambio',
-    'Preguntas Frecuentes',
-    'Nosotros',
-    'Contacto',
-  ];
-
   useEffect(() => {
     async function fetchData() {
       try {
-        const resProd = await axios.get('http://localhost:5000/api/productos');
-        const resSec = await axios.get('http://localhost:5000/api/secciones');
+        const resProd = await axios.get("http://localhost:5000/api/productos");
+        const resSec = await axios.get("http://localhost:5000/api/secciones");
         setAllProducts(resProd.data);
         setAllSections(resSec.data);
       } catch (err) {
-        console.error('Error al traer datos:', err);
+        console.error("Error al traer datos:", err);
       } finally {
         setLoading(false);
       }
@@ -46,7 +48,7 @@ function Dashboard() {
 
   const countSeccionesByTitle = (title) =>
     allSections.filter((s) =>
-      (s.title || '').toLowerCase().trim().includes(title.toLowerCase().trim())
+      (s.title || "").toLowerCase().trim().includes(title.toLowerCase().trim())
     ).length;
 
   const productosSinEntrenarItems = allProducts.filter(
@@ -56,107 +58,172 @@ function Dashboard() {
   const seccionesSinEntrenarItems = allSections.filter(
     (s) =>
       !seccionesEntrenadas.some((ent) =>
-        (s.title || '').toLowerCase().includes(ent.toLowerCase())
+        (s.title || "").toLowerCase().includes(ent.toLowerCase())
       )
   );
 
+  const emojiVariants = {
+    animate: {
+      x: [0, 3, 0],
+      transition: {
+        repeat: Infinity,
+        repeatDelay: 2,
+        duration: 0.8,
+      },
+    },
+  };
+
+  const Card = ({ title, icon, children, onClick }) => (
+    <motion.div
+      onClick={onClick}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      whileHover={{ scale: 1.01 }}
+      className="cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
+    >
+      <div>
+        <h2 className="text-lg font-semibold mb-4 flex justify-between items-center px-4 py-2 rounded-md bg-gradient-to-r from-gray-100 to-gray-50 text-black">
+          {title}
+          <motion.span
+            className="text-4xl ml-2"
+            variants={emojiVariants}
+            animate="animate"
+          >
+            {icon}
+          </motion.span>
+        </h2>
+        {children}
+      </div>
+    </motion.div>
+  );
+
   return (
-    <div className="min-h-screen bg-black text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-white to-violet-100 text-white p-4">
+      {/* TÍTULO DASHBOARD */}
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-4xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-black via-blue-800 to-violet-800 inline-block"
+      >
+        Dashboard
+      </motion.h1>
+
       {loading ? (
         <div className="min-h-[300px] flex justify-center items-center">
           <Spinner size="xl" className="w-16 h-16 text-purple-600" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* CARD PRODUCTOS */}
-          <div className="card-custom p-6 bg-neutral-900 rounded-lg h-auto">
-            <h2 className="text-2xl font-bold mb-2 flex justify-between items-center">
-              Productos
-              <span className="text-3xl ml-2">📦</span>
-            </h2>
-            <p className="text-gray-300 mb-4">Gestioná tus productos según su entrenamiento.</p>
-
-            <div
-              onClick={() => navigate('/productos-entrenados')}
-              className="cursor-pointer bg-neutral-800 p-4 rounded-md mb-4 transition transform hover:scale-[1.02] hover:shadow-md hover:shadow-gray-500/30"
-            >
-              <h3 className="text-lg font-semibold mb-2 flex items-center">
-                ✅ Productos Entrenados
-              </h3>
-              <ul className="list-disc list-inside text-sm text-gray-300">
-                {productosEntrenadas.map((cat) => (
-                  <li key={cat}>
-                    {cat} (<span className="text-blue-400 font-bold">{countProductosByCategory(cat)}</span>)
-                  </li>
-                ))}
-              </ul>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+          {/* Productos */}
+          <Card title="Productos" icon="📦">
+            <p className="text-gray-700 mb-3 text-sm">
+              Gestioná tus productos según su entrenamiento.
+            </p>
+            <div className="flex flex-col md:flex-row gap-4">
+              <motion.div
+                onClick={() => navigate("/productos-entrenados")}
+                whileHover={{ scale: 1.01 }}
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md cursor-pointer"
+              >
+                <h3 className="text-md font-semibold mb-2 text-violet-800">
+                  ✅ Productos Entrenados
+                </h3>
+                <ul className="list-disc list-inside text-sm text-gray-800">
+                  {productosEntrenadas.map((cat) => (
+                    <li key={cat}>
+                      {cat} (
+                      <span className="font-bold">
+                        {countProductosByCategory(cat)}
+                      </span>
+                      )
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+              <motion.div
+                onClick={() => navigate("/productos-sin-entrenamiento")}
+                whileHover={{ scale: 1.01 }}
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md cursor-pointer"
+              >
+                <h3 className="text-md font-semibold mb-2 text-violet-800">
+                  ⚙️ Productos Sin Entrenamiento
+                </h3>
+                <ul className="list-disc list-inside text-sm text-gray-800 max-h-[120px] overflow-y-auto">
+                  {productosSinEntrenarItems.map((p) => (
+                    <li key={p._id}>{p.title}</li>
+                  ))}
+                </ul>
+              </motion.div>
             </div>
+          </Card>
 
-            <div
-              onClick={() => navigate('/productos-sin-entrenamiento')}
-              className="cursor-pointer bg-neutral-800 p-4 rounded-md transition transform hover:scale-[1.02] hover:shadow-md hover:shadow-gray-500/30"
-            >
-              <h3 className="text-lg font-semibold mb-2 flex items-center">
-                ⚙️ Productos Sin Entrenamiento
-              </h3>
-              <ul className="list-disc list-inside text-sm text-gray-300">
-                {productosSinEntrenarItems.map((p) => (
-                  <li key={p._id}>{p.title}</li>
-                ))}
-              </ul>
+          {/* Secciones */}
+          <Card title="Secciones" icon="🧩">
+            <p className="text-gray-700 mb-3 text-sm">
+              Gestioná las secciones entrenadas o libres.
+            </p>
+            <div className="flex flex-col md:flex-row gap-4">
+              <motion.div
+                onClick={() => navigate("/secciones-entrenadas")}
+                whileHover={{ scale: 1.01 }}
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md cursor-pointer"
+              >
+                <h3 className="text-md font-semibold mb-2 text-violet-800">
+                  ✅ Secciones Entrenadas
+                </h3>
+                <ul className="list-disc list-inside text-sm text-gray-800">
+                  {seccionesEntrenadas.map((sec) => (
+                    <li key={sec}>
+                      {sec} (
+                      <span className="font-bold">
+                        {countSeccionesByTitle(sec)}
+                      </span>
+                      )
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+              <motion.div
+                onClick={() => navigate("/secciones-sin-entrenamiento")}
+                whileHover={{ scale: 1.01 }}
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md cursor-pointer"
+              >
+                <h3 className="text-md font-semibold mb-2 text-violet-800">
+                  🧪 Secciones Sin Entrenamiento
+                </h3>
+                <ul className="list-disc list-inside text-sm text-gray-800 max-h-[120px] overflow-y-auto">
+                  {seccionesSinEntrenarItems.map((s) => (
+                    <li key={s._id}>{s.title || "Sin título"}</li>
+                  ))}
+                </ul>
+              </motion.div>
             </div>
-          </div>
+          </Card>
 
-          {/* CARD RESERVAS */}
-          <div
-            onClick={() => navigate('/reservas')}
-            className="cursor-pointer card-custom p-6 bg-neutral-900 rounded-lg h-auto transition"
+          {/* Reservas */}
+          <Card
+            title="Reservas"
+            icon="🗓️"
+            onClick={() => navigate("/reservas")}
           >
-            <h2 className="text-2xl font-bold mb-2 flex justify-between items-center">
-              Reservas
-              <span className="text-3xl ml-2">📅</span>
-            </h2>
-            <p className="text-gray-300">Administra las reservas</p>
-          </div>
+            <p className="text-gray-700 text-sm">
+              Administrá las reservas con IA personalizada.
+            </p>
+          </Card>
 
-          {/* CARD SECCIONES */}
-          <div className="card-custom p-6 bg-neutral-900 rounded-lg h-auto transition">
-            <h2 className="text-2xl font-bold mb-2 flex justify-between items-center">
-              Secciones
-              <span className="text-3xl ml-2">🧩</span>
-            </h2>
-            <p className="text-gray-300 mb-4">Gestioná las secciones entrenadas o libres.</p>
-
-            <div
-              onClick={() => navigate('/secciones-entrenadas')}
-              className="cursor-pointer card-shadow bg-neutral-800 p-4 rounded-md mb-4 transition transform hover:scale-[1.02] hover:shadow-md hover:shadow-gray-500/30"
-            >
-              <h3 className="text-lg font-semibold mb-2 flex items-center">
-                ✅ Secciones Entrenadas
-              </h3>
-              <ul className="list-disc list-inside text-sm text-gray-300">
-                {seccionesEntrenadas.map((sec) => (
-                  <li key={sec}>
-                    {sec} (<span className="text-blue-400 font-bold">{countSeccionesByTitle(sec)}</span>)
-                  </li>
-                ))}
-              </ul>
+          {/* Chat */}
+          <Card title="Chat" icon="💬" onClick={() => navigate("/chat")}>
+            <p className="text-gray-700 mb-2 text-sm">
+              Administrá tus conversaciones aquí.
+            </p>
+            <div className="bg-gray-100 p-3 rounded-md shadow-sm text-gray-800 text-sm">
+              <p>🟢 3 conversaciones pendientes</p>
+              <p>🔔 2 alertas importantes</p>
+              <p>📨 Último mensaje: “¿Cómo reservo?”</p>
             </div>
-
-            <div
-              onClick={() => navigate('/secciones-sin-entrenamiento')}
-              className="cursor-pointer bg-neutral-800 p-4 rounded-md transition transform hover:scale-[1.02] hover:shadow-md hover:shadow-gray-500/30"
-            >
-              <h3 className="text-lg font-semibold mb-2 flex items-center">
-                🧪 Secciones Sin Entrenamiento
-              </h3>
-              <ul className="list-disc list-inside text-sm text-gray-300">
-                {seccionesSinEntrenarItems.map((s) => (
-                  <li key={s._id}>{s.title || 'Sin título'}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          </Card>
         </div>
       )}
     </div>

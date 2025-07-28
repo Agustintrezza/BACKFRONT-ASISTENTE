@@ -2,6 +2,9 @@ import { Navbar as FlowbiteNavbar, Button } from 'flowbite-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import './styles/Navbar.css';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
+import { FiPower } from 'react-icons/fi';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -35,64 +38,61 @@ function Navbar() {
   };
 
   return (
-    <FlowbiteNavbar fluid rounded className="shadow-md navbar-container bg-neutral-900">
-      <FlowbiteNavbar.Brand href="/">
-        <img
-          src="/asistente-logo.png"
-          className="mr-2 h-16 sm:h-10"
-          alt="Chatbot Logo"
-        />
-        <span
-          className="self-center whitespace-nowrap font-semibold text-2xl tracking-wide text-white"
-          style={{
-            background: 'linear-gradient(to right, #8b5cf6, #ffffff)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          CHATBOT ADMIN
-        </span>
-      </FlowbiteNavbar.Brand>
+    <motion.div
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+    >
+      <FlowbiteNavbar fluid className="bg-white border-gray-200 sticky top-0 z-50 shadow">
+        <FlowbiteNavbar.Brand href="/">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+            className="mr-2 h-7"
+            alt="Chatbot Logo"
+          />
+          <span className="text-xl font-semibold text-violet-600 whitespace-nowrap">
+            Asistente IA
+          </span>
+        </FlowbiteNavbar.Brand>
 
-      <FlowbiteNavbar.Toggle />
+        <FlowbiteNavbar.Toggle />
 
-      <FlowbiteNavbar.Collapse>
-        <div className="flex items-center text-md gap-5 font-medium">
-          <FlowbiteNavbar.Link
-            className="navbar-navlink text-white hover:text-yellow-300 transition font-medium"
-            onClick={() => navigate('/productos')}
-          >
-            📦 Productos
-          </FlowbiteNavbar.Link>
-          <FlowbiteNavbar.Link
-            className="navbar-navlink text-white hover:text-yellow-300 transition font-medium"
-            onClick={() => navigate('/categorias-secciones')}
-          >
-            🧩 Secciones
-          </FlowbiteNavbar.Link>
-          <FlowbiteNavbar.Link
-            className="navbar-navlink text-white hover:text-yellow-300 transition font-medium"
-            onClick={() => navigate('/reservas')}
-          >
-            📅 Reservas
-          </FlowbiteNavbar.Link>
-          <FlowbiteNavbar.Link
-            className="navbar-navlink text-white hover:text-yellow-300 transition font-medium"
-            onClick={() => navigate('/chat')}
-          >
-            💬 Chat
-          </FlowbiteNavbar.Link>
-          <Button
-            onClick={handleLogout}
-            color="failure"
-            size="sm"
-            className="ml-4 bg-red-500 logout-button"
-          >
-            Logout
-          </Button>
-        </div>
-      </FlowbiteNavbar.Collapse>
-    </FlowbiteNavbar>
+        <FlowbiteNavbar.Collapse>
+          <ul className="flex flex-col lg:flex-row items-center lg:space-x-6 mt-3 lg:mt-0 text-sm font-medium text-gray-800">
+            <motion.li whileHover={{ scale: 1.05 }} className="transition-shadow shadow-sm hover:shadow-md rounded-md">
+              <button onClick={() => navigate('/productos')} className="block py-1 px-2 hover:text-violet-700 whitespace-nowrap">
+                📦 Productos
+              </button>
+            </motion.li>
+            <motion.li whileHover={{ scale: 1.05 }} className="transition-shadow shadow-sm hover:shadow-md rounded-md">
+              <button onClick={() => navigate('/categorias-secciones')} className="block py-1 px-2 hover:text-violet-700 whitespace-nowrap">
+                🧩 Secciones
+              </button>
+            </motion.li>
+            <motion.li whileHover={{ scale: 1.05 }} className="transition-shadow shadow-sm hover:shadow-md rounded-md">
+              <button onClick={() => navigate('/reservas')} className="block py-1 px-2 hover:text-violet-700 whitespace-nowrap">
+                📅 Reservas
+              </button>
+            </motion.li>
+            <motion.li whileHover={{ scale: 1.05 }} className="transition-shadow shadow-sm hover:shadow-md rounded-md">
+              <button onClick={() => navigate('/chat')} className="block py-1 px-2 hover:text-violet-700 whitespace-nowrap">
+                💬 Chat
+              </button>
+            </motion.li>
+            <motion.li className="mt-2 lg:mt-0">
+            <Button
+  onClick={handleLogout}
+  color="failure"
+  size="sm"
+  className="ml-4 bg-red-500 logout-button flex items-center justify-center"
+>
+  <FiPower className="text-white text-lg" />
+</Button>
+            </motion.li>
+          </ul>
+        </FlowbiteNavbar.Collapse>
+      </FlowbiteNavbar>
+    </motion.div>
   );
 }
 
