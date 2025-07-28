@@ -270,8 +270,8 @@ function Productos() {
         </div>
       </Modal>
 
-      <Modal show={showFormModal} size="7xl" className="bg-black" onClose={() => setShowFormModal(false)}>
-        <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+      <Modal show={showFormModal} size="7xl" className="bg-white" onClose={() => setShowFormModal(false)}>
+        <div className="text-gray-900 p-6 rounded-lg w-full max-h-[100vh] overflow-y-auto">
           <ProductoModal
             producto={selected}
             category={decodeURIComponent(categoria)}

@@ -101,14 +101,14 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-violet-100 text-white p-4">
       {/* TÍTULO DASHBOARD */}
-      <motion.h1
+      {/* <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="text-4xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-black via-blue-800 to-violet-800 inline-block"
       >
         Dashboard
-      </motion.h1>
+      </motion.h1> */}
 
       {loading ? (
         <div className="min-h-[300px] flex justify-center items-center">

@@ -4,39 +4,23 @@ import { Label, Button } from 'flowbite-react';
 import { HiX } from 'react-icons/hi';
 import Swal from 'sweetalert2';
 import InputWithEmoji from './InputWithEmoji';
-import TextareaWithEditor from '../components/TextAreaWithEditor';
+import TextareaWithEditor from './TextAreaWithEditor';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 
 function ProductoModal({ producto, category, onClose, onSuccess }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [duration, setDuration] = useState('');
-  const [location, setLocation] = useState('');
-  const [image, setImage] = useState('');
-  const [availableDates, setAvailableDates] = useState('');
-  const [stock, setStock] = useState('');
   const [categoria, setCategoria] = useState('');
 
   useEffect(() => {
     if (producto) {
       setTitle(producto.title || '');
       setDescription(producto.description || '');
-      setPrice(producto.price || '');
-      setDuration(producto.duration || '');
-      setLocation(producto.location || '');
-      setImage(producto.image || '');
-      setAvailableDates((producto.availableDates || []).join(', '));
-      setStock(producto.stock || '');
       setCategoria(producto.category || '');
     } else {
       setTitle('');
       setDescription('');
-      setPrice('');
-      setDuration('');
-      setLocation('');
-      setImage('');
-      setAvailableDates('');
-      setStock('');
       setCategoria(category || '');
     }
   }, [producto, category]);
@@ -56,20 +40,18 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
     const payload = {
       title,
       description,
-      price: Number(price),
-      duration,
-      location: location || null,
-      image: image || null,
-      availableDates: availableDates
-        ? availableDates.split(',').map((d) => d.trim())
-        : [],
-      stock: Number(stock),
+      price: 0,
+      duration: '',
+      location: null,
+      image: null,
+      availableDates: [],
+      stock: 0,
       category: categoria?.trim() || 'Sin categoría',
     };
 
     const url = producto
       ? `http://localhost:5000/api/productos/${producto._id}`
-      : 'http://localhost:5000/api/productos';
+      : `http://localhost:5000/api/productos`;
 
     try {
       producto
@@ -96,101 +78,95 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 w-full max-w-7xl bg-black text-white space-y-6 rounded-lg mx-auto"
+    <motion.div
+      initial={{ opacity: 0, y: 60 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -60 }}
+      transition={{ duration: 0.4 }}
+      className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2"
     >
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <span className="text-5xl">
-            {producto ? '🛠️' : '🧾'}
-          </span>
-          {producto ? 'Editar Producto' : `Nuevo Producto (${categoria})`}
-        </h2>
+      <div className="relative w-full max-w-5xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto">
+        {/* Botón cerrar */}
         <button
-          type="button"
           onClick={onClose}
-          className="text-red-500 hover:text-red-700 text-3xl font-bold"
+          className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition"
+          title="Cerrar"
         >
           <HiX />
         </button>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <Label value="Título" className="label-inputs" />
-          <InputWithEmoji value={title} onChange={setTitle} placeholder="Título" />
-        </div>
-        <div>
-          <Label value="Precio" className="label-inputs"/>
-          <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="input-bg w-full px-3 py-2 label-inputs"
-          />
-        </div>
-        <div>
-          <Label value="Duración" className="label-inputs"/>
-          <input
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="Ej: 2hs"
-            className="input-bg w-full px-3 py-2"
-          />
-        </div>
-        <div>
-          <Label value="Ubicación" className="label-inputs"/>
-          <InputWithEmoji value={location} onChange={setLocation} placeholder="Ubicación" />
-        </div>
-        <div>
-          <Label value="Imagen (URL)" className="label-inputs"/>
-          <input
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            placeholder="https://ejemplo.com/imagen.jpg"
-            className="input-bg w-full px-3 py-2"
-          />
-        </div>
-        <div>
-          <Label value="Stock" className="label-inputs"/>
-          <input
-            type="number"
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            className="input-bg w-full px-3 py-2"
-          />
-        </div>
-        <div className="md:col-span-2">
-          <Label value="Fechas disponibles (separadas por coma)" className="label-inputs"/>
-          <input
-            value={availableDates}
-            onChange={(e) => setAvailableDates(e.target.value)}
-            placeholder="Ej: 10/08, 15/08, 20/08"
-            className="input-bg w-full px-3 py-2"
-          />
-        </div>
-        <div className="md:col-span-2">
-          <Label value="Descripción" className="label-inputs"/>
-          <TextareaWithEditor value={description} onChange={setDescription} />
-        </div>
-        <div className="md:col-span-2">
-          <Label value="Categoría" className="label-inputs"/>
-          <input
-            value={categoria}
-            onChange={(e) => setCategoria(e.target.value)}
-            required
-            disabled={!!category}
-            className="input-bg w-full px-3 py-2"
-          />
-        </div>
-      </div>
+        <motion.form
+          onSubmit={handleSubmit}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-10 text-gray-900"
+        >
+          {/* Título */}
+          <div className="!text-start">
+            <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3">
+              <span className="text-5xl me-2">📁</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
+                {producto ? 'Editar Producto' : `Nuevo Producto (${categoria})`}
+              </span>
+            </h2>
+            {/* <p className="text-sm mt-2 text-gray-600">Completá los datos del producto</p> */}
+          </div>
 
-      <div className="flex justify-end gap-2 mt-4">
-        <Button className="buttom-custom-red" onClick={onClose}>Cancelar</Button>
-        <Button type="submit" className="boton-azul">Guardar</Button>
+          {/* Campos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Título */}
+            <div className="md:col-span-2">
+              <Label value="Título del producto" className="text-violet-800 font-semibold mb-1" />
+              <InputWithEmoji
+                value={title}
+                onChange={setTitle}
+                placeholder="Escribí un título atractivo..."
+              />
+            </div>
+
+            {/* Descripción */}
+            <div className="md:col-span-2">
+              <Label value="Descripción detallada" className="text-violet-800 font-semibold mb-1" />
+              <TextareaWithEditor
+                value={description}
+                onChange={setDescription}
+                rows={14} // más grande aún
+              />
+            </div>
+
+            {/* Categoría */}
+            <div className="md:col-span-2">
+              <Label value="Categoría" className="text-violet-800 font-semibold mb-0" />
+              <input
+                value={categoria}
+                onChange={(e) => setCategoria(e.target.value)}
+                required
+                disabled={!!category}
+                className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-violet-400 focus:outline-none bg-white"
+              />
+            </div>
+          </div>
+
+          {/* Botones */}
+          <div className="flex justify-end gap-4 mt-2">
+            <Button
+              type="button"
+              onClick={onClose}
+              className="bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              className="bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
+            >
+              Guardar
+            </Button>
+          </div>
+        </motion.form>
       </div>
-    </form>
+    </motion.div>
   );
 }
 

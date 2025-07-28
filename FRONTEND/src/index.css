@@ -7,8 +7,14 @@
 html, body {
     height: 100%;
     margin: 0;
-    /* background-color: #000; */
-    color: white;
+    background-color: white!important; /* ✅ agregalo o asegurate de que no sea negro */
+    color: black;
+  }
+
+/* 🔧 Personalización para el overlay del Modal de flowbite-react */
+[data-testid="modal-backdrop"] {
+    background-color: rgba(255, 255, 255, 0.8) !important; /* blanco con transparencia */
+    backdrop-filter: blur(2px); /* efecto glass si querés */
   }
 
 .card-custom {
@@ -75,15 +81,6 @@ html, body {
     /* color: rgb(39, 78, 255)!important; */
   }
 
-  .input-bg {
-    background-color: #171717 !important;
-    color: white;
-    border: none !important;
-    border-bottom: 1px solid gray !important;
-    border-radius: 0 !important;
-    border-radius: 5px!important;
-  }
-  
   .input-bg:focus {
     border-bottom: 2px solid gold !important; /* verde tailwind (emerald-400) */
     outline: none !important;

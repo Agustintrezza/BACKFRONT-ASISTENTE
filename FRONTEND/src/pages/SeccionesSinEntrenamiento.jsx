@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Modal, Spinner } from 'flowbite-react';
+import { Modal, Spinner } from 'flowbite-react';
 import axios from 'axios';
 import { HiX } from 'react-icons/hi';
 import SeccionModal from '../components/SeccionModal';
@@ -14,7 +14,6 @@ const MySwal = withReactContent(Swal);
 
 function SeccionesSinEntrenamiento() {
   const navigate = useNavigate();
-
   const [secciones, setSecciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewModal, setViewModal] = useState(false);
@@ -121,7 +120,10 @@ function SeccionesSinEntrenamiento() {
 
         <div className="flex flex-wrap gap-2">
           <motion.button
-            onClick={() => setShowFormModal(true)}
+            onClick={() => {
+              setSelected(null);
+              setShowFormModal(true);
+            }}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -211,67 +213,90 @@ function SeccionesSinEntrenamiento() {
         </div>
       )}
 
-      <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
-        <div className="p-6 relative bg-white rounded-lg">
-          <HiX
-            className="absolute top-4 right-4 cursor-pointer"
-            size={24}
-            onClick={() => setViewModal(false)}
-          />
-          {selected && (
-            <>
-              <h2 className="text-2xl font-bold mb-4">{selected.title}</h2>
-              {selected.description && (
-                <p className="text-gray-700 mb-4">{selected.description}</p>
-              )}
-              {selected.menuItems?.length > 0 && (
-                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                  {selected.menuItems.map((item, idx) => (
-                    <li key={idx}>
-                      <strong>{item.title}:</strong> {item.detail}
-                      {item.link && (
-                        <a
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ml-1 text-blue-500 hover:underline"
-                        >
-                          (enlace)
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {selected.link && (
-                <div className="mt-4">
+<Modal
+  show={viewModal}
+  size="lg"
+  onClose={() => setViewModal(false)}
+  theme={{
+    root: {
+      show: {
+        on: 'fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm',
+      },
+    },
+  }}
+>
+  <div className="p-6 relative bg-white rounded-lg">
+    <HiX
+      className="absolute top-4 right-4 cursor-pointer"
+      size={24}
+      onClick={() => setViewModal(false)}
+    />
+    {selected && (
+      <>
+        <h2 className="text-2xl font-bold mb-4">{selected.title}</h2>
+        {selected.description && (
+          <p className="text-gray-700 mb-4">{selected.description}</p>
+        )}
+        {selected.menuItems?.length > 0 && (
+          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+            {selected.menuItems.map((item, idx) => (
+              <li key={idx}>
+                <strong>{item.title}:</strong> {item.detail}
+                {item.link && (
                   <a
-                    href={selected.link}
+                    href={item.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
+                    className="ml-1 text-blue-500 hover:underline"
                   >
-                    Ver enlace
+                    (enlace)
                   </a>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </Modal>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {selected.link && (
+          <div className="mt-4">
+            <a
+              href={selected.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              Ver enlace
+            </a>
+          </div>
+        )}
+      </>
+    )}
+  </div>
+</Modal>
 
-      <Modal show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
-        <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
-          <SeccionModal
-            seccion={selected}
-            onClose={() => setShowFormModal(false)}
-            onSuccess={() => {
-              setShowFormModal(false);
-              fetchSecciones();
-            }}
-          />
-        </div>
-      </Modal>
+<Modal
+  show={showFormModal}
+  size="6xl"
+  onClose={() => setShowFormModal(false)}
+  theme={{
+    root: {
+      show: {
+        on: 'fixed inset-0 z-50 flex items-center justify-center bg-white',
+      },
+    },
+  }}
+>
+  <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+    <SeccionModal
+      seccion={selected}
+      onClose={() => setShowFormModal(false)}
+      onSuccess={() => {
+        setShowFormModal(false);
+        fetchSecciones();
+      }}
+    />
+  </div>
+</Modal>
+
     </div>
   );
 }

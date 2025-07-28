@@ -1,11 +1,14 @@
-// src/pages/SeccionModal.jsx
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { Label, Button } from 'flowbite-react';
 import { HiX } from 'react-icons/hi';
+import Swal from 'sweetalert2';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
-import Swal from 'sweetalert2';
-import TextareaWithEditor from '../components/TextAreaWithEditor';
+import TextareaWithEditor from './TextAreaWithEditor';
+import InputWithEmoji from './InputWithEmoji';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 
 const entrenadas = [
   'Guía Turístico',
@@ -20,7 +23,6 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
   const [menuItems, setMenuItems] = useState([{ title: '', detail: '', link: '' }]);
   const [showEmoji, setShowEmoji] = useState(false);
   const [emojiField, setEmojiField] = useState('');
-
   const pickerRef = useRef();
 
   const isEntrenada =
@@ -29,16 +31,25 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
   useEffect(() => {
     if (seccion) {
       setTitle(seccion.title || '');
-      setMenuItems(
-        seccion.menuItems?.length
-          ? seccion.menuItems
-          : [{ title: '', detail: '', link: '' }]
-      );
+      setMenuItems(seccion.menuItems?.length ? seccion.menuItems : [{ title: '', detail: '', link: '' }]);
     } else {
       setTitle(category || '');
       setMenuItems([{ title: '', detail: '', link: '' }]);
     }
   }, [seccion, category]);
+
+  const handleEmojiSelect = (emoji) => {
+    const value = emoji.native;
+    if (emojiField === 'title') {
+      setTitle((prev) => prev + value);
+    } else {
+      const [index, field] = emojiField.split('.');
+      const updated = [...menuItems];
+      updated[parseInt(index)][field] += value;
+      setMenuItems(updated);
+    }
+    setShowEmoji(false);
+  };
 
   const handleMenuItemChange = (index, field, value) => {
     const updated = [...menuItems];
@@ -102,144 +113,130 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
     }
   };
 
-  const handleEmojiSelect = (emoji) => {
-    const value = emoji.native;
-    if (emojiField === 'title') {
-      setTitle((prev) => prev + value);
-    } else {
-      const [index, field] = emojiField.split('.');
-      handleMenuItemChange(parseInt(index), field, menuItems[index][field] + value);
-    }
-    setShowEmoji(false);
-  };
-
-  const renderHeading = () => {
-    if (seccion) return <>Editar Sección <span className="text-4xl">📝</span></>;
-    if (category) return <>Nueva Sección ({category}) <span className="text-4xl">📋</span></>;
-    return <>Nueva Sección <span className="text-4xl">📋</span></>;
-  };
-
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-black text-white p-6 w-full max-w-7xl rounded-lg shadow-xl relative"
+    <motion.div
+      initial={{ opacity: 0, y: 60 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -60 }}
+      transition={{ duration: 0.4 }}
+      className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2"
     >
-      {showEmoji && (
-        <div ref={pickerRef} className="absolute z-50 right-4 top-4">
-          <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="dark" />
-        </div>
-      )}
+      <div className="relative w-full max-w-5xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto">
+        {/* Picker de emojis */}
+        {showEmoji && (
+          <div ref={pickerRef} className="absolute z-50 right-5 top-5">
+            <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="light" />
+          </div>
+        )}
 
-      {/* Encabezado */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          {renderHeading()}
-        </h2>
+        {/* Botón cerrar */}
         <button
-          type="button"
           onClick={onClose}
-          className="text-red-500 hover:text-red-700 text-3xl font-bold"
+          className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition"
+          title="Cerrar"
         >
           <HiX />
         </button>
-      </div>
 
-      {/* Título */}
-      <div className="mb-6 relative">
-        <label className="block mb-1">Título</label>
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          disabled={isEntrenada}
-          className="w-full bg-neutral-900 border-b border-transparent focus:border-yellow-400 text-white px-3 py-2 pr-10 focus:outline-none"
-        />
-        <button
-          type="button"
-          className="absolute top-[30px] right-2 text-yellow-400"
-          onClick={() => {
-            setShowEmoji(true);
-            setEmojiField('title');
-          }}
+        <motion.form
+          onSubmit={handleSubmit}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-10 text-gray-900"
         >
-          😊
-        </button>
-      </div>
+          {/* Título */}
+          <div className="!text-start">
+            <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3">
+              <span className="text-5xl me-2">📋</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
+                {seccion ? 'Editar Sección' : `Nueva Sección (${category})`}
+              </span>
+            </h2>
+          </div>
 
-      {/* Ítems del menú interno */}
-      <div className="mt-6">
-        <label className="block mb-2">Ítems del menú interno</label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {menuItems.map((item, index) => (
-            <div key={index} className="p-4 border border-neutral-800 rounded-md space-y-4">
-              <div className="relative">
-                <input
-                  placeholder="Título"
+          {/* Campo título */}
+          <div>
+            <Label value="Título de la sección" className="text-violet-800 font-semibold mb-1" />
+            <InputWithEmoji
+              value={title}
+              onChange={setTitle}
+              placeholder="Título de la sección..."
+              disabled={isEntrenada}
+              onEmojiClick={() => {
+                setShowEmoji(true);
+                setEmojiField('title');
+              }}
+            />
+          </div>
+
+          {/* Menú interno */}
+          <div className="space-y-6">
+            {menuItems.map((item, index) => (
+              <div
+                key={index}
+                className="border border-gray-300 rounded-lg p-6 bg-white shadow-md space-y-4"
+              >
+                <InputWithEmoji
                   value={item.title}
-                  onChange={(e) => handleMenuItemChange(index, 'title', e.target.value)}
-                  className="bg-neutral-900 border-b border-transparent focus:border-yellow-400 text-white px-3 py-2 pr-10 focus:outline-none w-full"
-                />
-                <button
-                  type="button"
-                  className="absolute right-2 top-2 text-yellow-400"
-                  onClick={() => {
+                  onChange={(val) => handleMenuItemChange(index, 'title', val)}
+                  placeholder="Título del ítem"
+                  onEmojiClick={() => {
                     setShowEmoji(true);
                     setEmojiField(`${index}.title`);
                   }}
-                >
-                  😊
-                </button>
+                />
+                <TextareaWithEditor
+                  value={item.detail}
+                  onChange={(val) => handleMenuItemChange(index, 'detail', val)}
+                  rows={8}
+                />
+                <input
+                  type="text"
+                  value={item.link}
+                  onChange={(e) => handleMenuItemChange(index, 'link', e.target.value)}
+                  placeholder="Link (opcional)"
+                  className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-violet-400 focus:outline-none"
+                />
+                <div className="text-end">
+                  <button
+                    type="button"
+                    onClick={() => removeMenuItem(index)}
+                    className="text-red-500 text-sm hover:text-red-700"
+                  >
+                    Eliminar ítem
+                  </button>
+                </div>
               </div>
+            ))}
+            <button
+              type="button"
+              onClick={addMenuItem}
+              className="text-sm text-yellow-500 hover:text-yellow-600"
+            >
+              + Agregar ítem
+            </button>
+          </div>
 
-              <TextareaWithEditor
-                value={item.detail}
-                onChange={(val) => handleMenuItemChange(index, 'detail', val)}
-              />
-
-              <input
-                placeholder="Link"
-                value={item.link}
-                onChange={(e) => handleMenuItemChange(index, 'link', e.target.value)}
-                className="bg-neutral-900 border-b border-transparent focus:border-yellow-400 text-white px-3 py-2 focus:outline-none w-full"
-              />
-              <div className="text-right">
-                <button
-                  type="button"
-                  onClick={() => removeMenuItem(index)}
-                  className="text-sm text-red-500 hover:text-red-700"
-                >
-                  Eliminar ítem
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={addMenuItem}
-          className="text-sm text-yellow-400 hover:text-yellow-500 mt-4"
-        >
-          + Agregar ítem
-        </button>
+          {/* Botones */}
+          <div className="flex justify-end gap-4 mt-2">
+            <Button
+              type="button"
+              onClick={onClose}
+              className="bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              className="bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
+            >
+              Guardar
+            </Button>
+          </div>
+        </motion.form>
       </div>
-
-      {/* Botones */}
-      <div className="flex justify-end gap-3 mt-6">
-        <button
-          type="button"
-          onClick={onClose}
-          className="buttom-custom-red px-4 py-2 rounded"
-        >
-          Cancelar
-        </button>
-        <button
-          type="submit"
-          className="boton-azul px-4 py-2 rounded"
-        >
-          Guardar
-        </button>
-      </div>
-    </form>
+    </motion.div>
   );
 }
 

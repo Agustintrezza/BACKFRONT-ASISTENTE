@@ -96,7 +96,7 @@ function ProductosSinEntrenamiento() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-violet-200 text-gray-900">
+      <div className="min-h-screen p-8 bg-white text-gray-900">
         <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6" />
       </div>
     );
@@ -117,18 +117,21 @@ function ProductosSinEntrenamiento() {
         </motion.h1>
 
         <div className="flex flex-wrap gap-2">
-          <motion.button
-            onClick={() => setShowFormModal(true)}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            className="px-6 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
-          >
-            <FaPlusCircle className="text-yellow-300 text-2xl" />
-            <span className="text-sm">Crear producto</span>
-          </motion.button>
+        <motion.button
+  onClick={() => {
+    setSelected(null); // 🧼 Limpia el producto seleccionado
+    setShowFormModal(true); // 🟢 Abre el modal para crear
+  }}
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.3 }}
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.97 }}
+  className="px-6 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
+>
+  <FaPlusCircle className="text-yellow-300 text-2xl" />
+  <span className="text-sm">Crear producto</span>
+</motion.button>
 
           <motion.button
             onClick={() => navigate('/productos-entrenados')}
@@ -239,7 +242,17 @@ function ProductosSinEntrenamiento() {
         </div>
       </Modal>
 
-      <Modal show={showFormModal} size="6xl" onClose={() => setShowFormModal(false)}>
+      <Modal
+  show={showFormModal}
+  size="6xl"
+  onClose={() => setShowFormModal(false)}
+  className="bg-white bg-opacity-100"
+  theme={{
+    root: {
+      base: "fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-white bg-opacity-100",
+    }
+  }}
+>
         <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
           <ProductoModal
             producto={selected}
