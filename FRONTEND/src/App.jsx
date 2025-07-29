@@ -11,6 +11,7 @@ import SeccionesPorCategoria from "./pages/Secciones";
 import SeccionesSinEntrenamiento from "./pages/SeccionesSinEntrenamiento";
 import SeccionesEntrenadas from "./pages/SeccionesEntrenadas";
 import ChatPage from "./pages/ChatPage";
+import ProductoNuevo from "./pages/ProductoNuevo";
 
 import "./index.css";
 import "flowbite/dist/flowbite.css";
@@ -64,6 +65,22 @@ function App() {
               : <Navigate to="/login" replace />
           }
         />
+        <Route
+  path="/producto/nuevo"
+  element={
+    isAuthenticated
+      ? <ProductoNuevo />
+      : <Navigate to="/login" replace />
+  }
+/>
+<Route
+  path="/producto/editar/:id"
+  element={
+    isAuthenticated
+      ? <ProductoNuevo />
+      : <Navigate to="/login" replace />
+  }
+/>
         <Route
           path="/productos/:categoria/*"
           element={

@@ -1,16 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Modal, Spinner } from 'flowbite-react';
+import { Spinner } from 'flowbite-react';
 import axios from 'axios';
-import SeccionModal from '../components/SeccionModal';
 import Swal from 'sweetalert2';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { FaPlusCircle } from 'react-icons/fa';
 
+import SeccionModal from '../components/SeccionModal';
+import SeccionEntrenadaModal from '../components/SeccionEntrenadaModal';
+
+const SECCIONES_ENTRENADAS = [
+  'Guía Turístico',
+  'Tipo de Cambio',
+  'Preguntas Frecuentes',
+  'Nosotros',
+  'Contacto',
+];
+
 function Secciones() {
   const { categoria } = useParams();
   const navigate = useNavigate();
+  const decodedCategoria = decodeURIComponent(categoria);
+  const esEntrenada = SECCIONES_ENTRENADAS.includes(decodedCategoria);
 
   const [secciones, setSecciones] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +34,7 @@ function Secciones() {
     setLoading(true);
     try {
       const res = await axios.get(`http://localhost:5000/api/secciones`);
-      const filtradas = res.data.filter((s) => s.title === decodeURIComponent(categoria));
+      const filtradas = res.data.filter((s) => s.title === decodedCategoria);
       setSecciones(filtradas);
     } catch (err) {
       console.error('Error cargando secciones:', err);
@@ -106,7 +118,7 @@ function Secciones() {
         transition={{ duration: 0.6 }}
       >
         <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
-          {decodeURIComponent(categoria)}
+          {decodedCategoria}
         </h1>
 
         <div className="flex gap-3">
@@ -142,8 +154,7 @@ function Secciones() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
         >
-          ⚠️ Aún no hay datos para la sección{' '}
-          <strong>{decodeURIComponent(categoria)}</strong>.
+          ⚠️ Aún no hay datos para la sección <strong>{decodedCategoria}</strong>.
         </motion.div>
       )}
 
@@ -173,11 +184,33 @@ function Secciones() {
               setViewModal(true);
             }}
           >
-            <h2 className="text-xl font-semibold mb-1 flex flex-wrap items-center">
-              {s.title}
-            </h2>
-            <p className="text-gray-600 text-sm truncate">
-              🧩 Ítems: {s.menuItems?.length || 0}
+            <h2 className="text-xl font-semibold mb-3 flex flex-wrap items-center gap-2">
+  {(() => {
+    const fullTitle = esEntrenada ? s.menuItems?.[0]?.title || s.title : s.title;
+    const match = fullTitle?.match(/^(\p{Emoji_Presentation}|\p{Extended_Pictographic}|\p{Emoji})+/gu);
+    const emoji = match ? match[0] : '';
+    let text = fullTitle?.slice(emoji.length) || '';
+
+    // Limitar texto a 35 caracteres sin cortar palabras importantes
+    const maxLength = 35;
+    if (text.length > maxLength) {
+      text = text.slice(0, maxLength).trimEnd() + '...';
+    }
+
+    return (
+      <>
+        <span>{emoji}</span>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+          {text}
+        </span>
+      </>
+    );
+  })()}
+</h2>
+            <p className="text-gray-600 text-sm min-h-[70px]">
+              {esEntrenada
+                ? s.menuItems?.[0]?.detail?.slice(0, 140) + (s.menuItems?.[0]?.detail?.length > 80 ? '...' : '') || 'Sin contenido'
+                : `🧩Ítems: ${s.menuItems?.length || 0}`}
             </p>
             <div className="absolute bottom-2 right-3 flex space-x-3">
               <motion.span
@@ -206,61 +239,75 @@ function Secciones() {
         ))}
       </motion.div>
 
-      <Modal
-        show={viewModal}
-        size="6xl"
-        className="bg-black"
-        onClose={() => setViewModal(false)}
-      >
-        <div className="p-6 relative bg-white text-gray-900 rounded-lg w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">{selected?.title}</h2>
-            <span
-              className="text-red-500 hover:text-red-700 cursor-pointer text-2xl"
-              onClick={() => setViewModal(false)}
-            >
-              ❌
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            {selected?.menuItems?.map((item, idx) => (
-              <div key={idx} className="p-4 border border-gray-300 rounded">
-                <h3 className="text-base font-semibold mb-1">{item.title}</h3>
-                <p className="text-gray-700 mb-1">{item.detail}</p>
-                {item.link && (
-                  <a
-                    href={item.link}
-                    className="text-blue-500 underline break-all"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {item.link}
-                  </a>
+      {viewModal && selected && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4">
+          <div className="p-6 bg-white text-gray-900 rounded-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto relative">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">{esEntrenada ? selected.menuItems?.[0]?.title || selected.title : selected.title}</h2>
+              <span
+                className="text-red-500 hover:text-red-700 cursor-pointer text-2xl"
+                onClick={() => setViewModal(false)}
+              >
+                ❌
+              </span>
+            </div>
+            {esEntrenada ? (
+              <div className="p-4 bg-gray-100 border border-gray-300 rounded-xl text-gray-800">
+                {selected.menuItems?.[0]?.detail ? (
+                  <p className="leading-relaxed">
+                    {selected.menuItems[0].detail}
+                  </p>
+                ) : (
+                  <p className="italic text-gray-500">Sin contenido cargado.</p>
                 )}
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                {selected.menuItems?.map((item, idx) => (
+                  <div key={idx} className="p-4 border border-gray-300 rounded">
+                    <h3 className="text-base font-semibold mb-1">{item.title}</h3>
+                    <p className="text-gray-700 mb-1">{item.detail}</p>
+                    {item.link && (
+                      <a
+                        href={item.link}
+                        className="text-blue-500 underline break-all"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {item.link}
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      </Modal>
+      )}
 
-      <Modal
-        show={showFormModal}
-        size="7xl"
-        className="bg-white"
-        onClose={() => setShowFormModal(false)}
-      >
-        <div className="text-gray-900 p-6 rounded-lg w-full max-h-[100vh] overflow-y-auto">
-          <SeccionModal
+      {showFormModal && (
+        esEntrenada ? (
+          <SeccionEntrenadaModal
             seccion={selected}
-            category={decodeURIComponent(categoria)}
+            category={decodedCategoria}
             onClose={() => setShowFormModal(false)}
             onSuccess={() => {
               setShowFormModal(false);
               fetchSecciones();
             }}
           />
-        </div>
-      </Modal>
+        ) : (
+          <SeccionModal
+            seccion={selected}
+            category={decodedCategoria}
+            onClose={() => setShowFormModal(false)}
+            onSuccess={() => {
+              setShowFormModal(false);
+              fetchSecciones();
+            }}
+          />
+        )
+      )}
     </motion.div>
   );
 }

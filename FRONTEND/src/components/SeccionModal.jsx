@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Label, Button } from 'flowbite-react';
-import { HiX } from 'react-icons/hi';
-import Swal from 'sweetalert2';
+import { Label, Button, Table } from 'flowbite-react';
+import { HiX, HiPencil, HiTrash } from 'react-icons/hi';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import TextareaWithEditor from './TextAreaWithEditor';
@@ -10,228 +9,227 @@ import InputWithEmoji from './InputWithEmoji';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 
-const entrenadas = [
-  'Guía Turístico',
-  'Tipo de Cambio',
-  'Preguntas Frecuentes',
-  'Nosotros',
-  'Contacto',
-];
+const entrenadas = ['Guía Turístico', 'Tipo de Cambio', 'Preguntas Frecuentes', 'Nosotros', 'Contacto'];
 
 function SeccionModal({ seccion, category, onClose, onSuccess }) {
   const [title, setTitle] = useState('');
-  const [menuItems, setMenuItems] = useState([{ title: '', detail: '', link: '' }]);
+  const [menuItems, setMenuItems] = useState([]);
+  const [itemTitle, setItemTitle] = useState('');
+  const [itemDetail, setItemDetail] = useState('');
+  const [itemLink, setItemLink] = useState('');
+  const [editingIndex, setEditingIndex] = useState(null);
+
   const [showEmoji, setShowEmoji] = useState(false);
   const [emojiField, setEmojiField] = useState('');
   const pickerRef = useRef();
 
-  const isEntrenada =
-    !!category || (seccion && entrenadas.includes(seccion.title?.trim()));
+  const isEntrenada = !!category || (seccion && entrenadas.includes(seccion.title?.trim()));
 
   useEffect(() => {
     if (seccion) {
       setTitle(seccion.title || '');
-      setMenuItems(seccion.menuItems?.length ? seccion.menuItems : [{ title: '', detail: '', link: '' }]);
+      setMenuItems(seccion.menuItems || []);
     } else {
       setTitle(category || '');
-      setMenuItems([{ title: '', detail: '', link: '' }]);
+      setMenuItems([]);
     }
   }, [seccion, category]);
 
   const handleEmojiSelect = (emoji) => {
     const value = emoji.native;
-    if (emojiField === 'title') {
-      setTitle((prev) => prev + value);
-    } else {
-      const [index, field] = emojiField.split('.');
-      const updated = [...menuItems];
-      updated[parseInt(index)][field] += value;
-      setMenuItems(updated);
+    switch (emojiField) {
+      case 'title':
+        setTitle((prev) => prev + value);
+        break;
+      case 'itemTitle':
+        setItemTitle((prev) => prev + value);
+        break;
+      case 'itemDetail':
+        setItemDetail((prev) => prev + value);
+        break;
+      default:
+        break;
     }
     setShowEmoji(false);
   };
 
-  const handleMenuItemChange = (index, field, value) => {
-    const updated = [...menuItems];
-    updated[index][field] = value;
-    setMenuItems(updated);
+  const truncateText = (text, maxLength = 30) => {
+    if (!text) return '';
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   };
 
-  const addMenuItem = () => {
-    setMenuItems([...menuItems, { title: '', detail: '', link: '' }]);
+  const handleAddOrUpdateItem = () => {
+    const trimmedTitle = itemTitle.trim();
+    const trimmedDetail = itemDetail.trim();
+    const trimmedLink = itemLink.trim();
+    if (!trimmedTitle && !trimmedDetail && !trimmedLink) return;
+
+    const item = {
+      title: trimmedTitle,
+      detail: trimmedDetail,
+      link: trimmedLink,
+    };
+
+    const updatedItems = [...menuItems];
+    if (editingIndex !== null) {
+      updatedItems[editingIndex] = item;
+    } else {
+      updatedItems.push(item);
+    }
+
+    setMenuItems(updatedItems);
+    setEditingIndex(null);
+    setItemTitle('');
+    setItemDetail('');
+    setItemLink('');
   };
 
-  const removeMenuItem = (index) => {
+  const handleEditItem = (index) => {
+    const item = menuItems[index];
+    setItemTitle(item.title);
+    setItemDetail(item.detail);
+    setItemLink(item.link);
+    setEditingIndex(index);
+  };
+
+  const handleDeleteItem = (index) => {
     const updated = menuItems.filter((_, i) => i !== index);
     setMenuItems(updated);
+    if (index === editingIndex) {
+      setEditingIndex(null);
+      setItemTitle('');
+      setItemDetail('');
+      setItemLink('');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!title.trim()) {
-      return Swal.fire({
-        icon: 'warning',
-        title: 'Campo obligatorio',
-        text: 'El título es obligatorio.',
-        confirmButtonColor: '#facc15'
-      });
-    }
-
-    const payload = {
-      title,
-      menuItems: menuItems.filter(
-        (item) => item.title.trim() || item.detail.trim() || item.link.trim()
-      ),
-    };
-
-    const url = seccion
-      ? `http://localhost:5000/api/secciones/${seccion._id}`
-      : 'http://localhost:5000/api/secciones';
+    const payload = { title, menuItems };
 
     try {
-      seccion
-        ? await axios.put(url, payload)
-        : await axios.post(url, payload);
-
-      Swal.fire({
-        icon: 'success',
-        title: '¡Guardado!',
-        text: 'La sección fue guardada correctamente.',
-        confirmButtonColor: '#3b82f6'
-      });
-
+      if (seccion) {
+        await axios.put(`http://localhost:5000/api/secciones/${seccion._id}`, payload);
+      } else {
+        await axios.post('http://localhost:5000/api/secciones', payload);
+      }
       onSuccess();
-    } catch (e) {
-      console.error('Error guardando sección', e);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Ocurrió un error al guardar la sección.',
-        confirmButtonColor: '#ef4444'
-      });
+    } catch (err) {
+      console.error('❌ Error al guardar la sección:', err.response?.data || err.message);
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 60 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -60 }}
-      transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2"
-    >
-      <div className="relative w-full max-w-5xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto">
-        {/* Picker de emojis */}
+    <motion.div initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -60 }} transition={{ duration: 0.4 }} className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2">
+      <div className="relative w-full max-w-7xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto max-h-[95vh]">
+
         {showEmoji && (
           <div ref={pickerRef} className="absolute z-50 right-5 top-5">
             <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="light" />
           </div>
         )}
 
-        {/* Botón cerrar */}
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition"
-          title="Cerrar"
-        >
+        <button onClick={onClose} className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition" title="Cerrar">
           <HiX />
         </button>
 
-        <motion.form
-          onSubmit={handleSubmit}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-10 text-gray-900"
-        >
-          {/* Título */}
-          <div className="!text-start">
-            <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3">
-              <span className="text-5xl me-2">📋</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
-                {seccion ? 'Editar Sección' : `Nueva Sección (${category})`}
-              </span>
-            </h2>
-          </div>
+        <motion.form onSubmit={handleSubmit} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-10 text-gray-900">
 
-          {/* Campo título */}
-          <div>
-            <Label value="Título de la sección" className="text-violet-800 font-semibold mb-1" />
-            <InputWithEmoji
-              value={title}
-              onChange={setTitle}
-              placeholder="Título de la sección..."
-              disabled={isEntrenada}
-              onEmojiClick={() => {
-                setShowEmoji(true);
-                setEmojiField('title');
-              }}
-            />
-          </div>
+          <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3">
+            <span className="text-5xl">📂</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
+              {seccion ? 'Editar Sección' : 'Nueva Sección'}
+            </span>
+          </h2>
 
-          {/* Menú interno */}
-          <div className="space-y-6">
-            {menuItems.map((item, index) => (
-              <div
-                key={index}
-                className="border border-gray-300 rounded-lg p-6 bg-white shadow-md space-y-4"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            {/* Columna izquierda: formulario ítem */}
+            <div className="space-y-4 bg-gray-50 border border-gray-300 rounded-xl p-6 shadow-sm">
+              <Label value="Título de la sección" className="text-violet-800 font-semibold mb-1" />
+              <InputWithEmoji
+                value={title}
+                onChange={setTitle}
+                placeholder="Ej: Preguntas Frecuentes"
+                disabled={isEntrenada}
+                onEmojiClick={() => {
+                  setShowEmoji(true);
+                  setEmojiField('title');
+                }}
+              />
+
+              <Label value="Título del ítem" className="text-violet-800 font-semibold mt-2" />
+              <InputWithEmoji
+                value={itemTitle}
+                onChange={setItemTitle}
+                placeholder="Título del ítem"
+                onEmojiClick={() => {
+                  setShowEmoji(true);
+                  setEmojiField('itemTitle');
+                }}
+              />
+
+              <Label value="Detalle del ítem" className="text-violet-800 font-semibold mt-2" />
+              <TextareaWithEditor value={itemDetail} onChange={setItemDetail} rows={5} />
+
+              <input
+                type="text"
+                value={itemLink}
+                onChange={(e) => setItemLink(e.target.value)}
+                placeholder="Link (opcional)"
+                className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm shadow-sm"
+              />
+
+              <Button
+                type="button"
+                color="success"
+                className="mt-4 w-full rounded-full shadow-md font-semibold"
+                onClick={handleAddOrUpdateItem}
               >
-                <InputWithEmoji
-                  value={item.title}
-                  onChange={(val) => handleMenuItemChange(index, 'title', val)}
-                  placeholder="Título del ítem"
-                  onEmojiClick={() => {
-                    setShowEmoji(true);
-                    setEmojiField(`${index}.title`);
-                  }}
-                />
-                <TextareaWithEditor
-                  value={item.detail}
-                  onChange={(val) => handleMenuItemChange(index, 'detail', val)}
-                  rows={8}
-                />
-                <input
-                  type="text"
-                  value={item.link}
-                  onChange={(e) => handleMenuItemChange(index, 'link', e.target.value)}
-                  placeholder="Link (opcional)"
-                  className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-violet-400 focus:outline-none"
-                />
-                <div className="text-end">
-                  <button
-                    type="button"
-                    onClick={() => removeMenuItem(index)}
-                    className="text-red-500 text-sm hover:text-red-700"
-                  >
-                    Eliminar ítem
-                  </button>
-                </div>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addMenuItem}
-              className="text-sm text-yellow-500 hover:text-yellow-600"
-            >
-              + Agregar ítem
-            </button>
+                {editingIndex !== null ? '✅ Actualizar ítem' : '➕ Agregar ítem'}
+              </Button>
+            </div>
+
+            {/* Columna derecha: tabla ítems */}
+            <div className="bg-white border border-gray-300 rounded-xl p-6 shadow-sm overflow-x-auto">
+              <h3 className="text-xl font-semibold mb-4 text-violet-800">Ítems agregados</h3>
+              {menuItems.length > 0 ? (
+                <Table striped>
+                  <Table.Head>
+                    <Table.HeadCell>Título</Table.HeadCell>
+                    <Table.HeadCell>Detalle</Table.HeadCell>
+                    <Table.HeadCell>Acciones</Table.HeadCell>
+                  </Table.Head>
+                  <Table.Body>
+                    {menuItems.map((item, index) => (
+                      <Table.Row key={index}>
+                        <Table.Cell>{truncateText(item.title)}</Table.Cell>
+                        <Table.Cell>{truncateText(item.detail)}</Table.Cell>
+                        <Table.Cell>
+                          <button onClick={() => handleEditItem(index)} className="text-blue-600 text-xl hover:underline me-2" type="button">
+                            <HiPencil />
+                          </button>
+                          <button onClick={() => handleDeleteItem(index)} className="text-red-600 text-xl hover:underline" type="button">
+                            <HiTrash />
+                          </button>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table>
+              ) : (
+                <p className="text-sm text-gray-500">No hay ítems agregados todavía.</p>
+              )}
+            </div>
           </div>
 
-          {/* Botones */}
+          {/* Botones finales */}
           <div className="flex justify-end gap-4 mt-2">
-            <Button
-              type="button"
-              onClick={onClose}
-              className="bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
-            >
+            <Button type="button" onClick={onClose} className="bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition">
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              className="bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
-            >
-              Guardar
+            <Button type="submit" className="bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition">
+              Guardar sección
             </Button>
           </div>
         </motion.form>
