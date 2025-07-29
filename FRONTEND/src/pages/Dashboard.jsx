@@ -26,14 +26,17 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [allProducts, setAllProducts] = useState([]);
   const [allSections, setAllSections] = useState([]);
+  const [reservas, setReservas] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const resProd = await axios.get("http://localhost:5000/api/productos");
         const resSec = await axios.get("http://localhost:5000/api/secciones");
+        const resRes = await axios.get("http://localhost:5000/api/reservas");
         setAllProducts(resProd.data);
         setAllSections(resSec.data);
+        setReservas(resRes.data);
       } catch (err) {
         console.error("Error al traer datos:", err);
       } finally {
@@ -100,16 +103,6 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-violet-100 text-white p-4">
-      {/* TÍTULO DASHBOARD */}
-      {/* <motion.h1
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-4xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-black via-blue-800 to-violet-800 inline-block"
-      >
-        Dashboard
-      </motion.h1> */}
-
       {loading ? (
         <div className="min-h-[300px] flex justify-center items-center">
           <Spinner size="xl" className="w-16 h-16 text-purple-600" />
@@ -204,13 +197,39 @@ function Dashboard() {
 
           {/* Reservas */}
           <Card
-            title="Reservas"
+            title={`Reservas (${reservas.length})`}
             icon="🗓️"
             onClick={() => navigate("/reservas")}
           >
-            <p className="text-gray-700 text-sm">
+            <p className="text-gray-700 text-sm mb-2">
               Administrá las reservas con IA personalizada.
             </p>
+
+            <div className="bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md text-gray-800 text-sm">
+              <h3 className="text-md font-semibold mb-2 text-violet-800">
+                Reservas por estado
+              </h3>
+              <ul className="list-disc list-inside leading-relaxed">
+                <li>
+                  🟡 Pendientes:{" "}
+                  <span className="font-bold">
+                    {reservas.filter((r) => r.estado === "pendiente").length}
+                  </span>
+                </li>
+                <li>
+                  🟢 Atendidas:{" "}
+                  <span className="font-bold">
+                    {reservas.filter((r) => r.estado === "atendida").length}
+                  </span>
+                </li>
+                <li>
+                  ⚫ Cerradas:{" "}
+                  <span className="font-bold">
+                    {reservas.filter((r) => r.estado === "cerrada").length}
+                  </span>
+                </li>
+              </ul>
+            </div>
           </Card>
 
           {/* Chat */}

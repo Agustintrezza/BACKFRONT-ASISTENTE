@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Spinner } from 'flowbite-react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Spinner } from "flowbite-react";
+import axios from "axios";
 // eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 const entrenadas = [
-  'Tours y Excursiones',
-  'Alojamiento',
-  'Shows de Tango',
-  'Programas',
-  'Traslados',
+  "Tours y Excursiones",
+  "Alojamiento",
+  "Shows de Tango",
+  "Programas",
+  "Traslados",
 ];
 
 const emojis = {
-  'Tours y Excursiones': '🗺️',
-  'Alojamiento': '🏨',
-  'Shows de Tango': '💃',
-  'Programas': '📝',
-  'Traslados': '🚐',
+  "Tours y Excursiones": "🗺️",
+  Alojamiento: "🏨",
+  "Shows de Tango": "💃",
+  Programas: "📝",
+  Traslados: "🚐",
 };
 
 const emojiVariants = {
@@ -40,7 +40,7 @@ function ProductosEntrenados() {
   useEffect(() => {
     async function fetchCounts() {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/productos');
+        const { data } = await axios.get("http://localhost:5000/api/productos");
         const cnt = {};
         entrenadas.forEach((cat) => (cnt[cat] = 0));
         data.forEach((p) => {
@@ -50,7 +50,7 @@ function ProductosEntrenados() {
         });
         setCounts(cnt);
       } catch (e) {
-        console.error('Error fetching products:', e);
+        console.error("Error fetching products:", e);
       } finally {
         setLoading(false);
       }
@@ -63,7 +63,7 @@ function ProductosEntrenados() {
       onClick={onClick}
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       whileHover={{ scale: 1.01 }}
       className="cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
     >
@@ -81,7 +81,7 @@ function ProductosEntrenados() {
           </motion.span>
         </h2>
         <p className="text-gray-700 text-sm">
-          Total de productos:{' '}
+          Total de productos:{" "}
           <span className="font-bold text-blue-600">{count}</span>
         </p>
       </div>
@@ -112,7 +112,7 @@ function ProductosEntrenados() {
         </motion.h1>
         <div className="flex space-x-2">
           <motion.button
-            onClick={() => navigate('/productos-sin-entrenamiento')}
+            onClick={() => navigate("/productos-sin-entrenamiento")}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
@@ -124,7 +124,7 @@ function ProductosEntrenados() {
           </motion.button>
 
           <motion.button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate("/dashboard")}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}

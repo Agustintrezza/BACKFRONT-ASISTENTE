@@ -1,27 +1,27 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Label, Button } from 'flowbite-react';
-import { HiX } from 'react-icons/hi';
-import Swal from 'sweetalert2';
-import InputWithEmoji from './InputWithEmoji';
-import TextareaWithEditor from './TextAreaWithEditor';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Label, Button } from "flowbite-react";
+import { HiX } from "react-icons/hi";
+import Swal from "sweetalert2";
+import InputWithEmoji from "../inputs-emojis/InputWithEmoji";
+import TextareaWithEditor from "../inputs-emojis/TextAreaWithEditor";
 // eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 function SeccionEntrenadaModal({ seccion, onClose, onSuccess }) {
-  const [sectionTitle, setSectionTitle] = useState('');
-  const [itemTitle, setItemTitle] = useState('');
-  const [detail, setDetail] = useState('');
+  const [sectionTitle, setSectionTitle] = useState("");
+  const [itemTitle, setItemTitle] = useState("");
+  const [detail, setDetail] = useState("");
 
   useEffect(() => {
     if (seccion) {
-      setSectionTitle(seccion.title || '');
-      setItemTitle(seccion.menuItems?.[0]?.title || '');
-      setDetail(seccion.menuItems?.[0]?.detail || '');
+      setSectionTitle(seccion.title || "");
+      setItemTitle(seccion.menuItems?.[0]?.title || "");
+      setDetail(seccion.menuItems?.[0]?.detail || "");
     } else {
-      setSectionTitle('');
-      setItemTitle('');
-      setDetail('');
+      setSectionTitle("");
+      setItemTitle("");
+      setDetail("");
     }
   }, [seccion]);
 
@@ -30,10 +30,10 @@ function SeccionEntrenadaModal({ seccion, onClose, onSuccess }) {
 
     if (!itemTitle.trim() || !detail.trim()) {
       return Swal.fire({
-        icon: 'warning',
-        title: 'Campos requeridos',
-        text: 'Debés completar el título del ítem y el contenido.',
-        confirmButtonColor: '#facc15',
+        icon: "warning",
+        title: "Campos requeridos",
+        text: "Debés completar el título del ítem y el contenido.",
+        confirmButtonColor: "#facc15",
       });
     }
 
@@ -43,7 +43,7 @@ function SeccionEntrenadaModal({ seccion, onClose, onSuccess }) {
         {
           title: itemTitle.trim(),
           detail: detail.trim(),
-          link: '',
+          link: "",
         },
       ],
     };
@@ -57,20 +57,20 @@ function SeccionEntrenadaModal({ seccion, onClose, onSuccess }) {
       else await axios.post(url, payload);
 
       Swal.fire({
-        icon: 'success',
-        title: '¡Guardado!',
-        text: 'La tarjeta fue guardada correctamente.',
-        confirmButtonColor: '#3b82f6',
+        icon: "success",
+        title: "¡Guardado!",
+        text: "La tarjeta fue guardada correctamente.",
+        confirmButtonColor: "#3b82f6",
       });
 
       onSuccess();
     } catch (err) {
-      console.error('Error al guardar tarjeta:', err);
+      console.error("Error al guardar tarjeta:", err);
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Ocurrió un error al guardar.',
-        confirmButtonColor: '#ef4444',
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al guardar.",
+        confirmButtonColor: "#ef4444",
       });
     }
   };
@@ -102,7 +102,7 @@ function SeccionEntrenadaModal({ seccion, onClose, onSuccess }) {
           <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3 text-center">
             <span className="text-5xl">🧩</span>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
-              {seccion ? 'Editar Tarjeta' : 'Nueva Tarjeta'}
+              {seccion ? "Editar Tarjeta" : "Nueva Tarjeta"}
               {sectionTitle && (
                 <span className="text-xl font-bold text-violet-700 ml-2">
                   ({sectionTitle})

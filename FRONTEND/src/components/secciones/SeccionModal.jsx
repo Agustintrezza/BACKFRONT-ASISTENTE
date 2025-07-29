@@ -1,36 +1,43 @@
-import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { Label, Button, Table } from 'flowbite-react';
-import { HiX, HiPencil, HiTrash } from 'react-icons/hi';
-import Picker from '@emoji-mart/react';
-import data from '@emoji-mart/data';
-import TextareaWithEditor from './TextAreaWithEditor';
-import InputWithEmoji from './InputWithEmoji';
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { Label, Button, Table } from "flowbite-react";
+import { HiX, HiPencil, HiTrash } from "react-icons/hi";
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
+import TextareaWithEditor from "../inputs-emojis/TextAreaWithEditor";
+import InputWithEmoji from "../inputs-emojis/InputWithEmoji";
 // eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
-const entrenadas = ['Guía Turístico', 'Tipo de Cambio', 'Preguntas Frecuentes', 'Nosotros', 'Contacto'];
+const entrenadas = [
+  "Guía Turístico",
+  "Tipo de Cambio",
+  "Preguntas Frecuentes",
+  "Nosotros",
+  "Contacto",
+];
 
 function SeccionModal({ seccion, category, onClose, onSuccess }) {
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState("");
   const [menuItems, setMenuItems] = useState([]);
-  const [itemTitle, setItemTitle] = useState('');
-  const [itemDetail, setItemDetail] = useState('');
-  const [itemLink, setItemLink] = useState('');
+  const [itemTitle, setItemTitle] = useState("");
+  const [itemDetail, setItemDetail] = useState("");
+  const [itemLink, setItemLink] = useState("");
   const [editingIndex, setEditingIndex] = useState(null);
 
   const [showEmoji, setShowEmoji] = useState(false);
-  const [emojiField, setEmojiField] = useState('');
+  const [emojiField, setEmojiField] = useState("");
   const pickerRef = useRef();
 
-  const isEntrenada = !!category || (seccion && entrenadas.includes(seccion.title?.trim()));
+  const isEntrenada =
+    !!category || (seccion && entrenadas.includes(seccion.title?.trim()));
 
   useEffect(() => {
     if (seccion) {
-      setTitle(seccion.title || '');
+      setTitle(seccion.title || "");
       setMenuItems(seccion.menuItems || []);
     } else {
-      setTitle(category || '');
+      setTitle(category || "");
       setMenuItems([]);
     }
   }, [seccion, category]);
@@ -38,13 +45,13 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
   const handleEmojiSelect = (emoji) => {
     const value = emoji.native;
     switch (emojiField) {
-      case 'title':
+      case "title":
         setTitle((prev) => prev + value);
         break;
-      case 'itemTitle':
+      case "itemTitle":
         setItemTitle((prev) => prev + value);
         break;
-      case 'itemDetail':
+      case "itemDetail":
         setItemDetail((prev) => prev + value);
         break;
       default:
@@ -54,8 +61,8 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
   };
 
   const truncateText = (text, maxLength = 30) => {
-    if (!text) return '';
-    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+    if (!text) return "";
+    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
   };
 
   const handleAddOrUpdateItem = () => {
@@ -79,9 +86,9 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
 
     setMenuItems(updatedItems);
     setEditingIndex(null);
-    setItemTitle('');
-    setItemDetail('');
-    setItemLink('');
+    setItemTitle("");
+    setItemDetail("");
+    setItemLink("");
   };
 
   const handleEditItem = (index) => {
@@ -97,9 +104,9 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
     setMenuItems(updated);
     if (index === editingIndex) {
       setEditingIndex(null);
-      setItemTitle('');
-      setItemDetail('');
-      setItemLink('');
+      setItemTitle("");
+      setItemDetail("");
+      setItemLink("");
     }
   };
 
@@ -109,44 +116,70 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
 
     try {
       if (seccion) {
-        await axios.put(`http://localhost:5000/api/secciones/${seccion._id}`, payload);
+        await axios.put(
+          `http://localhost:5000/api/secciones/${seccion._id}`,
+          payload
+        );
       } else {
-        await axios.post('http://localhost:5000/api/secciones', payload);
+        await axios.post("http://localhost:5000/api/secciones", payload);
       }
       onSuccess();
     } catch (err) {
-      console.error('❌ Error al guardar la sección:', err.response?.data || err.message);
+      console.error(
+        "❌ Error al guardar la sección:",
+        err.response?.data || err.message
+      );
     }
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -60 }} transition={{ duration: 0.4 }} className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2">
+    <motion.div
+      initial={{ opacity: 0, y: 60 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -60 }}
+      transition={{ duration: 0.4 }}
+      className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2"
+    >
       <div className="relative w-full max-w-7xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto max-h-[95vh]">
-
         {showEmoji && (
           <div ref={pickerRef} className="absolute z-50 right-5 top-5">
-            <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="light" />
+            <Picker
+              data={data}
+              onEmojiSelect={handleEmojiSelect}
+              theme="light"
+            />
           </div>
         )}
 
-        <button onClick={onClose} className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition" title="Cerrar">
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition"
+          title="Cerrar"
+        >
           <HiX />
         </button>
 
-        <motion.form onSubmit={handleSubmit} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-10 text-gray-900">
-
+        <motion.form
+          onSubmit={handleSubmit}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-10 text-gray-900"
+        >
           <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3">
             <span className="text-5xl">📂</span>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
-              {seccion ? 'Editar Sección' : 'Nueva Sección'}
+              {seccion ? "Editar Sección" : "Nueva Sección"}
             </span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
             {/* Columna izquierda: formulario ítem */}
             <div className="space-y-4 bg-gray-50 border border-gray-300 rounded-xl p-6 shadow-sm">
-              <Label value="Título de la sección" className="text-violet-800 font-semibold mb-1" />
+              <Label
+                value="Título de la sección"
+                className="text-violet-800 font-semibold mb-1"
+              />
               <InputWithEmoji
                 value={title}
                 onChange={setTitle}
@@ -154,23 +187,33 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
                 disabled={isEntrenada}
                 onEmojiClick={() => {
                   setShowEmoji(true);
-                  setEmojiField('title');
+                  setEmojiField("title");
                 }}
               />
 
-              <Label value="Título del ítem" className="text-violet-800 font-semibold mt-2" />
+              <Label
+                value="Título del ítem"
+                className="text-violet-800 font-semibold mt-2"
+              />
               <InputWithEmoji
                 value={itemTitle}
                 onChange={setItemTitle}
                 placeholder="Título del ítem"
                 onEmojiClick={() => {
                   setShowEmoji(true);
-                  setEmojiField('itemTitle');
+                  setEmojiField("itemTitle");
                 }}
               />
 
-              <Label value="Detalle del ítem" className="text-violet-800 font-semibold mt-2" />
-              <TextareaWithEditor value={itemDetail} onChange={setItemDetail} rows={5} />
+              <Label
+                value="Detalle del ítem"
+                className="text-violet-800 font-semibold mt-2"
+              />
+              <TextareaWithEditor
+                value={itemDetail}
+                onChange={setItemDetail}
+                rows={5}
+              />
 
               <input
                 type="text"
@@ -186,13 +229,17 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
                 className="mt-4 w-full rounded-full shadow-md font-semibold"
                 onClick={handleAddOrUpdateItem}
               >
-                {editingIndex !== null ? '✅ Actualizar ítem' : '➕ Agregar ítem'}
+                {editingIndex !== null
+                  ? "✅ Actualizar ítem"
+                  : "➕ Agregar ítem"}
               </Button>
             </div>
 
             {/* Columna derecha: tabla ítems */}
             <div className="bg-white border border-gray-300 rounded-xl p-6 shadow-sm overflow-x-auto">
-              <h3 className="text-xl font-semibold mb-4 text-violet-800">Ítems agregados</h3>
+              <h3 className="text-xl font-semibold mb-4 text-violet-800">
+                Ítems agregados
+              </h3>
               {menuItems.length > 0 ? (
                 <Table striped>
                   <Table.Head>
@@ -206,10 +253,18 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
                         <Table.Cell>{truncateText(item.title)}</Table.Cell>
                         <Table.Cell>{truncateText(item.detail)}</Table.Cell>
                         <Table.Cell>
-                          <button onClick={() => handleEditItem(index)} className="text-blue-600 text-xl hover:underline me-2" type="button">
+                          <button
+                            onClick={() => handleEditItem(index)}
+                            className="text-blue-600 text-xl hover:underline me-2"
+                            type="button"
+                          >
                             <HiPencil />
                           </button>
-                          <button onClick={() => handleDeleteItem(index)} className="text-red-600 text-xl hover:underline" type="button">
+                          <button
+                            onClick={() => handleDeleteItem(index)}
+                            className="text-red-600 text-xl hover:underline"
+                            type="button"
+                          >
                             <HiTrash />
                           </button>
                         </Table.Cell>
@@ -218,17 +273,26 @@ function SeccionModal({ seccion, category, onClose, onSuccess }) {
                   </Table.Body>
                 </Table>
               ) : (
-                <p className="text-sm text-gray-500">No hay ítems agregados todavía.</p>
+                <p className="text-sm text-gray-500">
+                  No hay ítems agregados todavía.
+                </p>
               )}
             </div>
           </div>
 
           {/* Botones finales */}
           <div className="flex justify-end gap-4 mt-2">
-            <Button type="button" onClick={onClose} className="bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition">
+            <Button
+              type="button"
+              onClick={onClose}
+              className="bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
+            >
               Cancelar
             </Button>
-            <Button type="submit" className="bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition">
+            <Button
+              type="submit"
+              className="bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
+            >
               Guardar sección
             </Button>
           </div>

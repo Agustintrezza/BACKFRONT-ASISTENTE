@@ -1,0 +1,185 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import {
+  Table,
+  Badge,
+  Button,
+  Spinner,
+  TextInput,
+  Select,
+} from 'flowbite-react';
+import { HiCheck, HiXCircle, HiRefresh } from 'react-icons/hi';
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export default function Reservas() {
+  const [reservas, setReservas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filtroNombre, setFiltroNombre] = useState('');
+  const [filtroFecha, setFiltroFecha] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState('');
+
+  const fetchReservas = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/reservas`);
+      setReservas(res.data);
+    } catch (error) {
+      console.error('Error al obtener reservas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cambiarEstado = async (id, nuevoEstado) => {
+    try {
+      await axios.patch(`${API_URL}/reservas/${id}`, { estado: nuevoEstado });
+      setReservas(prev =>
+        prev.map(r => (r._id === id ? { ...r, estado: nuevoEstado } : r))
+      );
+    } catch (error) {
+      console.error('Error al cambiar estado:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReservas();
+  }, []);
+
+  const reservasFiltradas = reservas.filter(reserva => {
+    const nombreCoincide = reserva.nombre
+      .toLowerCase()
+      .includes(filtroNombre.toLowerCase());
+    const fechaCoincide = reserva.fecha.includes(filtroFecha);
+    const estadoCoincide =
+      filtroEstado === '' || reserva.estado === filtroEstado;
+    return nombreCoincide && fechaCoincide && estadoCoincide;
+  });
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">
+        <Spinner size="xl" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">📋 Reservas</h1>
+
+      {/* Filtros */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+        <div className="sm:col-span-2 flex gap-4">
+          <TextInput
+            placeholder="Buscar por nombre"
+            value={filtroNombre}
+            onChange={e => setFiltroNombre(e.target.value)}
+            className="w-1/2"
+          />
+          <TextInput
+            type="date"
+            placeholder="Buscar por fecha"
+            value={filtroFecha}
+            onChange={e => setFiltroFecha(e.target.value)}
+            className="w-1/2"
+          />
+        </div>
+        <Select
+          value={filtroEstado}
+          onChange={e => setFiltroEstado(e.target.value)}
+        >
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="atendida">Atendida</option>
+          <option value="cerrada">Cerrada</option>
+        </Select>
+        <Button
+          color="gray"
+          onClick={() => {
+            setFiltroNombre('');
+            setFiltroFecha('');
+            setFiltroEstado('');
+          }}
+        >
+          Limpiar
+        </Button>
+      </div>
+
+      <Table hoverable>
+        <Table.Head>
+          <Table.HeadCell>Cliente</Table.HeadCell>
+          <Table.HeadCell>Fecha</Table.HeadCell>
+          <Table.HeadCell>Hora</Table.HeadCell>
+          <Table.HeadCell>Pasajeros</Table.HeadCell>
+          <Table.HeadCell>Teléfono</Table.HeadCell>
+          <Table.HeadCell>Email</Table.HeadCell>
+          <Table.HeadCell>Producto</Table.HeadCell>
+          <Table.HeadCell>Estado</Table.HeadCell>
+          <Table.HeadCell>Acciones</Table.HeadCell>
+        </Table.Head>
+        <Table.Body className="divide-y">
+          {reservasFiltradas.map(reserva => (
+            <Table.Row key={reserva._id}>
+              <Table.Cell>{reserva.nombre}</Table.Cell>
+              <Table.Cell>{reserva.fecha}</Table.Cell>
+              <Table.Cell>{reserva.hora || '-'}</Table.Cell>
+              <Table.Cell>{reserva.pasajeros}</Table.Cell>
+              <Table.Cell>{reserva.telefono}</Table.Cell>
+              <Table.Cell>{reserva.email || '-'}</Table.Cell>
+              <Table.Cell>
+                {reserva.producto.length > 40
+                  ? reserva.producto.substring(0, 40) + '...'
+                  : reserva.producto}
+              </Table.Cell>
+              <Table.Cell>
+                <Badge
+                  color={
+                    reserva.estado === 'cerrada'
+                      ? 'gray'
+                      : reserva.estado === 'atendida'
+                      ? 'success'
+                      : 'warning'
+                  }
+                >
+                  {reserva.estado}
+                </Badge>
+              </Table.Cell>
+              <Table.Cell className="flex flex-wrap gap-2">
+                {reserva.estado !== 'pendiente' && (
+                  <Button
+                    color="warning"
+                    size="xs"
+                    onClick={() => cambiarEstado(reserva._id, 'pendiente')}
+                  >
+                    <HiRefresh className="mr-1" />
+                    Pendiente
+                  </Button>
+                )}
+                {reserva.estado !== 'atendida' && (
+                  <Button
+                    color="green"
+                    size="xs"
+                    onClick={() => cambiarEstado(reserva._id, 'atendida')}
+                  >
+                    <HiCheck className="mr-1" />
+                    Atendida
+                  </Button>
+                )}
+                {reserva.estado !== 'cerrada' && (
+                  <Button
+                    color="gray"
+                    size="xs"
+                    onClick={() => cambiarEstado(reserva._id, 'cerrada')}
+                  >
+                    <HiXCircle className="mr-1" />
+                    Cerrar
+                  </Button>
+                )}
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+    </div>
+  );
+}

@@ -1,78 +1,95 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { HiArrowLeft } from 'react-icons/hi';
-import { Button } from 'flowbite-react';
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { HiArrowLeft } from "react-icons/hi";
+import { Button } from "flowbite-react";
 
 function ChatPage() {
   const [messages, setMessages] = useState([]);
-  const [userInput, setUserInput] = useState('');
+  const [userInput, setUserInput] = useState("");
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
     }
   };
 
   const sendMessage = async () => {
     if (!userInput.trim()) return;
 
-    const newMessages = [...messages, { from: 'user', text: userInput }];
+    const newMessages = [...messages, { from: "user", text: userInput }];
     setMessages(newMessages);
-    setUserInput('');
+    setUserInput("");
 
     try {
-      const res = await axios.post('http://localhost:5005/webhooks/rest/webhook', {
-        sender: 'frontend-user',
-        message: userInput,
-      });
+      const res = await axios.post(
+        "http://localhost:5005/webhooks/rest/webhook",
+        {
+          sender: "frontend-user",
+          message: userInput,
+        }
+      );
 
       const botReplies = res.data.map((msg) => ({
-        from: 'bot',
-        text: msg.text || '',
+        from: "bot",
+        text: msg.text || "",
         buttons: msg.buttons || [],
       }));
 
       setMessages([...newMessages, ...botReplies]);
     } catch (err) {
-      console.error('Error enviando mensaje a Rasa:', err);
+      console.error("Error enviando mensaje a Rasa:", err);
       setMessages([
         ...newMessages,
-        { from: 'bot', text: '⚠️ No se pudo comunicar con el asistente.', buttons: [] },
+        {
+          from: "bot",
+          text: "⚠️ No se pudo comunicar con el asistente.",
+          buttons: [],
+        },
       ]);
     }
   };
 
   const sendMessageWithPayload = async (payload) => {
-    const newMessages = [...messages, { from: 'user', text: payload }];
+    const newMessages = [...messages, { from: "user", text: payload }];
     setMessages(newMessages);
 
     try {
-      const res = await axios.post('http://localhost:5005/webhooks/rest/webhook', {
-        sender: 'frontend-user',
-        message: payload,
-      });
+      const res = await axios.post(
+        "http://localhost:5005/webhooks/rest/webhook",
+        {
+          sender: "frontend-user",
+          message: payload,
+        }
+      );
 
       const botReplies = res.data.map((msg) => ({
-        from: 'bot',
-        text: msg.text || '',
+        from: "bot",
+        text: msg.text || "",
         buttons: msg.buttons || [],
       }));
 
       setMessages([...newMessages, ...botReplies]);
     } catch (err) {
-      console.error('Error enviando mensaje a Rasa:', err);
+      console.error("Error enviando mensaje a Rasa:", err);
       setMessages([
         ...newMessages,
-        { from: 'bot', text: '⚠️ No se pudo comunicar con el asistente.', buttons: [] },
+        {
+          from: "bot",
+          text: "⚠️ No se pudo comunicar con el asistente.",
+          buttons: [],
+        },
       ]);
     }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') sendMessage();
+    if (e.key === "Enter") sendMessage();
   };
 
   useEffect(() => {
@@ -90,7 +107,7 @@ function ChatPage() {
           Conversá con tu Asistente Virtual
         </h1>
         <Button
-          onClick={() => navigate('/productos')}
+          onClick={() => navigate("/productos")}
           className="flex items-center buttom-custom-yellow font-medium px-4 py-2"
         >
           <HiArrowLeft size={20} className="mr-2 self-center" />
@@ -104,21 +121,23 @@ function ChatPage() {
           <div
             key={i}
             className={`max-w-xl px-4 py-2 rounded-lg whitespace-pre-wrap ${
-              msg.from === 'user'
-                ? 'self-end text-black text-right ml-auto'
-                : 'bg-gray-700 self-start text-left mr-auto'
+              msg.from === "user"
+                ? "self-end text-black text-right ml-auto"
+                : "bg-gray-700 self-start text-left mr-auto"
             }`}
-            style={msg.from === 'user' ? { backgroundColor: '#ffd700' } : {}}
+            style={msg.from === "user" ? { backgroundColor: "#ffd700" } : {}}
           >
-            {msg.text.split('\n').map((line, idx) => (
-              <p key={idx} className="mb-[-3px]">{line}</p>
+            {msg.text.split("\n").map((line, idx) => (
+              <p key={idx} className="mb-[-3px]">
+                {line}
+              </p>
             ))}
 
             {/* Botones del asistente si existen */}
             {msg.buttons && msg.buttons.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {msg.buttons.map((btn, j) =>
-                  btn.type === 'web_url' && btn.url ? (
+                  btn.type === "web_url" && btn.url ? (
                     <a
                       key={j}
                       href={btn.url}
@@ -132,7 +151,7 @@ function ChatPage() {
                     <button
                       key={j}
                       onClick={() => {
-                        setUserInput('');
+                        setUserInput("");
                         sendMessageWithPayload(btn.payload);
                       }}
                       className="px-3 py-1 bg-yellow-500 text-black rounded hover:bg-yellow-600 text-sm"

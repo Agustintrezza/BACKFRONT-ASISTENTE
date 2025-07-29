@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Spinner } from 'flowbite-react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Spinner } from "flowbite-react";
+import axios from "axios";
 // eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 const entrenadas = [
-  'Guía Turístico',
-  'Tipo de cambio',
-  'Preguntas Frecuentes',
-  'Nosotros',
-  'Contacto',
+  "Guía Turístico",
+  "Tipo de cambio",
+  "Preguntas Frecuentes",
+  "Nosotros",
+  "Contacto",
 ];
 
 const emojis = {
-  'Guía Turístico': '🧭',
-  'Tipo de cambio': '💱',
-  'Preguntas Frecuentes': '📚',
-  'Nosotros': '🧑‍🤝‍🧑',
-  'Contacto': '📞',
+  "Guía Turístico": "🧭",
+  "Tipo de cambio": "💱",
+  "Preguntas Frecuentes": "📚",
+  Nosotros: "🧑‍🤝‍🧑",
+  Contacto: "📞",
 };
 
 const emojiVariants = {
@@ -40,12 +40,15 @@ function SeccionesEntrenadas() {
   useEffect(() => {
     async function fetchCounts() {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/secciones');
+        const { data } = await axios.get("http://localhost:5000/api/secciones");
         const cnt = {};
         entrenadas.forEach((t) => (cnt[t] = 0));
 
         data.forEach((s) => {
-          const normalizedTitle = s.title?.toLowerCase().replace(/[📚]/gu, '').trim();
+          const normalizedTitle = s.title
+            ?.toLowerCase()
+            .replace(/[📚]/gu, "")
+            .trim();
           const match = entrenadas.find(
             (t) => t.toLowerCase().trim() === normalizedTitle
           );
@@ -68,7 +71,7 @@ function SeccionesEntrenadas() {
       onClick={onClick}
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       whileHover={{ scale: 1.01 }}
       className="cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
     >
@@ -86,7 +89,7 @@ function SeccionesEntrenadas() {
           </motion.span>
         </h2>
         <p className="text-gray-700 text-sm">
-          Total de registros:{' '}
+          Total de registros:{" "}
           <span className="font-bold text-blue-600">{count}</span>
         </p>
       </div>
@@ -117,7 +120,7 @@ function SeccionesEntrenadas() {
         </motion.h1>
         <div className="flex space-x-2">
           <motion.button
-            onClick={() => navigate('/secciones-sin-entrenamiento')}
+            onClick={() => navigate("/secciones-sin-entrenamiento")}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
@@ -129,7 +132,7 @@ function SeccionesEntrenadas() {
           </motion.button>
 
           <motion.button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate("/dashboard")}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}

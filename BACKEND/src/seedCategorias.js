@@ -15,7 +15,7 @@ async function seed() {
     const exists = await CategoriaProducto.findOne({ categoria: cat });
     if (!exists) {
       await CategoriaProducto.create({ categoria: cat, items: [] });
-      console.log(`Creada categoría ${cat}`);
+      // console.log(`Creada categoría ${cat}`);
     }
   }
   mongoose.disconnect();

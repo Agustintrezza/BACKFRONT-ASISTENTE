@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Modal, Spinner } from 'flowbite-react';
-import axios from 'axios';
-import { HiX } from 'react-icons/hi';
-import SeccionModal from '../components/SeccionModal';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Modal, Spinner } from "flowbite-react";
+import axios from "axios";
+import { HiX } from "react-icons/hi";
+import SeccionModal from "../../components/secciones/SeccionModal";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 // eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
-import { FaPlusCircle } from 'react-icons/fa';
+import { motion } from "framer-motion";
+import { FaPlusCircle } from "react-icons/fa";
 
 const MySwal = withReactContent(Swal);
 
@@ -21,23 +21,23 @@ function SeccionesSinEntrenamiento() {
   const [selected, setSelected] = useState(null);
 
   const entrenadas = [
-    'Guía Turístico',
-    'Tipo de Cambio',
-    'Preguntas Frecuentes',
-    'Nosotros',
-    'Contacto',
+    "Guía Turístico",
+    "Tipo de Cambio",
+    "Preguntas Frecuentes",
+    "Nosotros",
+    "Contacto",
   ];
 
   const fetchSecciones = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/secciones');
+      const res = await axios.get("http://localhost:5000/api/secciones");
       const sin = res.data.filter(
-        (s) => !entrenadas.includes(s.title.replace(/\s*📚|\s*📘/, '').trim())
+        (s) => !entrenadas.includes(s.title.replace(/\s*📚|\s*📘/, "").trim())
       );
       setSecciones(sin);
     } catch (err) {
-      console.error('Error cargando secciones:', err);
+      console.error("Error cargando secciones:", err);
     } finally {
       setLoading(false);
     }
@@ -50,47 +50,51 @@ function SeccionesSinEntrenamiento() {
   const handleDelete = async (seccion) => {
     const confirm = await MySwal.fire({
       title: `¿Eliminar "${seccion.title}"?`,
-      text: 'Esta acción no se puede deshacer.',
-      icon: 'warning',
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      background: '#171717',
-      color: '#f3f4f6',
-      iconColor: '#facc15',
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      background: "#171717",
+      color: "#f3f4f6",
+      iconColor: "#facc15",
       customClass: {
-        popup: 'rounded-lg',
-        title: 'text-lg font-semibold',
-        confirmButton: 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700',
-        cancelButton: 'bg-blue-600 text-white px-4 py-2 rounded hover:bg-gray-700'
-      }
+        popup: "rounded-lg",
+        title: "text-lg font-semibold",
+        confirmButton:
+          "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700",
+        cancelButton:
+          "bg-blue-600 text-white px-4 py-2 rounded hover:bg-gray-700",
+      },
     });
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/secciones/${seccion._id}`);
+        await axios.delete(
+          `http://localhost:5000/api/secciones/${seccion._id}`
+        );
         fetchSecciones();
         MySwal.fire({
-          title: 'Eliminado',
+          title: "Eliminado",
           text: `"${seccion.title}" fue eliminada correctamente.`,
-          icon: 'success',
-          background: '#171717',
-          color: '#f3f4f6',
-          iconColor: '#4ade80',
-          confirmButtonColor: '#3b82f6'
+          icon: "success",
+          background: "#171717",
+          color: "#f3f4f6",
+          iconColor: "#4ade80",
+          confirmButtonColor: "#3b82f6",
         });
       } catch (err) {
-        console.error('Error eliminando:', err);
+        console.error("Error eliminando:", err);
         MySwal.fire({
-          title: 'Error',
-          text: 'No se pudo eliminar la sección.',
-          icon: 'error',
-          background: '#111827',
-          color: '#f3f4f6',
-          iconColor: '#f87171',
-          confirmButtonColor: '#ef4444'
+          title: "Error",
+          text: "No se pudo eliminar la sección.",
+          icon: "error",
+          background: "#111827",
+          color: "#f3f4f6",
+          iconColor: "#f87171",
+          confirmButtonColor: "#ef4444",
         });
       }
     }
@@ -136,7 +140,7 @@ function SeccionesSinEntrenamiento() {
           </motion.button>
 
           <motion.button
-            onClick={() => navigate('/secciones-entrenadas')}
+            onClick={() => navigate("/secciones-entrenadas")}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
@@ -149,7 +153,7 @@ function SeccionesSinEntrenamiento() {
           </motion.button>
 
           <motion.button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate("/dashboard")}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -183,7 +187,9 @@ function SeccionesSinEntrenamiento() {
                 {s.title}
               </h2>
               <div className="text-sm space-y-1">
-                <p>🧾 <strong>Ítems:</strong> {s.menuItems?.length || 0}</p>
+                <p>
+                  🧾 <strong>Ítems:</strong> {s.menuItems?.length || 0}
+                </p>
               </div>
               <div className="flex justify-end gap-4 mt-4 text-xl">
                 <span
@@ -213,90 +219,89 @@ function SeccionesSinEntrenamiento() {
         </div>
       )}
 
-<Modal
-  show={viewModal}
-  size="lg"
-  onClose={() => setViewModal(false)}
-  theme={{
-    root: {
-      show: {
-        on: 'fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm',
-      },
-    },
-  }}
->
-  <div className="p-6 relative bg-white rounded-lg">
-    <HiX
-      className="absolute top-4 right-4 cursor-pointer"
-      size={24}
-      onClick={() => setViewModal(false)}
-    />
-    {selected && (
-      <>
-        <h2 className="text-2xl font-bold mb-4">{selected.title}</h2>
-        {selected.description && (
-          <p className="text-gray-700 mb-4">{selected.description}</p>
-        )}
-        {selected.menuItems?.length > 0 && (
-          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-            {selected.menuItems.map((item, idx) => (
-              <li key={idx}>
-                <strong>{item.title}:</strong> {item.detail}
-                {item.link && (
+      <Modal
+        show={viewModal}
+        size="lg"
+        onClose={() => setViewModal(false)}
+        theme={{
+          root: {
+            show: {
+              on: "fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm",
+            },
+          },
+        }}
+      >
+        <div className="p-6 relative bg-white rounded-lg">
+          <HiX
+            className="absolute top-4 right-4 cursor-pointer"
+            size={24}
+            onClick={() => setViewModal(false)}
+          />
+          {selected && (
+            <>
+              <h2 className="text-2xl font-bold mb-4">{selected.title}</h2>
+              {selected.description && (
+                <p className="text-gray-700 mb-4">{selected.description}</p>
+              )}
+              {selected.menuItems?.length > 0 && (
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {selected.menuItems.map((item, idx) => (
+                    <li key={idx}>
+                      <strong>{item.title}:</strong> {item.detail}
+                      {item.link && (
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-1 text-blue-500 hover:underline"
+                        >
+                          (enlace)
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {selected.link && (
+                <div className="mt-4">
                   <a
-                    href={item.link}
+                    href={selected.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-1 text-blue-500 hover:underline"
+                    className="text-blue-500 hover:underline"
                   >
-                    (enlace)
+                    Ver enlace
                   </a>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-        {selected.link && (
-          <div className="mt-4">
-            <a
-              href={selected.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              Ver enlace
-            </a>
-          </div>
-        )}
-      </>
-    )}
-  </div>
-</Modal>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </Modal>
 
-<Modal
-  show={showFormModal}
-  size="6xl"
-  onClose={() => setShowFormModal(false)}
-  theme={{
-    root: {
-      show: {
-        on: 'fixed inset-0 z-50 flex items-center justify-center bg-white',
-      },
-    },
-  }}
->
-  <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
-    <SeccionModal
-      seccion={selected}
-      onClose={() => setShowFormModal(false)}
-      onSuccess={() => {
-        setShowFormModal(false);
-        fetchSecciones();
-      }}
-    />
-  </div>
-</Modal>
-
+      <Modal
+        show={showFormModal}
+        size="6xl"
+        onClose={() => setShowFormModal(false)}
+        theme={{
+          root: {
+            show: {
+              on: "fixed inset-0 z-50 flex items-center justify-center bg-white",
+            },
+          },
+        }}
+      >
+        <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+          <SeccionModal
+            seccion={selected}
+            onClose={() => setShowFormModal(false)}
+            onSuccess={() => {
+              setShowFormModal(false);
+              fetchSecciones();
+            }}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, Modal, Spinner } from 'flowbite-react';
-import axios from 'axios';
-import { HiX } from 'react-icons/hi';
-import ProductoModal from '../components/ProductoModal';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, Modal, Spinner } from "flowbite-react";
+import axios from "axios";
+import { HiX } from "react-icons/hi";
+import ProductoModal from "../../components/productos/ProductoModal";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 // eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
-import { FaPlusCircle } from 'react-icons/fa';
+import { motion } from "framer-motion";
+import { FaPlusCircle } from "react-icons/fa";
 
 const MySwal = withReactContent(Swal);
 
@@ -25,18 +25,18 @@ function ProductosSinEntrenamiento() {
   const fetchProductos = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/productos');
+      const res = await axios.get("http://localhost:5000/api/productos");
       const entrenadas = [
-        'Tours y Excursiones',
-        'Alojamiento',
-        'Shows de Tango',
-        'Programas',
-        'Traslados',
+        "Tours y Excursiones",
+        "Alojamiento",
+        "Shows de Tango",
+        "Programas",
+        "Traslados",
       ];
       const sin = res.data.filter((p) => !entrenadas.includes(p.category));
       setProductos(sin);
     } catch (err) {
-      console.error('Error cargando productos:', err);
+      console.error("Error cargando productos:", err);
     } finally {
       setLoading(false);
     }
@@ -55,47 +55,51 @@ function ProductosSinEntrenamiento() {
   const handleDelete = async (producto) => {
     const confirm = await MySwal.fire({
       title: `¿Eliminar "${producto.title}"?`,
-      text: 'Esta acción no se puede deshacer.',
-      icon: 'warning',
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      background: '#171717',
-      color: '#f3f4f6',
-      iconColor: '#facc15',
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      background: "#171717",
+      color: "#f3f4f6",
+      iconColor: "#facc15",
       customClass: {
-        popup: 'rounded-lg',
-        title: 'text-lg font-semibold',
-        confirmButton: 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700',
-        cancelButton: 'bg-blue-600 text-white px-4 py-2 rounded hover:bg-gray-700'
-      }
+        popup: "rounded-lg",
+        title: "text-lg font-semibold",
+        confirmButton:
+          "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700",
+        cancelButton:
+          "bg-blue-600 text-white px-4 py-2 rounded hover:bg-gray-700",
+      },
     });
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/productos/${producto._id}`);
+        await axios.delete(
+          `http://localhost:5000/api/productos/${producto._id}`
+        );
         fetchProductos();
         MySwal.fire({
-          title: 'Eliminado',
+          title: "Eliminado",
           text: `"${producto.title}" fue eliminado correctamente.`,
-          icon: 'success',
-          background: '#171717',
-          color: '#f3f4f6',
-          iconColor: '#4ade80',
-          confirmButtonColor: '#3b82f6'
+          icon: "success",
+          background: "#171717",
+          color: "#f3f4f6",
+          iconColor: "#4ade80",
+          confirmButtonColor: "#3b82f6",
         });
       } catch (err) {
-        console.error('Error eliminando:', err);
+        console.error("Error eliminando:", err);
         MySwal.fire({
-          title: 'Error',
-          text: 'No se pudo eliminar el producto.',
-          icon: 'error',
-          background: '#111827',
-          color: '#f3f4f6',
-          iconColor: '#f87171',
-          confirmButtonColor: '#ef4444'
+          title: "Error",
+          text: "No se pudo eliminar el producto.",
+          icon: "error",
+          background: "#111827",
+          color: "#f3f4f6",
+          iconColor: "#f87171",
+          confirmButtonColor: "#ef4444",
         });
       }
     }
@@ -142,7 +146,7 @@ function ProductosSinEntrenamiento() {
           </motion.button>
 
           <motion.button
-            onClick={() => navigate('/productos-entrenados')}
+            onClick={() => navigate("/productos-entrenados")}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
@@ -155,7 +159,7 @@ function ProductosSinEntrenamiento() {
           </motion.button>
 
           <motion.button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate("/dashboard")}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -174,7 +178,9 @@ function ProductosSinEntrenamiento() {
       ) : (
         Object.entries(productosAgrupados).map(([categoria, lista]) => (
           <div key={categoria} className="mb-10">
-            <h2 className="text-2xl font-bold mb-4 text-violet-800">{categoria}</h2>
+            <h2 className="text-2xl font-bold mb-4 text-violet-800">
+              {categoria}
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {lista.map((p, i) => (
                 <motion.div
@@ -192,9 +198,15 @@ function ProductosSinEntrenamiento() {
                     {p.title}
                   </h2>
                   <div className="text-sm space-y-1">
-                    <p>💰 <strong>Precio:</strong> ${p.price}</p>
-                    <p>📦 <strong>Stock:</strong> {p.stock}</p>
-                    <p>🕒 <strong>Duración:</strong> {p.duration}</p>
+                    <p>
+                      💰 <strong>Precio:</strong> ${p.price}
+                    </p>
+                    <p>
+                      📦 <strong>Stock:</strong> {p.stock}
+                    </p>
+                    <p>
+                      🕒 <strong>Duración:</strong> {p.duration}
+                    </p>
                   </div>
                   <div className="flex justify-end gap-4 mt-4 text-xl">
                     <span
@@ -247,10 +259,18 @@ function ProductosSinEntrenamiento() {
               )}
               <p className="text-gray-700 mb-4">{selected.description}</p>
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><strong>Precio:</strong> ${selected.price}</div>
-                <div><strong>Stock:</strong> {selected.stock}</div>
-                <div><strong>Duración:</strong> {selected.duration}</div>
-                <div><strong>Categoría:</strong> {selected.category}</div>
+                <div>
+                  <strong>Precio:</strong> ${selected.price}
+                </div>
+                <div>
+                  <strong>Stock:</strong> {selected.stock}
+                </div>
+                <div>
+                  <strong>Duración:</strong> {selected.duration}
+                </div>
+                <div>
+                  <strong>Categoría:</strong> {selected.category}
+                </div>
               </div>
             </>
           )}
@@ -266,7 +286,7 @@ function ProductosSinEntrenamiento() {
         theme={{
           root: {
             base: "fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-white bg-opacity-100",
-          }
+          },
         }}
       >
         <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
@@ -279,7 +299,8 @@ function ProductosSinEntrenamiento() {
               fetchProductos();
 
               if (!categoriaFijada) {
-                const nuevaCategoria = selected?.category || productos[0]?.category;
+                const nuevaCategoria =
+                  selected?.category || productos[0]?.category;
                 if (nuevaCategoria) setCategoriaFijada(nuevaCategoria);
               }
             }}

@@ -1,9 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { HiEmojiHappy } from 'react-icons/hi';
-import Picker from '@emoji-mart/react';
-import data from '@emoji-mart/data';
+import React, { useState, useRef, useEffect } from "react";
+import { HiEmojiHappy } from "react-icons/hi";
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
-function InputWithEmoji({ value, onChange, placeholder = '', disabled = false }) {
+function InputWithEmoji({
+  value,
+  onChange,
+  placeholder = "",
+  disabled = false,
+}) {
   const [showEmoji, setShowEmoji] = useState(false);
   const ref = useRef(null);
 
@@ -16,8 +21,8 @@ function InputWithEmoji({ value, onChange, placeholder = '', disabled = false })
     const handleClickOutside = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setShowEmoji(false);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (

@@ -3,15 +3,15 @@ const Seccion = require('../models/Secciones');
 // Crear nueva sección
 exports.createSeccion = async (req, res) => {
   try {
-    console.log('📥 [CREATE] Body recibido:', req.body);
+    // console.log('📥 [CREATE] Body recibido:', req.body);
 
     const seccion = new Seccion(req.body);
     const saved = await seccion.save();
 
-    console.log('✅ [CREATE] Sección guardada:', saved);
+    // console.log('✅ [CREATE] Sección guardada:', saved);
     res.status(201).json(saved);
   } catch (error) {
-    console.error('❌ [CREATE] Error al guardar sección:', error.message);
+    // console.error('❌ [CREATE] Error al guardar sección:', error.message);
     res.status(400).json({ error: error.message });
   }
 };
@@ -49,10 +49,10 @@ exports.updateSeccion = async (req, res) => {
       return res.status(404).json({ error: 'Sección no encontrada' });
     }
 
-    console.log('✅ [UPDATE] Sección actualizada:', seccion);
+    // console.log('✅ [UPDATE] Sección actualizada:', seccion);
     res.json(seccion);
   } catch (error) {
-    console.error('❌ [UPDATE] Error al actualizar sección:', error.message);
+    // console.error('❌ [UPDATE] Error al actualizar sección:', error.message);
     res.status(400).json({ error: error.message });
   }
 };

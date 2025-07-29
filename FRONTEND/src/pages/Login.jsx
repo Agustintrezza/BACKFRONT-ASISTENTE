@@ -149,7 +149,9 @@ function Login() {
       {/* Columna derecha: Login */}
       <div
         className={`relative flex flex-col items-center justify-center transition-all duration-700 ease-in-out bg-[#0f172a] text-white ${
-          isCollapsed ? "w-full h-screen px-6 py-8" : "w-full lg:basis-[45%] px-6 py-12"
+          isCollapsed
+            ? "w-full h-screen px-6 py-8"
+            : "w-full lg:basis-[45%] px-6 py-12"
         }`}
       >
         {/* Botón abrir */}

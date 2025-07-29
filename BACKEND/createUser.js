@@ -13,7 +13,7 @@ async function createUser() {
   });
 
   await user.save();
-  console.log('Usuario creado');
+  // console.log('Usuario creado');
   mongoose.disconnect();
 }
 
