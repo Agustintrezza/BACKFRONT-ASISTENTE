@@ -18,7 +18,14 @@ const ProductoSchema = new mongoose.Schema({
   },
   image: String,
   link: String,
-  availableDates: [String]
+  availableDates: [String],
+  menuItems: [ // ✅ NUEVO BLOQUE
+    {
+      title: String,
+      detail: String,
+      link: String
+    }
+  ]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Producto', ProductoSchema);
