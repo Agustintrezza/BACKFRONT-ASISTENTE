@@ -29,6 +29,24 @@ function Secciones() {
   const [viewModal, setViewModal] = useState(false);
   const [selected, setSelected] = useState(null);
   const [showFormModal, setShowFormModal] = useState(false);
+  const [maxLength, setMaxLength] = useState(45);
+
+
+useEffect(() => {
+  const updateMaxLength = () => {
+    const width = window.innerWidth;
+    if (width < 1424) {
+      setMaxLength(30); // menor a 'lg'
+    } else {
+      setMaxLength(45); // lg o mayor
+    }
+  };
+
+  updateMaxLength(); // Inicial
+
+  window.addEventListener('resize', updateMaxLength);
+  return () => window.removeEventListener('resize', updateMaxLength);
+}, []);
 
   const fetchSecciones = async () => {
     setLoading(true);
@@ -191,8 +209,6 @@ function Secciones() {
     const emoji = match ? match[0] : '';
     let text = fullTitle?.slice(emoji.length) || '';
 
-    // Limitar texto a 35 caracteres sin cortar palabras importantes
-    const maxLength = 35;
     if (text.length > maxLength) {
       text = text.slice(0, maxLength).trimEnd() + '...';
     }
