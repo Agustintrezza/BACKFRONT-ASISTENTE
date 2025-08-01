@@ -27,6 +27,20 @@ function Dashboard() {
   const [allProducts, setAllProducts] = useState([]);
   const [allSections, setAllSections] = useState([]);
   const [reservas, setReservas] = useState([]);
+  const [conversaciones, setConversaciones] = useState([]);
+
+  useEffect(() => {
+    const fetchConversaciones = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/chat/conversaciones");
+        setConversaciones(data);
+      } catch (err) {
+        console.error("Error al traer conversaciones:", err);
+      }
+    };
+  
+    fetchConversaciones();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -233,16 +247,37 @@ function Dashboard() {
           </Card>
 
           {/* Chat */}
-          <Card title="Chat" icon="💬" onClick={() => navigate("/chat")}>
-            <p className="text-gray-700 mb-2 text-sm">
-              Administrá tus conversaciones aquí.
-            </p>
-            <div className="bg-gray-100 p-3 rounded-md shadow-sm text-gray-800 text-sm">
-              <p>🟢 3 conversaciones pendientes</p>
-              <p>🔔 2 alertas importantes</p>
-              <p>📨 Último mensaje: “¿Cómo reservo?”</p>
-            </div>
-          </Card>
+          <Card title={`Chat (${conversaciones.length})`} icon="💬" onClick={() => navigate("/chat")}>
+  <p className="text-gray-700 mb-2 text-sm">
+    Administrá tus conversaciones aquí.
+  </p>
+
+  <div className="bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md text-gray-800 text-sm">
+    <h3 className="text-md font-semibold mb-2 text-violet-800">
+      Estado de conversaciones
+    </h3>
+    <ul className="list-disc list-inside leading-relaxed">
+      <li>
+        🟢 Activas:{" "}
+        <span className="font-bold">
+          {conversaciones.length}
+        </span>
+      </li>
+      <li>
+        🟡 Pendientes:{" "}
+        <span className="font-bold">
+          {conversaciones.filter((c) => !c.respondido).length}
+        </span>
+      </li>
+      <li>
+        📨 Último mensaje:{" "}
+        <span className="font-bold">
+          {conversaciones[0]?.lastMessage?.slice(0, 50) || "Sin mensajes"}
+        </span>
+      </li>
+    </ul>
+  </div>
+</Card>
         </div>
       )}
     </div>

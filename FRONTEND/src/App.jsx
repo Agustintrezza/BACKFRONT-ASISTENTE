@@ -15,7 +15,7 @@ import Login from "./pages/Login";
 import SeccionesPorCategoria from "./pages/secciones/Secciones";
 import SeccionesSinEntrenamiento from "./pages/secciones/SeccionesSinEntrenamiento";
 import SeccionesEntrenadas from "./pages/secciones/SeccionesEntrenadas";
-import ChatPage from "./pages/ChatPage";
+import ChatPage from "./pages/chat/ChatPage";
 import ProductoNuevo from "./pages/productos/ProductoNuevo";
 import Reservas from "./pages/reservas/Reservas"; // ✅ NUEVO PANEL DE RESERVAS
 
