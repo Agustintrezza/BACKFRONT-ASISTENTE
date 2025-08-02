@@ -42,6 +42,23 @@ export default function Sidebar({ selected, onSelect }) {
     }
   }, [selected]);
 
+  const handleDeleteConversation = async (sender) => {
+    const confirmed = window.confirm(`¿Estás seguro de que querés eliminar la conversación con ${sender}?`);
+    if (!confirmed) return;
+  
+    try {
+      await axios.delete(`http://localhost:5000/api/chat/conversaciones/${sender}`);
+      setConversations(prev => prev.filter(c => c.sender !== sender));
+      if (selected?.sender === sender) {
+        onSelect(null);
+        sessionStorage.removeItem("selectedSender");
+      }
+    } catch (err) {
+      console.error("Error eliminando conversación:", err);
+      alert("Hubo un error al intentar eliminar la conversación.");
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col">
       {/* Header con botón de volver */}
@@ -60,7 +77,7 @@ export default function Sidebar({ selected, onSelect }) {
           className="px-4 py-2 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-md font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
         >
           <span className="text-lg">⬅️</span>
-          <span>Volver</span>
+          {/* <span>Volver</span> */}
         </motion.button>
       </div>
 
@@ -90,11 +107,21 @@ export default function Sidebar({ selected, onSelect }) {
                 }`}
               >
                 <div className="flex justify-between items-center mb-1">
-                  <h3 className="text-sm font-semibold text-gray-800 truncate">
-                    🧍 {conv.sender}
-                  </h3>
-                  <span className="text-xs text-gray-400">{time}</span>
-                </div>
+  <h3 className="text-sm font-semibold text-gray-800 truncate flex items-center gap-2">
+    🧍 {conv.sender}
+    <button
+      onClick={(e) => {
+        e.stopPropagation(); // evita que se seleccione la conversación al eliminar
+        handleDeleteConversation(conv.sender);
+      }}
+      title="Eliminar conversación"
+      className="ml-1 hover:scale-110 transition-transform"
+    >
+      🗑️
+    </button>
+  </h3>
+  <span className="text-xs text-gray-400">{time}</span>
+</div>
                 <div className="flex justify-between items-center text-xs text-gray-600">
                   <p className="truncate">{lastMsg}</p>
                   {conv.respondido && (

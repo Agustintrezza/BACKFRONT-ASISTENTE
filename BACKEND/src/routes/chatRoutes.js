@@ -72,4 +72,18 @@ router.post('/enviar', async (req, res) => {
   }
 });
 
+router.delete("/conversaciones/:sender", async (req, res) => {
+  const { sender } = req.params;
+  try {
+    const result = await Conversacion.findOneAndDelete({ sender });
+    if (!result) {
+      return res.status(404).json({ error: "Conversación no encontrada" });
+    }
+    res.json({ message: "Conversación eliminada con éxito" });
+  } catch (err) {
+    console.error("Error eliminando conversación:", err);
+    res.status(500).json({ error: "Error del servidor" });
+  }
+});
+
 module.exports = router;
