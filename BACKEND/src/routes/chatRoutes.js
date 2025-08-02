@@ -18,13 +18,12 @@ router.post('/enviar', async (req, res) => {
     let conv = await Conversacion.findOne({ sender });
 
     if (!conv) {
-      // Crear conversación si no existe
       conv = new Conversacion({
         sender,
         mensajes: [entrada],
         lastMessage: message,
         timestamp: new Date(),
-        adminActivo: false // default
+        adminActivo: false
       });
     } else {
       conv.mensajes.push(entrada);
@@ -32,17 +31,14 @@ router.post('/enviar', async (req, res) => {
       conv.timestamp = new Date();
     }
 
-    // Guardar mensaje del usuario
     await conv.save();
 
-    // 🚫 Si el modo admin está activo, NO llamamos a Rasa
     if (conv.adminActivo) {
       const io = req.app.get('io');
       io.emit('actualizar_conversacion', conv);
-      return res.json([]); // Devolvemos array vacío porque no hay respuesta del bot
+      return res.json([]);
     }
 
-    // ✅ Si no hay admin, llamamos a Rasa
     const rasaRes = await axios.post('http://localhost:5005/webhooks/rest/webhook', {
       sender,
       message
@@ -60,18 +56,18 @@ router.post('/enviar', async (req, res) => {
     conv.timestamp = new Date();
     await conv.save();
 
-    // 🔁 Emitimos cambios en tiempo real
     const io = req.app.get('io');
     io.emit('nueva_conversacion', conv);
     io.emit('actualizar_conversacion', conv);
 
-    res.json(botMsgs); // Devuelve las respuestas del bot al frontend
+    res.json(botMsgs);
   } catch (err) {
     console.error('Error en /api/chat/enviar:', err);
     res.status(500).json({ error: 'Error al procesar mensaje' });
   }
 });
 
+// DELETE /api/chat/conversaciones/:sender
 router.delete("/conversaciones/:sender", async (req, res) => {
   const { sender } = req.params;
   try {
@@ -83,6 +79,37 @@ router.delete("/conversaciones/:sender", async (req, res) => {
   } catch (err) {
     console.error("Error eliminando conversación:", err);
     res.status(500).json({ error: "Error del servidor" });
+  }
+});
+
+// PATCH /api/chat/conversaciones/:sender/status
+router.patch('/conversaciones/:sender/status', async (req, res) => {
+  const { sender } = req.params;
+  const { status } = req.body;
+
+  try {
+    const allowedStatuses = ['none', 'pendiente', 'urgente', 'resuelto'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Estado inválido' });
+    }
+
+    const updated = await Conversacion.findOneAndUpdate(
+      { sender },
+      { status },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Conversación no encontrada' });
+    }
+
+    const io = req.app.get('io');
+    io.emit('actualizar_conversacion', updated);
+
+    res.json(updated);
+  } catch (err) {
+    console.error('Error actualizando status:', err);
+    res.status(500).json({ error: 'Error del servidor' });
   }
 });
 

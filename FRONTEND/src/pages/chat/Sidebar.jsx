@@ -8,18 +8,23 @@ import { es } from "date-fns/locale";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const estados = {
+  none: { emoji: "➖", bg: "" },
+  pendiente: { emoji: "🟡", bg: "bg-yellow-100" },
+  urgente: { emoji: "🔴", bg: "bg-red-100" },
+  resuelto: { emoji: "✅", bg: "bg-green-100" },
+};
+
 export default function Sidebar({ selected, onSelect }) {
   const [conversations, setConversations] = useState([]);
   const navigate = useNavigate();
 
-  // 🔄 Cargar conversaciones cada 3 segundos
   useEffect(() => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get("http://localhost:5000/api/chat/conversaciones");
         setConversations(data);
 
-        // Restaurar selección si hay guardado
         const savedSender = sessionStorage.getItem("selectedSender");
         if (savedSender && !selected) {
           const conv = data.find((c) => c.sender === savedSender);
@@ -35,7 +40,6 @@ export default function Sidebar({ selected, onSelect }) {
     return () => clearInterval(interval);
   }, [selected, onSelect]);
 
-  // 💾 Guardar en sessionStorage
   useEffect(() => {
     if (selected?.sender) {
       sessionStorage.setItem("selectedSender", selected.sender);
@@ -43,25 +47,42 @@ export default function Sidebar({ selected, onSelect }) {
   }, [selected]);
 
   const handleDeleteConversation = async (sender) => {
-    const confirmed = window.confirm(`¿Estás seguro de que querés eliminar la conversación con ${sender}?`);
+    const confirmed = window.confirm(`¿Eliminar la conversación con ${sender}?`);
     if (!confirmed) return;
-  
+
     try {
       await axios.delete(`http://localhost:5000/api/chat/conversaciones/${sender}`);
-      setConversations(prev => prev.filter(c => c.sender !== sender));
+      setConversations((prev) => prev.filter((c) => c.sender !== sender));
       if (selected?.sender === sender) {
         onSelect(null);
         sessionStorage.removeItem("selectedSender");
       }
     } catch (err) {
       console.error("Error eliminando conversación:", err);
-      alert("Hubo un error al intentar eliminar la conversación.");
+      alert("Hubo un error al eliminar.");
+    }
+  };
+
+  const handleStatusChange = async (sender, currentStatus) => {
+    const keys = Object.keys(estados);
+    const next = keys[(keys.indexOf(currentStatus) + 1) % keys.length];
+
+    try {
+      await axios.patch(`http://localhost:5000/api/chat/conversaciones/${sender}/status`, {
+        status: next,
+      });
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.sender === sender ? { ...c, status: next } : c
+        )
+      );
+    } catch (err) {
+      console.error("Error actualizando estado:", err);
     }
   };
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Header con botón de volver */}
       <div className="px-4 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
         <div className="flex items-center gap-2">
           <HiChatAlt2 className="text-2xl text-violet-600" />
@@ -71,17 +92,15 @@ export default function Sidebar({ selected, onSelect }) {
           onClick={() => navigate("/dashboard")}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
+          transition={{ duration: 0.3 }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="px-4 py-2 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-md font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
+          className="px-2.5 py-2 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-md font-medium shadow-md hover:shadow-lg flex items-center gap-2"
         >
-          <span className="text-lg">⬅️</span>
-          {/* <span>Volver</span> */}
+          ⬅️
         </motion.button>
       </div>
 
-      {/* Lista de conversaciones */}
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
           <div className="text-center py-10 text-gray-400">
@@ -90,6 +109,7 @@ export default function Sidebar({ selected, onSelect }) {
         ) : (
           conversations.map((conv, idx) => {
             const isSelected = selected?.sender === conv.sender;
+            const status = conv.status || "none";
             const lastMsg = conv.lastMessage || "Sin mensajes";
             const time = conv.timestamp
               ? format(new Date(conv.timestamp), "HH:mm", { locale: es })
@@ -103,27 +123,40 @@ export default function Sidebar({ selected, onSelect }) {
                 className={`px-4 py-3 cursor-pointer border-b border-gray-100 transition-all ${
                   isSelected
                     ? "bg-violet-100 border-l-4 border-violet-500"
-                    : "hover:bg-violet-50"
+                    : estados[status].bg
                 }`}
               >
                 <div className="flex justify-between items-center mb-1">
-  <h3 className="text-sm font-semibold text-gray-800 truncate flex items-center gap-2">
-    🧍 {conv.sender}
-    <button
-      onClick={(e) => {
-        e.stopPropagation(); // evita que se seleccione la conversación al eliminar
-        handleDeleteConversation(conv.sender);
-      }}
-      title="Eliminar conversación"
-      className="ml-1 hover:scale-110 transition-transform"
-    >
-      🗑️
-    </button>
-  </h3>
-  <span className="text-xs text-gray-400">{time}</span>
-</div>
+                  <h3 className="text-sm font-semibold text-gray-800 truncate flex items-center gap-2">
+                    🧍 {conv.sender}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteConversation(conv.sender);
+                      }}
+                      title="Eliminar"
+                      className="hover:scale-110 transition-transform"
+                    >
+                      🗑️
+                    </button>
+                  </h3>
+                  <span className="text-xs text-gray-400">{time}</span>
+                </div>
+
                 <div className="flex justify-between items-center text-xs text-gray-600">
                   <p className="truncate">{lastMsg}</p>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStatusChange(conv.sender, status);
+                    }}
+                    title="Cambiar estado"
+                    className="ml-2 hover:scale-125 transition-transform"
+                  >
+                    {estados[status].emoji}
+                  </button>
+
                   {conv.respondido && (
                     <BsCheck2All className="text-green-500 ml-2 text-base" />
                   )}
@@ -135,4 +168,4 @@ export default function Sidebar({ selected, onSelect }) {
       </div>
     </div>
   );
-};
+}

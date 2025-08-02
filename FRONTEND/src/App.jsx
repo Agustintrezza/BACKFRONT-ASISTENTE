@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -17,21 +18,26 @@ import SeccionesSinEntrenamiento from "./pages/secciones/SeccionesSinEntrenamien
 import SeccionesEntrenadas from "./pages/secciones/SeccionesEntrenadas";
 import ChatPage from "./pages/chat/ChatPage";
 import ProductoNuevo from "./pages/productos/ProductoNuevo";
-import Reservas from "./pages/reservas/Reservas"; // ✅ NUEVO PANEL DE RESERVAS
+import Reservas from "./pages/reservas/Reservas";
 
 import "./index.css";
 import "flowbite/dist/flowbite.css";
 
-function App() {
+function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     setIsAuthenticated(!!localStorage.getItem("token"));
   }, []);
 
+  // 👇 Condición: no mostrar navbar en /chat
+  const hideNavbarRoutes = ["/chat"];
+  const hideNavbar = hideNavbarRoutes.includes(location.pathname);
+
   return (
-    <Router>
-      {isAuthenticated && <Navbar />}
+    <>
+      {isAuthenticated && !hideNavbar && <Navbar />}
 
       <Routes>
         {/* Login */}
@@ -130,7 +136,7 @@ function App() {
           }
         />
 
-        {/* ✅ Chat con el asistente */}
+        {/* ✅ Chat */}
         <Route
           path="/chat"
           element={
@@ -138,7 +144,7 @@ function App() {
           }
         />
 
-        {/* ✅ Panel de Reservas */}
+        {/* ✅ Reservas */}
         <Route
           path="/reservas"
           element={
@@ -154,6 +160,14 @@ function App() {
           }
         />
       </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
