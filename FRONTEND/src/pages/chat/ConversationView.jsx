@@ -9,6 +9,22 @@ import { Spinner } from "flowbite-react";
 
 const socket = io("http://localhost:5000");
 
+function formatearHora(fecha) {
+  return new Date(fecha).toLocaleTimeString("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatearFecha(fecha) {
+  return new Date(fecha).toLocaleDateString("es-AR", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export default function ConversationView({ conversation }) {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
@@ -32,7 +48,7 @@ export default function ConversationView({ conversation }) {
         const { data } = await axios.get(
           `http://localhost:5000/api/chat/conversaciones/${sender}`
         );
-        setMessages(data.mensajes);
+        setMessages(data.mensajes || []);
         setAdminActivo(data.adminActivo || false);
         setNotaInterna(data.notaInterna || "");
       } catch (err) {
@@ -114,6 +130,8 @@ export default function ConversationView({ conversation }) {
     );
   }
 
+  let ultimaFechaMostrada = null;
+
   return (
     <div className="h-screen flex flex-col bg-neutral-100">
       {/* Header */}
@@ -180,34 +198,62 @@ export default function ConversationView({ conversation }) {
       </div>
 
       {/* Mensajes */}
-      <div className="flex-1 overflow-y-auto border-violet-800 px-4 py-6 space-y-4 bg-gradient-to-b from-neutral-100 to-white">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`max-w-xl px-4 py-2 rounded-lg whitespace-pre-wrap text-sm ${
-              msg.from === "user"
-                ? "bg-yellow-400 text-black self-end ml-auto"
-                : msg.from === "admin"
-                ? "bg-violet-200 text-violet-800 self-end ml-auto"
-                : "bg-white text-gray-800 self-start mr-auto shadow"
-            }`}
-          >
-            {msg.text}
-            {msg.buttons && msg.buttons.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {msg.buttons.map((btn, j) => (
-                  <button
-                    key={j}
-                    onClick={() => handleMessage(btn.payload)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs"
-                  >
-                    {btn.title}
-                  </button>
-                ))}
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gradient-to-b from-neutral-100 to-white">
+        {messages.map((msg, i) => {
+          const fechaMsg = new Date(msg.timestamp);
+          const fechaActual = fechaMsg.toDateString();
+          const mostrarFecha =
+            !ultimaFechaMostrada || ultimaFechaMostrada !== fechaActual;
+
+          if (mostrarFecha) {
+            ultimaFechaMostrada = fechaActual;
+          }
+
+          const isRight = msg.from === "user" || msg.from === "admin";
+
+          return (
+            <div key={i} className="flex flex-col items-center gap-1 w-full">
+              {mostrarFecha && (
+                <div className="text-xs text-violet-900 font-semibold my-1 px-4 py-1 bg-violet-100 border border-violet-300 rounded-full shadow-sm">
+                  {formatearFecha(fechaMsg)}
+                </div>
+              )}
+
+              <div
+                className={`flex ${isRight ? "justify-end" : "justify-start"} items-end w-full gap-1`}
+              >
+                <div
+                  className={`max-w-xl px-4 py-2 rounded-lg whitespace-pre-wrap text-sm ${
+                    msg.from === "user"
+                      ? "bg-yellow-300 text-black"
+                      : msg.from === "admin"
+                      ? "bg-violet-200 text-violet-800"
+                      : "bg-white text-gray-800 shadow"
+                  }`}
+                >
+                  {msg.text}
+                  {msg.buttons && msg.buttons.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {msg.buttons.map((btn, j) => (
+                        <button
+                          key={j}
+                          onClick={() => handleMessage(btn.payload)}
+                          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs"
+                        >
+                          {btn.title}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <span className="text-[11px] text-violet-500 mb-0.5 min-w-[35px] text-right">
+                  {formatearHora(msg.timestamp)}
+                </span>
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 
@@ -239,13 +285,13 @@ export default function ConversationView({ conversation }) {
         </button>
 
         {notaInterna && (
-  <button
-    onClick={() => setShowNota((prev) => !prev)}
-    className="absolute top-1 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full hover:bg-red-600 transition"
-  >
-    Esta conversación tiene una nota interna
-  </button>
-)}
+          <button
+            onClick={() => setShowNota((prev) => !prev)}
+            className="absolute top-1 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full hover:bg-red-600 transition"
+          >
+            Esta conversación tiene una nota interna
+          </button>
+        )}
       </div>
 
       {/* Modal Nota Interna */}

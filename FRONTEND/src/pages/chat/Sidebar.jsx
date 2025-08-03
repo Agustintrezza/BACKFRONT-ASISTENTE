@@ -10,8 +10,8 @@ import { useNavigate } from "react-router-dom";
 
 const estados = {
   none: { emoji: "➖", bg: "" },
-  pendiente: { emoji: "🟡", bg: "bg-yellow-100" },
-  urgente: { emoji: "🔴", bg: "bg-red-100" },
+  pendiente: { emoji: "⏰", bg: "bg-yellow-100" },
+  urgente: { emoji: "🔥", bg: "bg-red-100" },
   resuelto: { emoji: "✅", bg: "bg-green-100" },
 };
 
@@ -146,7 +146,7 @@ export default function Sidebar({ selected, onSelect }) {
           transition={{ duration: 0.3 }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="px-2.5 py-2 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-md font-medium shadow-md hover:shadow-lg flex items-center gap-2"
+          className="px-2 py-2 text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-md font-medium shadow-md hover:shadow-lg flex items-center gap-2"
         >
           ⬅️
         </motion.button>
