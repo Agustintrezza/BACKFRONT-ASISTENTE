@@ -1,4 +1,3 @@
-// models/Conversaciones.js
 const mongoose = require('mongoose');
 
 // Esquema de cada mensaje dentro de una conversación
@@ -17,6 +16,23 @@ const MensajeSchema = new mongoose.Schema({
     default: [],
   },
   timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+// ✅ Esquema para trazabilidad de notas internas
+const NotaInternaSchema = new mongoose.Schema({
+  texto: {
+    type: String,
+    required: true,
+    maxlength: 2000,
+  },
+  autor: {
+    type: String, // generalmente el email
+    required: true,
+  },
+  fecha: {
     type: Date,
     default: Date.now,
   },
@@ -44,14 +60,20 @@ const ConversacionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pendiente', 'prioritario', 'seguimiento', 'cerrado', null],
+    enum: ['pendiente', 'urgente', 'prioritario', 'seguimiento', 'cerrado', 'resuelto', null],
     default: null,
   },
-  notaInterna: {
-    type: String,
-    default: '',
-    maxlength: 2000, // límite opcional por seguridad
+  notasInternas: {
+    type: [NotaInternaSchema],
+    default: [],
   },
+
+  // ✅ CAMPO NUEVO
+  responsable: {
+    type: String,
+    default: null,
+  },
+
   leido: {
     type: Boolean,
     default: false,
@@ -61,7 +83,7 @@ const ConversacionSchema = new mongoose.Schema({
     default: false,
   },
 }, {
-  timestamps: true, // ✅ crea automáticamente createdAt y updatedAt
+  timestamps: true,
 });
 
 module.exports = mongoose.model('Conversacion', ConversacionSchema);

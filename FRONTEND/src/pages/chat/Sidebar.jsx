@@ -17,12 +17,21 @@ const estados = {
 
 export default function Sidebar({ selected, onSelect }) {
   const [conversations, setConversations] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [responsableOpenId, setResponsableOpenId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/chat/conversaciones");
+        const { data } = await axios.get(
+          `${import.meta.env.VITE_API_URL}/chat/conversaciones`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
         setConversations(data);
 
         const savedSender = sessionStorage.getItem("selectedSender");
@@ -35,7 +44,21 @@ export default function Sidebar({ selected, onSelect }) {
       }
     };
 
+    const fetchUsuarios = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/usuarios`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setUsuarios(res.data);
+      } catch (err) {
+        console.error("Error al obtener usuarios:", err);
+      }
+    };
+
     fetchConversations();
+    fetchUsuarios();
     const interval = setInterval(fetchConversations, 3000);
     return () => clearInterval(interval);
   }, [selected, onSelect]);
@@ -51,7 +74,11 @@ export default function Sidebar({ selected, onSelect }) {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/chat/conversaciones/${sender}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/chat/conversaciones/${sender}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       setConversations((prev) => prev.filter((c) => c.sender !== sender));
       if (selected?.sender === sender) {
         onSelect(null);
@@ -68,21 +95,45 @@ export default function Sidebar({ selected, onSelect }) {
     const next = keys[(keys.indexOf(currentStatus) + 1) % keys.length];
 
     try {
-      await axios.patch(`http://localhost:5000/api/chat/conversaciones/${sender}/status`, {
-        status: next,
-      });
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/chat/conversaciones/${sender}/status`,
+        { status: next },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       setConversations((prev) =>
-        prev.map((c) =>
-          c.sender === sender ? { ...c, status: next } : c
-        )
+        prev.map((c) => (c.sender === sender ? { ...c, status: next } : c))
       );
     } catch (err) {
       console.error("Error actualizando estado:", err);
     }
   };
 
+  const handleResponsableChange = async (sender, responsable) => {
+    try {
+      const value = responsable === "" ? null : responsable;
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/chat/conversaciones/${sender}/responsable`,
+        { responsable: value },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setConversations((prev) =>
+        prev.map((c) => (c.sender === sender ? { ...c, responsable: value } : c))
+      );
+    } catch (err) {
+      console.error("Error asignando responsable:", err);
+    }
+  };
+
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col relative z-10">
       <div className="px-4 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
         <div className="flex items-center gap-2">
           <HiChatAlt2 className="text-2xl text-violet-600" />
@@ -103,9 +154,7 @@ export default function Sidebar({ selected, onSelect }) {
 
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
-          <div className="text-center py-10 text-gray-400">
-            No hay conversaciones activas.
-          </div>
+          <div className="text-center py-10 text-gray-400">No hay conversaciones activas.</div>
         ) : (
           conversations.map((conv, idx) => {
             const isSelected = selected?.sender === conv.sender;
@@ -120,7 +169,7 @@ export default function Sidebar({ selected, onSelect }) {
                 key={idx}
                 whileHover={{ scale: 1.01 }}
                 onClick={() => onSelect(conv)}
-                className={`px-4 py-3 cursor-pointer border-b border-gray-100 transition-all ${
+                className={`px-4 py-3 cursor-pointer border-b border-gray-100 transition-all relative z-0 ${
                   isSelected
                     ? "bg-violet-100 border-l-4 border-violet-500"
                     : estados[status].bg
@@ -128,7 +177,7 @@ export default function Sidebar({ selected, onSelect }) {
               >
                 <div className="flex justify-between items-center mb-1">
                   <h3 className="text-sm font-semibold text-gray-800 truncate flex items-center gap-2">
-                    🧍 {conv.sender}
+                    👤 {conv.sender}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -143,23 +192,67 @@ export default function Sidebar({ selected, onSelect }) {
                   <span className="text-xs text-gray-400">{time}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-xs text-gray-600">
-                  <p className="truncate">{lastMsg}</p>
+                <div className="flex justify-between items-center text-xs text-gray-600 relative">
+                  <div className="flex flex-col w-3/4">
+                    <p className="truncate">{lastMsg.slice(0, 70)}...</p>
+                    {conv.responsable && (
+                      <span className="text-[10px] text-blue-500 mt-0.5 italic">
+                        {conv.responsable}
+                      </span>
+                    )}
+                  </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleStatusChange(conv.sender, status);
-                    }}
-                    title="Cambiar estado"
-                    className="ml-2 hover:scale-125 transition-transform"
-                  >
-                    {estados[status].emoji}
-                  </button>
+                  <div className="flex items-center gap-2 ml-auto relative z-30">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(conv.sender, status);
+                      }}
+                      title="Cambiar estado"
+                      className="hover:scale-125 transition-transform text-lg"
+                    >
+                      {estados[status].emoji}
+                    </button>
 
-                  {conv.respondido && (
-                    <BsCheck2All className="text-green-500 ml-2 text-base" />
-                  )}
+                    <div className="relative">
+                      <span
+                        className="cursor-pointer text-xl"
+                        title="Asignar responsable"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setResponsableOpenId((prev) =>
+                            prev === conv.sender ? null : conv.sender
+                          );
+                        }}
+                      >
+                        👤
+                      </span>
+
+                      {responsableOpenId === conv.sender && (
+                        <select
+                          autoFocus
+                          onBlur={() => setResponsableOpenId(null)}
+                          onChange={(e) => {
+                            handleResponsableChange(conv.sender, e.target.value);
+                            setResponsableOpenId(null);
+                          }}
+                          value={conv.responsable || ""}
+                          className="absolute top-6 right-0 bg-white border text-xs border-gray-300 rounded shadow z-50"
+                        >
+                          <option value="">Sin responsable</option>
+                          {usuarios.map((u) => (
+                            <option key={u._id} value={u.email}>
+                              {u.email}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+
+                    {conv.respondido && (
+                      <BsCheck2All className="text-green-500 ml-1 text-base" />
+                    )}
+                  </div>
                 </div>
               </motion.div>
             );

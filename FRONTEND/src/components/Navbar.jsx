@@ -67,9 +67,9 @@ function Navbar() {
         <FlowbiteNavbar.Toggle />
 
         <FlowbiteNavbar.Collapse>
-          <li className="mt-2 lg:mt-0 flex items-center gap-3 relative">
+          <li className="mt-2 lg:mt-0 text-sm flex items-center gap-3 relative">
             {/* 👤 Email del usuario */}
-            <span className="text-xs text-gray-600 font-semibold">
+            <span className="text-sm text-gray-600 font-semibold">
               👤 {user?.email || "Usuario"}
             </span>
 
@@ -77,7 +77,7 @@ function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setShowAdminMenu((prev) => !prev)}
-                className="text-xs text-violet-600 font-semibold hover:underline"
+                className="text-sm text-violet-600 font-semibold hover:underline"
               >
                 Administrar
               </button>
