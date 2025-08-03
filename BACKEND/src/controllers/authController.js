@@ -18,16 +18,30 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Credenciales inválidas' });
     }
 
-    // Crear token
+    // Crear token incluyendo role y plan
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        plan: user.plan,
+      },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    res.json({ token });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        plan: user.plan,
+      },
+    });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("❌ Error en login:", error.message);
+    res.status(500).json({ error: 'Error en el servidor' });
   }
 };

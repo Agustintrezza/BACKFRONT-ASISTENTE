@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { Navbar as FlowbiteNavbar, Button } from "flowbite-react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { FiPower } from "react-icons/fi";
+import { useUser } from "../context/UserContext"; // 👈 Importar el hook
 
 function Navbar() {
   const navigate = useNavigate();
+  const [showAdminMenu, setShowAdminMenu] = useState(false);
+  const { user, setUser } = useUser(); // 👈 Usar user desde contexto
 
   const handleLogout = async () => {
     const result = await Swal.fire({
@@ -33,6 +37,7 @@ function Navbar() {
 
     if (result.isConfirmed) {
       localStorage.removeItem("token");
+      setUser(null); // 🔒 Limpiar el contexto también
       navigate("/login");
       window.location.reload();
     }
@@ -62,62 +67,46 @@ function Navbar() {
         <FlowbiteNavbar.Toggle />
 
         <FlowbiteNavbar.Collapse>
-          <ul className="flex flex-col lg:flex-row items-center lg:space-x-6 mt-3 lg:mt-0 text-sm font-medium text-gray-800">
-            <motion.li
-              whileHover={{ scale: 1.05 }}
-              className="transition-shadow shadow-sm hover:shadow-md rounded-md"
-            >
+          <li className="mt-2 lg:mt-0 flex items-center gap-3 relative">
+            {/* 👤 Email del usuario */}
+            <span className="text-xs text-gray-600 font-semibold">
+              👤 {user?.email || "Usuario"}
+            </span>
+
+            {/* Menú desplegable */}
+            <div className="relative">
               <button
-                onClick={() => navigate("/productos")}
-                className="block py-1 px-2 hover:text-violet-700 whitespace-nowrap"
+                onClick={() => setShowAdminMenu((prev) => !prev)}
+                className="text-xs text-violet-600 font-semibold hover:underline"
               >
-                📦 Productos
+                Administrar
               </button>
-            </motion.li>
-            <motion.li
-              whileHover={{ scale: 1.05 }}
-              className="transition-shadow shadow-sm hover:shadow-md rounded-md"
+
+              {showAdminMenu && (
+                <div className="absolute right-0 mt-2 bg-white border rounded shadow-lg p-2 z-50 w-52">
+                  <button
+                    onClick={() => {
+                      setShowAdminMenu(false);
+                      navigate("/usuarios");
+                    }}
+                    className="block w-full text-sm py-2 px-3 text-left hover:bg-violet-100"
+                  >
+                    📋 Usuarios
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Botón logout */}
+            <Button
+              onClick={handleLogout}
+              color="failure"
+              size="sm"
+              className="ml-2 bg-red-500 logout-button flex items-center justify-center"
             >
-              <button
-                onClick={() => navigate("/categorias-secciones")}
-                className="block py-1 px-2 hover:text-violet-700 whitespace-nowrap"
-              >
-                🧩 Secciones
-              </button>
-            </motion.li>
-            <motion.li
-              whileHover={{ scale: 1.05 }}
-              className="transition-shadow shadow-sm hover:shadow-md rounded-md"
-            >
-              <button
-                onClick={() => navigate("/reservas")}
-                className="block py-1 px-2 hover:text-violet-700 whitespace-nowrap"
-              >
-                📅 Reservas
-              </button>
-            </motion.li>
-            <motion.li
-              whileHover={{ scale: 1.05 }}
-              className="transition-shadow shadow-sm hover:shadow-md rounded-md"
-            >
-              <button
-                onClick={() => navigate("/chat")}
-                className="block py-1 px-2 hover:text-violet-700 whitespace-nowrap"
-              >
-                💬 Chat
-              </button>
-            </motion.li>
-            <motion.li className="mt-2 lg:mt-0">
-              <Button
-                onClick={handleLogout}
-                color="failure"
-                size="sm"
-                className="ml-4 bg-red-500 logout-button flex items-center justify-center"
-              >
-                <FiPower className="text-white text-lg" />
-              </Button>
-            </motion.li>
-          </ul>
+              <FiPower className="text-white text-lg" />
+            </Button>
+          </li>
         </FlowbiteNavbar.Collapse>
       </FlowbiteNavbar>
     </motion.div>
