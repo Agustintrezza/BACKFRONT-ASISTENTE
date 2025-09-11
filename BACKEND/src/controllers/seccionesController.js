@@ -1,69 +1,98 @@
-const Seccion = require('../models/Secciones');
+'use strict';
 
-// Crear nueva sección
-exports.createSeccion = async (req, res) => {
-  try {
-    // console.log('📥 [CREATE] Body recibido:', req.body);
+const { getSeccionesFromDB } = require('../services/configService');
 
-    const seccion = new Seccion(req.body);
-    const saved = await seccion.save();
+function slugify(str = '') {
+  return String(str)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .substring(0, 64);
+}
 
-    // console.log('✅ [CREATE] Sección guardada:', saved);
-    res.status(201).json(saved);
-  } catch (error) {
-    // console.error('❌ [CREATE] Error al guardar sección:', error.message);
-    res.status(400).json({ error: error.message });
+function sectionsFromConfig(cfg) {
+  const menu = Array.isArray(cfg?.menu) ? cfg.menu : [];
+  return menu
+    .filter(i => (i?.type || '').toLowerCase() === 'section')
+    .map(sec => ({
+      id: slugify(sec.title || 'section'),
+      title: sec.title || 'Sin título',
+      children: Array.isArray(sec.children) ? sec.children : [],
+      _source: 'config'
+    }));
+}
+
+async function createSeccion(req, res) {
+  const usingConfig = !!req?.cfg?.features?.useConfigForMenu;
+  if (usingConfig && Array.isArray(req?.cfg?.menu)) {
+    return res.status(409).json({
+      error: 'Secciones gestionadas por configuración del tenant. Editá el archivo de config.'
+    });
   }
-};
+  return res.status(501).json({ error: 'createSeccion no implementado en modo legacy.' });
+}
 
-// Obtener todas las secciones
-exports.getSecciones = async (req, res) => {
+async function getSecciones(req, res) {
   try {
-    const secciones = await Seccion.find().sort({ createdAt: -1 });
-    res.json(secciones);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const usingConfig = !!req?.cfg?.features?.useConfigForMenu;
+    if (usingConfig && Array.isArray(req?.cfg?.menu)) {
+      return res.json(sectionsFromConfig(req.cfg));
+    }
+    const data = await getSeccionesFromDB();
+    return res.json(Array.isArray(data) ? data : []);
+  } catch (e) {
+    console.error('[seccionesController.getSecciones] Error:', e);
+    return res.status(500).json({ error: 'No se pudieron obtener secciones.' });
   }
-};
+}
 
-// Obtener una sección por ID
-exports.getSeccionById = async (req, res) => {
+async function getSeccionById(req, res) {
   try {
-    const seccion = await Seccion.findById(req.params.id);
-    if (!seccion) return res.status(404).json({ error: 'Sección no encontrada' });
-    res.json(seccion);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+    const { id } = req.params;
+    const usingConfig = !!req?.cfg?.features?.useConfigForMenu;
 
-// Actualizar una sección
-exports.updateSeccion = async (req, res) => {
-  try {
-    console.log('📥 [UPDATE] Body recibido:', req.body);
-
-    const seccion = await Seccion.findByIdAndUpdate(req.params.id, req.body, { new: true });
-
-    if (!seccion) {
-      console.warn('⚠️ [UPDATE] Sección no encontrada:', req.params.id);
-      return res.status(404).json({ error: 'Sección no encontrada' });
+    if (usingConfig && Array.isArray(req?.cfg?.menu)) {
+      const secs = sectionsFromConfig(req.cfg);
+      const found = secs.find(s => s.id === id);
+      if (!found) return res.status(404).json({ error: 'Sección no encontrada.' });
+      return res.json(found);
     }
 
-    // console.log('✅ [UPDATE] Sección actualizada:', seccion);
-    res.json(seccion);
-  } catch (error) {
-    // console.error('❌ [UPDATE] Error al actualizar sección:', error.message);
-    res.status(400).json({ error: error.message });
+    const all = await getSeccionesFromDB();
+    const found = (Array.isArray(all) ? all : []).find(s => String(s.id || s._id) === id);
+    if (!found) return res.status(404).json({ error: 'Sección no encontrada.' });
+    return res.json(found);
+  } catch (e) {
+    console.error('[seccionesController.getSeccionById] Error:', e);
+    return res.status(500).json({ error: 'No se pudo obtener la sección.' });
   }
-};
+}
 
-// Eliminar una sección
-exports.deleteSeccion = async (req, res) => {
-  try {
-    const seccion = await Seccion.findByIdAndDelete(req.params.id);
-    if (!seccion) return res.status(404).json({ error: 'Sección no encontrada' });
-    res.json({ message: 'Sección eliminada correctamente' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+async function updateSeccion(req, res) {
+  const usingConfig = !!req?.cfg?.features?.useConfigForMenu;
+  if (usingConfig && Array.isArray(req?.cfg?.menu)) {
+    return res.status(409).json({
+      error: 'Secciones gestionadas por configuración del tenant. Editá el archivo de config.'
+    });
   }
+  return res.status(501).json({ error: 'updateSeccion no implementado en modo legacy.' });
+}
+
+async function deleteSeccion(req, res) {
+  const usingConfig = !!req?.cfg?.features?.useConfigForMenu;
+  if (usingConfig && Array.isArray(req?.cfg?.menu)) {
+    return res.status(409).json({
+      error: 'Secciones gestionadas por configuración del tenant. Editá el archivo de config.'
+    });
+  }
+  return res.status(501).json({ error: 'deleteSeccion no implementado en modo legacy.' });
+}
+
+module.exports = {
+  createSeccion,
+  getSecciones,
+  getSeccionById,
+  updateSeccion,
+  deleteSeccion
 };

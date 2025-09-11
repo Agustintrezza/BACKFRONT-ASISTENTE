@@ -1,0 +1,27 @@
+# Config base por defecto (se aplica a todos los tenants si no sobreescriben)
+features:
+  useConfigForMenu: false   # cuando esté en true, /api/menu podrá leer desde config
+
+branding:
+  name: "Ethereal Tours"
+  logoUrl: "https://example.com/logo.png"
+  colors:
+    primary: "#0ea5e9"
+    secondary: "#111827"
+
+menu:
+  - type: "categoria_producto"
+    categoria: "Shows de Tango"
+    title: "Shows de Tango"
+    children:
+      - title: "La Ventana"
+        description: "Cena + show. San Telmo."
+      - title: "Tango Porteño"
+        description: "Show clásico cerca del Obelisco."
+  - type: "section"
+    title: "Guía Turístico"
+    children:
+      - title: "Barrios icónicos"
+        detail: "Recoleta, San Telmo, La Boca, Palermo."
+      - title: "Consejos prácticos"
+        detail: "Seguridad, transporte, horarios."

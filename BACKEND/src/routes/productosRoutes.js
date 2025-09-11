@@ -1,42 +1,32 @@
-// routes/productoRoutes.js
+'use strict';
+
 const express = require('express');
+const router = express.Router();
 const {
   createProducto,
   getProductos,
   getProductoById,
   updateProducto,
   deleteProducto,
-  getCategorias
+  getCategorias,
+  getProductosPorCategoria
 } = require('../controllers/productoController');
 
-const router = express.Router();
-
-// Rutas CRUD de Productos
+// Crear (bloqueado si la fuente es config)
 router.post('/', createProducto);
-router.get('/', getProductos);        // Soporta query param ?category=XXX
+
+// Listado general (?category=XXX soportado)
+router.get('/', getProductos);
+
+// RUTAS ESPECIALES (ANTES de '/:id')
+router.get('/categories/list', getCategorias);
+router.get('/categoria/:categoria', getProductosPorCategoria);
+
+// Lectura por id
 router.get('/:id', getProductoById);
+
+// Update/Delete (bloqueados si fuente es config)
 router.put('/:id', updateProducto);
 router.delete('/:id', deleteProducto);
-
-// Ruta para listar categorías únicas
-router.get('/categories/list', getCategorias);
-
-// ✅ NUEVA RUTA: Obtener productos por categoría (case insensitive)
-router.get('/categoria/:categoria', async (req, res) => {
-  try {
-    const categoria = decodeURIComponent(req.params.categoria || "").trim().toLowerCase();
-
-    const Producto = require('../models/Productos');
-    const productos = await Producto.find();
-
-    const filtrados = productos.filter(p =>
-      (p.category || "").trim().toLowerCase() === categoria
-    );
-
-    res.json({ items: filtrados });
-  } catch (err) {
-    res.status(500).json({ error: "Error al obtener productos por categoría" });
-  }
-});
 
 module.exports = router;

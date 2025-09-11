@@ -1,26 +1,24 @@
+// src/routes/reservaRoutes.js
 const express = require('express');
-const router = express.Router();
 const {
-  crearReserva,
-  obtenerReservas,
-  obtenerReservaPorId,
-  actualizarEstado,
-  eliminarReserva
+  createReserva,
+  listReservas,
+  getReservaById,
+  updateReserva,
+  deleteReserva,
 } = require('../controllers/reservaController');
 
-// ✅ Crear una nueva reserva
-router.post('/', crearReserva);
+const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware'); // (tus middlewares)
 
-// 📋 Obtener todas las reservas
-router.get('/', obtenerReservas);
+const router = express.Router();
 
-// 🔍 Obtener una reserva específica por ID
-router.get('/:id', obtenerReservaPorId);
+// 👇 Pública: el front/Rasa puede crear pre-reservas sin login
+router.post('/', createReserva);
 
-// 🔄 Actualizar el estado de una reserva
-router.patch('/:id', actualizarEstado); // ✅ ahora coincide con el frontend
-
-// 🗑️ Eliminar una reserva
-router.delete('/:id', eliminarReserva);
+// 👇 Protegidas: ver/listar/editar/borrar requieren admin (ajustá a gusto)
+router.get('/', verifyToken, authorizeRoles('admin'), listReservas);
+router.get('/:id', verifyToken, authorizeRoles('admin'), getReservaById);
+router.put('/:id', verifyToken, authorizeRoles('admin'), updateReserva);
+router.delete('/:id', verifyToken, authorizeRoles('admin'), deleteReserva);
 
 module.exports = router;

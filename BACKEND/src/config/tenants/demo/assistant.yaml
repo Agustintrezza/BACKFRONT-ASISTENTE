@@ -1,0 +1,12 @@
+# Overrides del tenant "demo"
+features:
+  useConfigForMenu: true
+
+branding:
+  name: "Demo Travel Co."
+  logoUrl: "https://example.com/demo-logo.png"
+  colors:
+    primary: "#8b5cf6"
+    secondary: "#0f172a"
+
+# Podés también sobreescribir el menú si querés otro orden o textos
