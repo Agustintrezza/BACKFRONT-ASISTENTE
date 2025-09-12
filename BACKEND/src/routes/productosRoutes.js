@@ -1,31 +1,35 @@
-'use strict';
-
+// src/routes/productosRoutes.js
 const express = require('express');
 const router = express.Router();
+
+// ⬇️ Importá exactamente estos nombres como los exporta tu controller
 const {
-  createProducto,
   getProductos,
   getProductoById,
+  getCategorias,
+  getProductosPorCategoria,
+  createProducto,
   updateProducto,
   deleteProducto,
-  getCategorias,
-  getProductosPorCategoria
 } = require('../controllers/productoController');
 
-// Crear (bloqueado si la fuente es config)
-router.post('/', createProducto);
+// (Opcional) Middlewares de auth si los querés acá
+// const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware');
 
-// Listado general (?category=XXX soportado)
-router.get('/', getProductos);
-
-// RUTAS ESPECIALES (ANTES de '/:id')
-router.get('/categories/list', getCategorias);
+// Listado / filtros
+router.get('/', getProductos); // ?category=... &source=db|legacy (override)
+router.get('/categorias', getCategorias);
 router.get('/categoria/:categoria', getProductosPorCategoria);
 
-// Lectura por id
+// Detalle
 router.get('/:id', getProductoById);
 
-// Update/Delete (bloqueados si fuente es config)
+// CRUD (legacy). Si usás auth, descomentá:
+// router.post('/', verifyToken, authorizeRoles('admin'), createProducto);
+// router.put('/:id', verifyToken, authorizeRoles('admin'), updateProducto);
+// router.delete('/:id', verifyToken, authorizeRoles('admin'), deleteProducto);
+
+router.post('/', createProducto);
 router.put('/:id', updateProducto);
 router.delete('/:id', deleteProducto);
 

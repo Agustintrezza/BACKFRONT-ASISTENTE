@@ -21,9 +21,11 @@ const reservasRoutes = require('./routes/reservaRoutes');
 // ✅ Rutas unificadas de chat
 const conversacionRoutes = require('./routes/conversacionRoutes'); // /api/chat/conversaciones
 const chatRoutes = require('./routes/chatRoutes');                 // /api/chat/enviar
-const enviarManualRoute = require('./routes/enviarManual');       // /api/chat/manual
-const enviarAdminRoute = require('./routes/enviarAdmin');         // /api/chat/admin
+const enviarManualRoute = require('./routes/enviarManual');       // /api/chat/enviarManual
+const enviarAdminRoute = require('./routes/enviarAdmin');         // /api/chat/enviarAdmin
 const modoAdminRoutes = require('./routes/modoAdmin');            // /api/chat/modo-admin
+const chatgpt = require("./routes/chatgpt.routes");
+
 
 // 👤 Usuarios
 const usuariosRoutes = require('./routes/userRoutes');
@@ -71,6 +73,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/chat', enviarManualRoute);
 app.use('/api/chat', enviarAdminRoute);
 app.use('/api/chat', modoAdminRoutes);
+app.use("/api/chatgpt", chatgpt);
 
 // 👤 Usuarios
 app.use('/api/usuarios', usuariosRoutes);

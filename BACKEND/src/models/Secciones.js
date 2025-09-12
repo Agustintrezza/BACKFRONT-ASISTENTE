@@ -1,3 +1,4 @@
+// src/models/Secciones.js
 const mongoose = require('mongoose');
 
 const ItemSchema = new mongoose.Schema({
@@ -7,12 +8,9 @@ const ItemSchema = new mongoose.Schema({
 });
 
 const SeccionSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true
-  },
+  title: { type: String, required: true },
   link: String,
   menuItems: [ItemSchema]
-}, { timestamps: true });
+}, { timestamps: true, collection: 'seccions' });
 
 module.exports = mongoose.model('Seccion', SeccionSchema);

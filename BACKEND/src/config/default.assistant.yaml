@@ -1,6 +1,5 @@
-# Config base por defecto (se aplica a todos los tenants si no sobreescriben)
 features:
-  useConfigForMenu: false   # cuando esté en true, /api/menu podrá leer desde config
+  useConfigForMenu: true
 
 branding:
   name: "Ethereal Tours"
@@ -10,18 +9,53 @@ branding:
     secondary: "#111827"
 
 menu:
-  - type: "categoria_producto"
-    categoria: "Shows de Tango"
+  - type: categoria_producto
     title: "Shows de Tango"
-    children:
-      - title: "La Ventana"
-        description: "Cena + show. San Telmo."
-      - title: "Tango Porteño"
-        description: "Show clásico cerca del Obelisco."
-  - type: "section"
+    emoji: "💃"
+    slug: "shows-de-tango"
+    children: []
+  - type: categoria_producto
+    title: "Tours y Experiencias"
+    emoji: "🗺️"
+    slug: "tours-experiencias"
+    children: []
+  - type: categoria_producto
+    title: "Alojamientos"
+    emoji: "🛏️"
+    slug: "alojamientos"
+    children: []
+  - type: categoria_producto
+    title: "Traslados"
+    emoji: "🚐"
+    slug: "traslados"
+    children: []
+  - type: categoria_producto
+    title: "Programas"
+    emoji: "📦"
+    slug: "programas"
+    children: []
+  - type: section
     title: "Guía Turístico"
-    children:
-      - title: "Barrios icónicos"
-        detail: "Recoleta, San Telmo, La Boca, Palermo."
-      - title: "Consejos prácticos"
-        detail: "Seguridad, transporte, horarios."
+    emoji: "🧭"
+    slug: "guia-turistico"
+    description: "Descubrí Buenos Aires con guías locales expertos. Barrios icónicos, historia, cultura y tips prácticos para moverte como un porteño."
+  - type: section
+    title: "Contacto"
+    emoji: "📞"
+    slug: "contacto"
+    description: "Estamos para ayudarte. Tel: 011 2434-5157 · WhatsApp: +54 9 11 2434-5157 · info@ethereal.tur.ar"
+  - type: section
+    title: "Preguntas Frecuentes"
+    emoji: "❓"
+    slug: "preguntas-frecuentes"
+    description: "Todo lo que necesitás saber sobre reservas, pagos, horarios y políticas."
+  - type: section
+    title: "Quiénes Somos"
+    emoji: "🏛️"
+    slug: "quienes-somos"
+    description: "Ethereal Tours: 30+ años creando experiencias auténticas en Buenos Aires."
+  - type: section
+    title: "Tipo de Cambio"
+    emoji: "💱"
+    slug: "tipo-de-cambio"
+    description: "Cotización de referencia y consejos para cambiar dinero de forma segura."

@@ -1,18 +1,39 @@
-'use strict';
-
+// src/routes/seccionesRoutes.js
 const express = require('express');
 const router = express.Router();
-const seccionesController = require('../controllers/seccionesController');
 
-// CRUD (bloqueados si la fuente es config)
-router.post('/', seccionesController.createSeccion);
+const ctrl = require('../controllers/seccionesController');
 
-// Listado y lectura
-router.get('/', seccionesController.getSecciones);
-router.get('/:id', seccionesController.getSeccionById);
+// Guardas para evitar “argument handler must be a function”
+function assertFn(fn, name) {
+  if (typeof fn !== 'function') {
+    const exported = ctrl && typeof ctrl === 'object' ? Object.keys(ctrl) : [];
+    throw new TypeError(
+      `[seccionesRoutes] El handler '${name}' no es una función. ` +
+      `Exports disponibles: ${exported.join(', ')}`
+    );
+  }
+}
 
-// Updates (bloqueados si es config)
-router.put('/:id', seccionesController.updateSeccion);
-router.delete('/:id', seccionesController.deleteSeccion);
+const {
+  getSecciones,
+  getSeccionById,
+  createSeccion,
+  updateSeccion,
+  deleteSeccion,
+} = ctrl;
+
+assertFn(getSecciones, 'getSecciones');
+assertFn(getSeccionById, 'getSeccionById');
+assertFn(createSeccion, 'createSeccion');
+assertFn(updateSeccion, 'updateSeccion');
+assertFn(deleteSeccion, 'deleteSeccion');
+
+// Rutas
+router.get('/', getSecciones);
+router.get('/:id', getSeccionById);
+router.post('/', createSeccion);
+router.put('/:id', updateSeccion);
+router.delete('/:id', deleteSeccion);
 
 module.exports = router;

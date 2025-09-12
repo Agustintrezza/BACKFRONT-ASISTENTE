@@ -1,115 +1,139 @@
-// routes/chatRoutes.js
-const express = require('express');
-const router = express.Router();
+'use strict';
+
+const router = require('express').Router();
 const axios = require('axios');
+
 const Conversacion = require('../models/Conversaciones');
+const AsistenteGlobalStatus = require('../models/AsistenteGlobalStatus');
 
-// POST /api/chat/enviar
+// util: obtiene baseUrl de Rasa desde config del tenant o .env
+function getRasaBaseUrl(req) {
+  const cfgUrl = req?.cfg?.integrations?.rasa?.baseUrl;
+  return (cfgUrl && String(cfgUrl)) || process.env.RASA_BASE_URL || 'http://localhost:5005';
+}
+
+async function getGlobalStatus(tenant) {
+  const doc = await AsistenteGlobalStatus.findOne({ tenant });
+  if (!doc) return { online: true, mensajeOffline: null };
+  return { online: !!doc.online, mensajeOffline: doc.mensajeOffline || null };
+}
+
+/**
+ * POST /api/chat/enviar
+ * Body: { sender, message }
+ */
 router.post('/enviar', async (req, res) => {
-  const { sender, message } = req.body;
-
   try {
-    const entrada = {
-      from: 'user',
-      text: message,
-      timestamp: new Date()
-    };
+    const { sender, message } = req.body || {};
+    if (!sender || !message) {
+      return res.status(400).json({ error: 'Faltan parámetros: sender, message' });
+    }
 
-    let conv = await Conversacion.findOne({ sender });
-
+    // 1) asegurar conversación por tenant+sender
+    let conv = await Conversacion.findOne({ tenant: req.tenant, sender });
     if (!conv) {
-      conv = new Conversacion({
+      conv = await Conversacion.create({
+        tenant: req.tenant,
         sender,
-        mensajes: [entrada],
-        lastMessage: message,
+        mensajes: [],
+        lastMessage: '',
         timestamp: new Date(),
-        adminActivo: false
       });
-    } else {
-      conv.mensajes.push(entrada);
+    }
+
+    const io = req.app.get('io'); // socket.io
+
+    // 2) takeover activo: NO mandamos a Rasa
+    if (conv.adminActivo) {
+      conv.mensajes.push({
+        from: 'user',
+        text: message,
+        buttons: [],
+        timestamp: new Date(),
+      });
       conv.lastMessage = message;
       conv.timestamp = new Date();
+      await conv.save();
+
+      // emitir a sala del sender para panel operador
+      if (io) io.to(sender).emit('nuevo_mensaje', { from: 'user', text: message });
+
+      return res.json({ ok: true, takeover: true, routed: 'operador' });
     }
 
-    await conv.save();
+    // 3) conversación cerrada (modoOffline): NO mandamos a Rasa
+    if (conv.modoOffline) {
+      conv.mensajes.push({ from: 'user', text: message, buttons: [], timestamp: new Date() });
+      const cierre = 'Esta conversación está cerrada. Si necesitás, abrí una nueva o esperá a un operador.';
+      conv.mensajes.push({ from: 'bot', text: cierre, buttons: [], timestamp: new Date() });
+      conv.lastMessage = cierre;
+      conv.timestamp = new Date();
+      await conv.save();
 
-    if (conv.adminActivo) {
-      const io = req.app.get('io');
-      io.emit('actualizar_conversacion', conv);
-      return res.json([]);
+      if (io) {
+        io.to(sender).emit('nuevo_mensaje', { from: 'user', text: message });
+        io.to(sender).emit('nuevo_mensaje', { from: 'bot', text: cierre });
+      }
+
+      return res.json({ ok: true, messages: [{ text: cierre }] });
     }
 
-    const rasaRes = await axios.post('http://localhost:5005/webhooks/rest/webhook', {
-      sender,
-      message
+    // 4) offline GLOBAL por tenant: NO mandamos a Rasa
+    const { online, mensajeOffline } = await getGlobalStatus(req.tenant);
+    if (!online) {
+      conv.mensajes.push({ from: 'user', text: message, buttons: [], timestamp: new Date() });
+      const txt = mensajeOffline || 'Estamos fuera de línea. ¡Volvemos pronto!';
+      conv.mensajes.push({ from: 'bot', text: txt, buttons: [], timestamp: new Date() });
+      conv.lastMessage = txt;
+      conv.timestamp = new Date();
+      await conv.save();
+
+      if (io) {
+        io.to(sender).emit('nuevo_mensaje', { from: 'user', text: message });
+        io.to(sender).emit('nuevo_mensaje', { from: 'bot', text: txt });
+      }
+
+      return res.json({ ok: true, messages: [{ text: txt }] });
+    }
+
+    // 5) flujo normal -> guardo mensaje del user y mando a Rasa
+    conv.mensajes.push({
+      from: 'user',
+      text: message,
+      buttons: [],
+      timestamp: new Date(),
     });
-
-    const botMsgs = rasaRes.data.map((msg) => ({
-      from: 'bot',
-      text: msg.text || '',
-      buttons: msg.buttons || [],
-      timestamp: new Date()
-    }));
-
-    conv.mensajes.push(...botMsgs);
-    conv.lastMessage = botMsgs[botMsgs.length - 1]?.text || message;
+    conv.lastMessage = message;
     conv.timestamp = new Date();
     await conv.save();
 
-    const io = req.app.get('io');
-    io.emit('nueva_conversacion', conv);
-    io.emit('actualizar_conversacion', conv);
+    if (io) io.to(sender).emit('nuevo_mensaje', { from: 'user', text: message });
 
-    res.json(botMsgs);
-  } catch (err) {
-    console.error('Error en /api/chat/enviar:', err);
-    res.status(500).json({ error: 'Error al procesar mensaje' });
-  }
-});
-
-// DELETE /api/chat/conversaciones/:sender
-router.delete("/conversaciones/:sender", async (req, res) => {
-  const { sender } = req.params;
-  try {
-    const result = await Conversacion.findOneAndDelete({ sender });
-    if (!result) {
-      return res.status(404).json({ error: "Conversación no encontrada" });
-    }
-    res.json({ message: "Conversación eliminada con éxito" });
-  } catch (err) {
-    console.error("Error eliminando conversación:", err);
-    res.status(500).json({ error: "Error del servidor" });
-  }
-});
-
-// PATCH /api/chat/conversaciones/:sender/status
-router.patch('/conversaciones/:sender/status', async (req, res) => {
-  const { sender } = req.params;
-  const { status } = req.body;
-
-  try {
-    const allowedStatuses = ['none', 'pendiente', 'urgente', 'resuelto'];
-    if (!allowedStatuses.includes(status)) {
-      return res.status(400).json({ error: 'Estado inválido' });
-    }
-
-    const updated = await Conversacion.findOneAndUpdate(
-      { sender },
-      { status },
-      { new: true }
+    const rasaBase = getRasaBaseUrl(req);
+    const senderNamespaced = `${req.tenant}:${sender}`;
+    const { data: rasaRes } = await axios.post(
+      `${rasaBase.replace(/\/$/, '')}/webhooks/rest/webhook`,
+      { sender: senderNamespaced, message },
+      { timeout: 12000 }
     );
 
-    if (!updated) {
-      return res.status(404).json({ error: 'Conversación no encontrada' });
+    const out = [];
+    for (const r of (rasaRes || [])) {
+      if (r.text) {
+        conv.mensajes.push({ from: 'bot', text: r.text, buttons: r.buttons || [], timestamp: new Date() });
+        out.push({ text: r.text, buttons: r.buttons || [] });
+        if (io) io.to(sender).emit('nuevo_mensaje', { from: 'bot', text: r.text, buttons: r.buttons || [] });
+      }
+      // acá podés sumar imágenes, payloads, etc., si Rasa los devuelve
     }
+    conv.lastMessage = out.length ? out[out.length - 1].text : conv.lastMessage;
+    conv.timestamp = new Date();
+    await conv.save();
 
-    const io = req.app.get('io');
-    io.emit('actualizar_conversacion', updated);
-
-    res.json(updated);
-  } catch (err) {
-    console.error('Error actualizando status:', err);
-    res.status(500).json({ error: 'Error del servidor' });
+    return res.json({ ok: true, messages: out });
+  } catch (e) {
+    console.error('[POST /api/chat/enviar] Error:', e);
+    return res.status(500).json({ error: 'Error procesando el mensaje' });
   }
 });
 
