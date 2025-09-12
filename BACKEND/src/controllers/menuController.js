@@ -1,3 +1,4 @@
+// controllers/menuController.js
 const Producto = require('../models/Productos');
 const Seccion = require('../models/Secciones');
 
@@ -10,13 +11,12 @@ exports.getMenu = async (req, res) => {
 
     // 🧩 Agrupar productos por categoría
     const categoriasMap = {};
-
     productos.forEach((producto) => {
       const categoriaNombre = producto.category?.trim() || "Sin categoría";
 
       if (!categoriasMap[categoriaNombre]) {
         categoriasMap[categoriaNombre] = {
-          categoria: categoriaNombre,
+          title: categoriaNombre,
           type: "categoria_producto",
           link: null,
           children: [],
@@ -36,12 +36,10 @@ exports.getMenu = async (req, res) => {
       });
     });
 
-    // Insertar categorías de productos al menú
     Object.values(categoriasMap).forEach((cat) => menuItems.push(cat));
 
-    // 🧩 Agrupar secciones por título (para evitar duplicados)
+    // 🧩 Agregar secciones
     const seccionesMap = {};
-
     secciones.forEach((seccion) => {
       const titulo = seccion.title.trim();
 
@@ -55,7 +53,6 @@ exports.getMenu = async (req, res) => {
         };
       }
 
-      // Agregar ítems (si hay)
       seccionesMap[titulo].children.push(
         ...(seccion.menuItems || []).map((item) => ({
           title: item.title,
@@ -65,12 +62,16 @@ exports.getMenu = async (req, res) => {
       );
     });
 
-    // Insertar secciones agrupadas al menú
     Object.values(seccionesMap).forEach((section) => menuItems.push(section));
 
-    res.json(menuItems);
+    // Si viene desde router, responde con res.json
+    if (res) return res.json(menuItems);
+    // Si viene como llamada interna (source), devuelve el array
+    return menuItems;
+
   } catch (error) {
     console.error("Error generando el menú:", error);
-    res.status(500).json({ error: error.message });
+    if (res) return res.status(500).json({ error: error.message });
+    throw error;
   }
 };
