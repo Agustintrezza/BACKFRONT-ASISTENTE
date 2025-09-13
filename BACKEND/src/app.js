@@ -26,6 +26,8 @@ const enviarAdminRoute = require('./routes/enviarAdmin');         // /api/chat/e
 const modoAdminRoutes = require('./routes/modoAdmin');            // /api/chat/modo-admin
 const chatgpt = require("./routes/chatgpt.routes");
 
+// ✅ Rutas unificadas de items
+const itemsRoutes = require("./routes/itemsRoutes");
 
 // 👤 Usuarios
 const usuariosRoutes = require('./routes/userRoutes');
@@ -75,6 +77,9 @@ app.use('/api/chat', enviarAdminRoute);
 app.use('/api/chat', modoAdminRoutes);
 app.use("/api/chatgpt", chatgpt);
 
+// ✅ Items unificados
+app.use("/api/items", itemsRoutes);
+
 // 👤 Usuarios
 app.use('/api/usuarios', usuariosRoutes);
 
@@ -104,7 +109,6 @@ app.use((req, res, next) => {
 // Manejo básico de errores
 // ------------------------
 app.use((err, _req, res, _next) => {
-  // Si algo falló cargando la config (schema, YAML, etc.), lo vas a ver acá
   console.error('❌ Error:', err && (err.stack || err.message || err));
   res.status(500).json({
     error: 'Internal Server Error',

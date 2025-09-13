@@ -1,0 +1,16 @@
+// src/routes/itemsRoutes.js
+const express = require("express");
+const router = express.Router();
+const itemController = require("../controllers/ItemController");
+
+// ✅ Ruta de búsqueda primero
+router.get("/search", itemController.searchItems);
+
+// CRUD Items
+router.get("/", itemController.getItems);
+router.get("/:id", itemController.getItemById);
+router.post("/", itemController.createItem);
+router.put("/:id", itemController.updateItem);
+router.delete("/:id", itemController.deleteItem);
+
+module.exports = router;
