@@ -20,7 +20,6 @@ const slug = (s) =>
     .replace(/\s+/g, "-")
     .trim();
 
-// Labels visibles + keys (secciones entrenadas)
 const SPECIAL_LABELS = clientConfig.sections?.special || [];
 const SPECIAL_KEYS = clientConfig.sections?.specialKeys?.length
   ? clientConfig.sections.specialKeys
@@ -34,7 +33,6 @@ const keyToLabel = Object.fromEntries(
 );
 
 function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
-  // Derivar la key estable y el label visible
   const derivedKey =
     seccion?.sectionKey ||
     (category ? labelToKey[category] : null) ||
@@ -42,12 +40,11 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
 
   const visibleLabel = keyToLabel[derivedKey] || category || seccion?.title || "";
 
-  const [sectionTitle, setSectionTitle] = useState(visibleLabel); // sólo display
+  const [sectionTitle, setSectionTitle] = useState(visibleLabel);
   const [itemTitle, setItemTitle] = useState("");
   const [detail, setDetail] = useState("");
 
   useEffect(() => {
-    // Prefill
     setSectionTitle(visibleLabel);
     if (seccion) {
       setItemTitle(seccion.menuItems?.[0]?.title || "");
@@ -71,10 +68,9 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
       });
     }
 
-    // IMPORTANTE: enviar sectionKey para estabilidad
     const payload = {
-      title: visibleLabel,          // para UI
-      sectionKey: derivedKey,       // 🔑 clave estable
+      title: visibleLabel,
+      sectionKey: derivedKey,
       menuItems: [
         {
           title: itemTitle.trim(),
@@ -117,9 +113,9 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -60 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2"
+      className="fixed inset-0 z-50 bg-gray-200 dark:bg-gray-900 flex justify-center items-center px-2"
     >
-      <div className="relative w-full max-w-6xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto max-h-[95vh]">
+      <div className="relative w-full max-w-6xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-900 shadow-xl p-10 overflow-y-auto max-h-[95vh] text-gray-900 dark:text-gray-100">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition"
@@ -133,14 +129,14 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="space-y-10 text-gray-900"
+          className="space-y-10"
         >
           <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3 text-center">
             <span className="text-5xl">🧩</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700 dark:from-white dark:via-violet-400 dark:to-purple-400">
               {seccion ? "Editar Tarjeta" : "Nueva Tarjeta"}
               {sectionTitle && (
-                <span className="text-xl font-bold text-violet-700 ml-2">
+                <span className="text-xl font-bold text-violet-700 dark:text-violet-300 ml-2">
                   ({sectionTitle})
                 </span>
               )}
@@ -151,7 +147,7 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
             <div>
               <Label
                 value="Título del ítem"
-                className="text-violet-800 font-semibold mb-1"
+                className="text-violet-800 dark:text-violet-300 font-semibold mb-1"
               />
               <InputWithEmoji
                 value={itemTitle}
@@ -163,7 +159,7 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
             <div>
               <Label
                 value="Contenido / respuesta"
-                className="text-violet-800 font-semibold mb-1"
+                className="text-violet-800 dark:text-violet-300 font-semibold mb-1"
               />
               <TextareaWithEditor
                 value={detail}

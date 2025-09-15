@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Modal, Spinner } from "flowbite-react";
+import { Modal, Spinner } from "flowbite-react";
 import axios from "axios";
 import { HiX } from "react-icons/hi";
 import ProductoModal from "../../components/productos/ProductoModal";
@@ -29,10 +29,6 @@ const PRODUCT_KEYS =
   clientConfig.products?.trainedKeys?.length
     ? clientConfig.products.trainedKeys
     : PRODUCT_LABELS.map(slug);
-
-// const labelToProductKey = Object.fromEntries(
-//   PRODUCT_LABELS.map((lbl, i) => [lbl, PRODUCT_KEYS[i] || slug(lbl)])
-// );
 
 const TRAINED_PRODUCT_KEY_SET = new Set(PRODUCT_KEYS);
 
@@ -132,14 +128,14 @@ function ProductosSinEntrenamiento() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-8 bg-white text-gray-900">
+      <div className="min-h-screen p-8 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex items-center justify-center">
         <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-white to-violet-200 text-gray-900">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-white to-violet-200 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
       <div className="flex justify-between items-center mb-8 flex-wrap gap-2">
         <motion.h1
           className="text-4xl font-extrabold"
@@ -147,7 +143,7 @@ function ProductosSinEntrenamiento() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-blue-400 dark:to-violet-400">
             Productos Sin Entrenamiento
           </span>
         </motion.h1>
@@ -199,11 +195,13 @@ function ProductosSinEntrenamiento() {
       </div>
 
       {productos.length === 0 ? (
-        <p className="text-gray-600">No hay productos sin entrenamiento.</p>
+        <p className="text-gray-600 dark:text-gray-300">
+          No hay productos sin entrenamiento.
+        </p>
       ) : (
         Object.entries(productosAgrupados).map(([categoriaKey, lista]) => (
           <div key={categoriaKey} className="mb-10">
-            <h2 className="text-2xl font-bold mb-4 text-violet-800">
+            <h2 className="text-2xl font-bold mb-4 text-violet-800 dark:text-violet-400">
               {lista[0]?.category || categoriaKey}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -213,13 +211,13 @@ function ProductosSinEntrenamiento() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.5 }}
-                  className="cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
+                  className="cursor-pointer bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200 dark:hover:shadow-violet-800"
                   onClick={() => {
                     setSelected(p);
                     setViewModal(true);
                   }}
                 >
-                  <h2 className="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+                  <h2 className="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-blue-400 dark:to-violet-400">
                     {p.title}
                   </h2>
                   <div className="text-sm space-y-1">
@@ -266,7 +264,7 @@ function ProductosSinEntrenamiento() {
 
       {/* Modal vista previa */}
       <Modal show={viewModal} size="lg" onClose={() => setViewModal(false)}>
-        <div className="p-6 relative bg-white rounded-lg">
+        <div className="p-6 relative bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg">
           <HiX
             className="absolute top-4 right-4 cursor-pointer"
             size={24}
@@ -282,7 +280,9 @@ function ProductosSinEntrenamiento() {
                   className="w-full h-64 object-cover rounded-lg mb-4"
                 />
               )}
-              <p className="text-gray-700 mb-4">{selected.description}</p>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                {selected.description}
+              </p>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <strong>Precio:</strong> ${selected.price}
@@ -307,14 +307,14 @@ function ProductosSinEntrenamiento() {
         show={showFormModal}
         size="6xl"
         onClose={() => setShowFormModal(false)}
-        className="bg-white bg-opacity-100"
+        className="bg-white dark:bg-gray-900 bg-opacity-100"
         theme={{
           root: {
-            base: "fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-white bg-opacity-100",
+            base: "fixed top-0 left-0 right-0 z-50 flex justify-center items-center w-full h-full bg-white dark:bg-gray-900 bg-opacity-100",
           },
         }}
       >
-        <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
           <ProductoModal
             producto={selected}
             category={categoriaFijada}

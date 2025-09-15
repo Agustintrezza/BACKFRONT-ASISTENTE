@@ -21,7 +21,6 @@ const slug = (s) =>
     .replace(/\s+/g, "-")
     .trim();
 
-// Labels visibles + keys
 const SPECIAL_LABELS = clientConfig.sections?.special || [];
 const SPECIAL_KEYS = clientConfig.sections?.specialKeys?.length
   ? clientConfig.sections.specialKeys
@@ -31,12 +30,11 @@ const keyToLabel = Object.fromEntries(
   SPECIAL_LABELS.map((lbl, i) => [SPECIAL_KEYS[i] || slug(lbl), lbl])
 );
 const labelToKey = Object.fromEntries(
-  SPECIAL_LABELS.map((lbl, i) => [lbl, SPECIAL_KEYS[i] || slug(lbl)])
+  SPECIAL_LABELS.map((lbl, i) => [lbl, SPECIAL_KEYS[i] || slug(lbl), lbl])
 );
 const specialKeySet = new Set(SPECIAL_KEYS);
 
 function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
-  // Derivar la key estable de esta sección
   const derivedKey =
     sectionKey ||
     seccion?.sectionKey ||
@@ -61,7 +59,6 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
       setTitle(seccion.title || keyToLabel[derivedKey] || "");
       setMenuItems(seccion.menuItems || []);
     } else {
-      // Prefill con el label visible si vino por route
       setTitle(category || keyToLabel[derivedKey] || "");
       setMenuItems([]);
     }
@@ -86,10 +83,8 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
     setShowEmoji(false);
   };
 
-  const truncateText = (text, maxLength = 30) => {
-    if (!text) return "";
-    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-  };
+  const truncateText = (text, maxLength = 30) =>
+    !text ? "" : text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 
   const handleAddOrUpdateItem = () => {
     const trimmedTitle = itemTitle.trim();
@@ -98,8 +93,8 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
     if (!trimmedTitle && !trimmedDetail && !trimmedLink) return;
 
     const item = { title: trimmedTitle, detail: trimmedDetail, link: trimmedLink };
-
     const updatedItems = [...menuItems];
+
     if (editingIndex !== null) {
       updatedItems[editingIndex] = item;
     } else {
@@ -134,13 +129,7 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // IMPORTANTE: siempre mandar la key estable
-    const payload = {
-      title,
-      sectionKey: derivedKey,
-      menuItems,
-    };
+    const payload = { title, sectionKey: derivedKey, menuItems };
 
     try {
       if (seccion) {
@@ -160,12 +149,16 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -60 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2"
+      className="fixed inset-0 z-50 bg-gray-200 dark:bg-gray-900 flex justify-center items-center px-2"
     >
-      <div className="relative w-full max-w-7xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto max-h-[95vh]">
+      <div className="relative w-full max-w-7xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-900 shadow-xl p-10 overflow-y-auto max-h-[95vh] text-gray-900 dark:text-gray-100">
         {showEmoji && (
           <div ref={pickerRef} className="absolute z-50 right-5 top-5">
-            <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="light" />
+            <Picker
+              data={data}
+              onEmojiSelect={handleEmojiSelect}
+              theme="auto" // 👈 detecta dark/light
+            />
           </div>
         )}
 
@@ -182,31 +175,31 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="space-y-10 text-gray-900"
+          className="space-y-10"
         >
           <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3">
             <span className="text-5xl">📂</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700 dark:from-white dark:via-violet-400 dark:to-purple-400">
               {seccion ? "Editar Sección" : "Nueva Sección"}
             </span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Columna izquierda: formulario + item */}
-            <div className="space-y-4 bg-gray-50 border border-gray-300 rounded-xl p-6 shadow-sm">
-              <Label value="Título de la sección" className="text-violet-800 font-semibold mb-1" />
+            {/* Columna izquierda */}
+            <div className="space-y-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl p-6 shadow-sm">
+              <Label value="Título de la sección" className="text-violet-800 dark:text-violet-300 font-semibold mb-1" />
               <InputWithEmoji
                 value={title}
                 onChange={setTitle}
                 placeholder="Ej: Preguntas Frecuentes"
-                disabled={isEntrenada} // entrenada: se edita contenido, no el nombre
+                disabled={isEntrenada}
                 onEmojiClick={() => {
                   setShowEmoji(true);
                   setEmojiField("title");
                 }}
               />
 
-              <Label value="Título del ítem" className="text-violet-800 font-semibold mt-2" />
+              <Label value="Título del ítem" className="text-violet-800 dark:text-violet-300 font-semibold mt-2" />
               <InputWithEmoji
                 value={itemTitle}
                 onChange={setItemTitle}
@@ -217,7 +210,7 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
                 }}
               />
 
-              <Label value="Detalle del ítem" className="text-violet-800 font-semibold mt-2" />
+              <Label value="Detalle del ítem" className="text-violet-800 dark:text-violet-300 font-semibold mt-2" />
               <TextareaWithEditor value={itemDetail} onChange={setItemDetail} rows={5} />
 
               <input
@@ -225,7 +218,7 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
                 value={itemLink}
                 onChange={(e) => setItemLink(e.target.value)}
                 placeholder="Link (opcional)"
-                className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm shadow-sm"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 text-sm shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
 
               <Button
@@ -238,9 +231,11 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
               </Button>
             </div>
 
-            {/* Columna derecha: tabla ítems */}
-            <div className="bg-white border border-gray-300 rounded-xl p-6 shadow-sm overflow-x-auto">
-              <h3 className="text-xl font-semibold mb-4 text-violet-800">Ítems agregados</h3>
+            {/* Columna derecha */}
+            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl p-6 shadow-sm overflow-x-auto">
+              <h3 className="text-xl font-semibold mb-4 text-violet-800 dark:text-violet-300">
+                Ítems agregados
+              </h3>
               {menuItems.length > 0 ? (
                 <Table striped>
                   <Table.Head>
@@ -250,20 +245,23 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
                   </Table.Head>
                   <Table.Body>
                     {menuItems.map((item, index) => (
-                      <Table.Row key={index}>
+                      <Table.Row
+                        key={index}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      >
                         <Table.Cell>{truncateText(item.title)}</Table.Cell>
                         <Table.Cell>{truncateText(item.detail)}</Table.Cell>
                         <Table.Cell>
                           <button
                             onClick={() => handleEditItem(index)}
-                            className="text-blue-600 text-xl hover:underline me-2"
+                            className="text-blue-600 dark:text-blue-400 text-xl hover:underline me-2"
                             type="button"
                           >
                             <HiPencil />
                           </button>
                           <button
                             onClick={() => handleDeleteItem(index)}
-                            className="text-red-600 text-xl hover:underline"
+                            className="text-red-600 dark:text-red-400 text-xl hover:underline"
                             type="button"
                           >
                             <HiTrash />
@@ -274,7 +272,9 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
                   </Table.Body>
                 </Table>
               ) : (
-                <p className="text-sm text-gray-500">No hay ítems agregados todavía.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  No hay ítems agregados todavía.
+                </p>
               )}
             </div>
           </div>

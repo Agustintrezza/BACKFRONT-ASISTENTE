@@ -35,7 +35,6 @@ const keyToLabel = Object.fromEntries(
 const trainedKeySet = new Set(TRAINED_KEYS);
 
 function ProductoModal({ producto, category, onClose, onSuccess }) {
-  // Key estable de categoría para este producto
   const derivedKey =
     producto?.categoryKey ||
     (category ? labelToKey[category] : null) ||
@@ -45,7 +44,7 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [categoria, setCategoria] = useState(""); // label visible para no entrenados
+  const [categoria, setCategoria] = useState("");
   const [categoriasDisponibles, setCategoriasDisponibles] = useState([]);
   const [nuevaCategoria, setNuevaCategoria] = useState("");
 
@@ -54,13 +53,12 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
     if (producto && producto._id) {
       setTitle(producto.title ?? "");
       setDescription(producto.description ?? "");
-      // Para entrenados usamos el label de la key; para no entrenados, la categoría guardada
       const labelFromKey = keyToLabel[producto.categoryKey || ""] || producto.category || "";
       setCategoria(labelFromKey);
     } else if (category) {
       setTitle("");
       setDescription("");
-      setCategoria(category); // viene de la ruta
+      setCategoria(category);
     } else {
       setTitle("");
       setDescription("");
@@ -88,9 +86,7 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
     fetchCategorias();
   }, []);
 
-  // helper: obtener key desde label o valor crudo
   const pKeyFromLabelOrValue = (val) => {
-    // si es un label entrenado, devuelvo su key; si no, hago slug
     if (labelToKey[val]) return labelToKey[val];
     return slug(val);
   };
@@ -107,7 +103,6 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
       });
     }
 
-    // categoría visible y key estable
     const categoriaVisible = isEntrenado
       ? (keyToLabel[derivedKey] || categoria || "")
       : (categoria === "nueva" ? nuevaCategoria.trim() : categoria.trim());
@@ -128,8 +123,8 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
     const payload = {
       title,
       description,
-      category: categoriaVisible,  // se mantiene para compatibilidad UI/reportes
-      categoryKey: categoriaKey,   // 🔑 clave estable para matching
+      category: categoriaVisible,
+      categoryKey: categoriaKey,
       price: 0,
       duration: "",
       location: null,
@@ -182,9 +177,9 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -60 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2"
+      className="fixed inset-0 z-50 bg-gray-200 dark:bg-gray-900 flex justify-center items-center px-2"
     >
-      <div className="relative w-full max-w-5xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto max-h-[95vh]">
+      <div className="relative w-full max-w-5xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-700 shadow-xl p-10 overflow-y-auto max-h-[95vh] text-gray-900 dark:text-gray-100">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition"
@@ -198,11 +193,11 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="space-y-10 text-gray-900"
+          className="space-y-10"
         >
           <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3">
             <span className="text-5xl">📦</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700 dark:from-white dark:via-violet-400 dark:to-purple-400">
               {producto ? "Editar Producto" : "Nuevo Producto"}
               {isEntrenado && (keyToLabel[derivedKey] || categoria)
                 ? ` (${keyToLabel[derivedKey] || categoria})`
@@ -212,7 +207,7 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <Label value="Título del producto" className="text-violet-800 font-semibold mb-1" />
+              <Label value="Título del producto" className="text-violet-800 dark:text-violet-300 font-semibold mb-1" />
               <InputWithEmoji
                 value={title}
                 onChange={setTitle}
@@ -221,19 +216,19 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
             </div>
 
             <div className="md:col-span-2">
-              <Label value="Descripción detallada" className="text-violet-800 font-semibold mb-1" />
+              <Label value="Descripción detallada" className="text-violet-800 dark:text-violet-300 font-semibold mb-1" />
               <TextareaWithEditor value={description} onChange={setDescription} rows={12} />
             </div>
 
             {!isEntrenado && (
               <>
                 <div className="md:col-span-2">
-                  <Label value="Categoría" className="text-violet-800 font-semibold mb-1" />
+                  <Label value="Categoría" className="text-violet-800 dark:text-violet-300 font-semibold mb-1" />
                   <select
                     value={categoria}
                     onChange={(e) => setCategoria(e.target.value)}
                     required
-                    className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-violet-400 focus:outline-none bg-white"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-violet-400 focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100"
                   >
                     <option value="">Seleccionar categoría</option>
                     {categoriasDisponibles.map((cat, i) => (
@@ -249,13 +244,13 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
                   <div className="md:col-span-2">
                     <Label
                       value="Nombre de nueva categoría"
-                      className="text-violet-800 font-semibold mb-1"
+                      className="text-violet-800 dark:text-violet-300 font-semibold mb-1"
                     />
                     <input
                       value={nuevaCategoria}
                       onChange={(e) => setNuevaCategoria(e.target.value)}
                       placeholder="Ej: Descuentos OFF"
-                      className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-yellow-400 focus:outline-none bg-white"
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-yellow-400 focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100"
                       required
                     />
                   </div>

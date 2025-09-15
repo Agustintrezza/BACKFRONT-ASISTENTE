@@ -47,6 +47,8 @@ function UsuariosDashboard() {
       cancelButtonText: "Cancelar",
       confirmButtonColor: "#dc2626",
       cancelButtonColor: "#6b7280",
+      background: "#1f1f1f",
+      color: "#f3f4f6",
     });
 
     if (confirm.isConfirmed) {
@@ -61,6 +63,8 @@ function UsuariosDashboard() {
           icon: "success",
           title: "Usuario eliminado",
           confirmButtonColor: "#3b82f6",
+          background: "#1f1f1f",
+          color: "#f3f4f6",
         });
       } catch (err) {
         console.error("Error eliminando usuario:", err);
@@ -69,15 +73,19 @@ function UsuariosDashboard() {
           title: "Error",
           text: "No se pudo eliminar el usuario.",
           confirmButtonColor: "#ef4444",
+          background: "#1f1f1f",
+          color: "#f3f4f6",
         });
       }
     }
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-gray-100">
       <div className="flex flex-wrap justify-between items-center mb-6 gap-3">
-        <h1 className="text-3xl font-bold text-violet-800">Usuarios del sistema</h1>
+        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-purple-500">
+          👥 Usuarios del sistema
+        </h1>
 
         <div className="flex gap-3">
           {currentUser.role === "admin" && (
@@ -106,54 +114,51 @@ function UsuariosDashboard() {
           <Spinner size="xl" color="purple" />
         </div>
       ) : usuarios.length === 0 ? (
-        <p className="text-gray-600">No hay usuarios registrados.</p>
+        <p className="text-gray-400">No hay usuarios registrados.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl shadow-md">
-          <Table striped hoverable className="min-w-full">
-            <Table.Head>
+        <div className="overflow-x-auto rounded-xl shadow-md border border-gray-700">
+          <Table striped={false} hoverable className="min-w-full">
+            <Table.Head className="bg-gray-800 text-gray-300">
               <Table.HeadCell>Email</Table.HeadCell>
               <Table.HeadCell>Rol</Table.HeadCell>
               <Table.HeadCell>Acciones</Table.HeadCell>
             </Table.Head>
-            <Table.Body className="divide-y">
+            <Table.Body className="divide-y divide-gray-700">
               {usuarios.map((usuario) => {
                 const puedeEditar =
-                currentUser.role === "admin" || currentUser._id === usuario._id;
+                  currentUser.role === "admin" || currentUser._id === usuario._id;
                 const puedeEliminar = currentUser.role === "admin";
-                const esMiPerfil = currentUser._id === usuario._id;
 
                 return (
                   <Table.Row
                     key={usuario._id}
-                    className="bg-white hover:bg-gray-100 transition"
+                    className="bg-gray-900 hover:bg-gray-800 transition"
                   >
-                    <Table.Cell className="font-medium text-gray-900">
+                    <Table.Cell className="font-medium text-gray-100">
                       {usuario.email}
                     </Table.Cell>
                     <Table.Cell>
-                      <Badge color={usuario.role === "admin" ? "purple" : "gray"}>
+                      <Badge
+                        color={usuario.role === "admin" ? "purple" : "gray"}
+                        className="px-3 py-1"
+                      >
                         {usuario.role}
                       </Badge>
                     </Table.Cell>
-                    {/* <Table.Cell>
-                      <Badge color={usuario.plan === "premium" ? "success" : "info"}>
-                        {usuario.plan}
-                      </Badge>
-                    </Table.Cell> */}
                     <Table.Cell className="flex gap-3">
                       <button
-                        className={`text-blue-600 hover:text-blue-800 transition text-xl ${
+                        className={`text-blue-400 hover:text-blue-600 transition text-xl ${
                           !puedeEditar ? "opacity-30 cursor-not-allowed" : ""
                         }`}
                         disabled={!puedeEditar}
                         title="Editar"
-                        onClick={() => puedeEditar && setUsuarioAEditar({ ...usuario, esMiPerfil })}
+                        onClick={() => puedeEditar && setUsuarioAEditar(usuario)}
                       >
                         ✏️
                       </button>
 
                       <button
-                        className={`text-red-600 hover:text-red-800 transition text-xl ${
+                        className={`text-red-400 hover:text-red-600 transition text-xl ${
                           !puedeEliminar ? "opacity-30 cursor-not-allowed" : ""
                         }`}
                         disabled={!puedeEliminar}
@@ -181,17 +186,17 @@ function UsuariosDashboard() {
         />
       )}
 
-{usuarioAEditar && (
-  <EditarUsuarioModal
-    usuario={usuarioAEditar}
-    usuarioLogueado={currentUser} // ⚠️ Asegurate de pasar esto
-    onClose={() => setUsuarioAEditar(null)}
-    onSuccess={() => {
-      setUsuarioAEditar(null);
-      fetchUsuarios();
-    }}
-  />
-)}
+      {usuarioAEditar && (
+        <EditarUsuarioModal
+          usuario={usuarioAEditar}
+          usuarioLogueado={currentUser}
+          onClose={() => setUsuarioAEditar(null)}
+          onSuccess={() => {
+            setUsuarioAEditar(null);
+            fetchUsuarios();
+          }}
+        />
+      )}
     </div>
   );
 }

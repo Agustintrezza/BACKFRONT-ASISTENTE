@@ -95,12 +95,12 @@ function CrearUsuarioModal({ onClose, onSuccess }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -60 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-50 bg-gray-200 bg-opacity-90 flex justify-center items-center px-2"
+      className="fixed inset-0 z-50 bg-black/70 flex justify-center items-center px-2"
     >
-      <div className="relative w-full max-w-3xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto max-h-[95vh]">
+      <div className="relative w-full max-w-3xl rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-xl p-10 overflow-y-auto max-h-[95vh] text-gray-100">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition"
+          className="absolute top-5 right-5 text-3xl text-red-400 hover:text-red-600 transition"
           title="Cerrar"
         >
           <HiX />
@@ -111,20 +111,21 @@ function CrearUsuarioModal({ onClose, onSuccess }) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="space-y-10 text-gray-900"
+          className="space-y-10"
         >
           <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3">
             <span className="text-5xl">👤</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-300 to-purple-400">
               Crear nuevo usuario
             </span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Email */}
             <div className="md:col-span-2">
               <Label
                 value="Correo electrónico"
-                className="text-violet-800 font-semibold mb-1"
+                className="text-violet-300 font-semibold mb-1"
               />
               <input
                 type="email"
@@ -132,14 +133,15 @@ function CrearUsuarioModal({ onClose, onSuccess }) {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="ejemplo@correo.com"
-                className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-violet-400 focus:outline-none bg-white"
+                className="w-full border border-gray-600 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-violet-400 focus:outline-none bg-gray-800 text-gray-100"
               />
             </div>
 
+            {/* Password */}
             <div className="md:col-span-2">
               <Label
                 value="Contraseña"
-                className="text-violet-800 font-semibold mb-1"
+                className="text-violet-300 font-semibold mb-1"
               />
               <div className="relative">
                 <input
@@ -148,7 +150,7 @@ function CrearUsuarioModal({ onClose, onSuccess }) {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-violet-400 focus:outline-none bg-white pr-10"
+                  className="w-full border border-gray-600 rounded-full px-4 py-2 text-sm shadow-md focus:ring-2 focus:ring-violet-400 focus:outline-none bg-gray-800 text-gray-100 pr-10"
                 />
                 <span
                   onClick={() => setShowPassword((prev) => !prev)}
@@ -160,23 +162,28 @@ function CrearUsuarioModal({ onClose, onSuccess }) {
               </div>
             </div>
 
+            {/* Admin Checkbox */}
             <div className="md:col-span-2 flex items-center gap-3 mt-2">
               <Checkbox
                 id="crear-admin"
                 checked={crearComoAdmin}
                 onChange={() => setCrearComoAdmin((prev) => !prev)}
               />
-              <Label htmlFor="crear-admin" className="text-violet-800 font-medium">
+              <Label
+                htmlFor="crear-admin"
+                className="text-violet-300 font-medium"
+              >
                 Crear como administrador
               </Label>
             </div>
           </div>
 
+          {/* Botones */}
           <div className="flex justify-end gap-4 mt-4">
             <Button
               type="button"
               onClick={onClose}
-              className="bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
+              className="bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
             >
               Cancelar
             </Button>

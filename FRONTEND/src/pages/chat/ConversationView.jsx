@@ -124,8 +124,8 @@ export default function ConversationView({ conversation }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen justify-center items-center bg-white">
-        <Spinner size="xl" color="purple" />
+      <div className="flex h-screen justify-center items-center bg-white dark:bg-gray-900 transition-colors duration-300">
+        <Spinner size="xl" className="text-violet-500" />
       </div>
     );
   }
@@ -133,21 +133,23 @@ export default function ConversationView({ conversation }) {
   let ultimaFechaMostrada = null;
 
   return (
-    <div className="h-screen flex flex-col bg-neutral-100">
+    <div className="h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 transition-colors duration-300">
       {/* Header */}
-      <div className="p-4 border-b flex items-center justify-between bg-violet-100 shadow-sm">
+      <div className="p-4 border-b border-gray-300 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800 shadow-sm transition-colors duration-300">
         <div className="flex items-center gap-3">
-          <HiUserCircle className="text-3xl text-violet-700" />
+          <HiUserCircle className="text-3xl text-violet-600 dark:text-violet-400" />
           <div>
-            <h2 className="text-lg font-bold text-violet-900">{sender}</h2>
-            <p className="text-sm text-violet-700">Conversación activa</p>
+            <h2 className="text-lg font-bold">{sender}</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Conversación activa
+            </p>
           </div>
         </div>
 
         <div className="flex flex-col items-end gap-2">
           <p
             className={`text-sm font-semibold ${
-              adminActivo ? "text-green-600" : "text-red-500"
+              adminActivo ? "text-green-600 dark:text-green-400" : "text-red-500 dark:text-red-400"
             }`}
           >
             Modo Manual:{" "}
@@ -159,24 +161,16 @@ export default function ConversationView({ conversation }) {
           <div className="relative flex gap-2">
             <motion.button
               onClick={() => toggleModoAdmin(true)}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
               whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              className="px-4 py-2 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-md font-semibold shadow-md hover:shadow-lg"
+              className="px-4 py-2 text-xs bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-md font-semibold shadow-md hover:shadow-lg"
             >
               Activar Modo Admin
             </motion.button>
 
             <motion.button
               onClick={() => toggleModoAdmin(false)}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
               whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              className="px-4 py-2 text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-md font-semibold shadow-md hover:shadow-lg"
+              className="px-4 py-2 text-xs bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-md font-semibold shadow-md hover:shadow-lg"
             >
               Desactivar Modo Admin
             </motion.button>
@@ -184,11 +178,11 @@ export default function ConversationView({ conversation }) {
             <motion.button
               onClick={() => setShowNota((prev) => !prev)}
               whileHover={{ scale: 1.05 }}
-              className="relative px-3 py-1 text-xs bg-yellow-200 hover:bg-yellow-300 text-yellow-900 rounded-md font-semibold shadow-sm"
+              className="relative px-3 py-1 text-xs bg-yellow-300 dark:bg-yellow-600 hover:bg-yellow-400 dark:hover:bg-yellow-500 text-black rounded-md font-semibold shadow-sm"
             >
               📝 Nota Interna
               {notaInterna && (
-                <span className="absolute -top-1.5 -right-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                <span className="absolute -top-1.5 -right-1 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                   1
                 </span>
               )}
@@ -198,7 +192,7 @@ export default function ConversationView({ conversation }) {
       </div>
 
       {/* Mensajes */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gradient-to-b from-neutral-100 to-white">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
         {messages.map((msg, i) => {
           const fechaMsg = new Date(msg.timestamp);
           const fechaActual = fechaMsg.toDateString();
@@ -214,21 +208,23 @@ export default function ConversationView({ conversation }) {
           return (
             <div key={i} className="flex flex-col items-center gap-1 w-full">
               {mostrarFecha && (
-                <div className="text-xs text-violet-900 font-semibold my-1 px-4 py-1 bg-violet-100 border border-violet-300 rounded-full shadow-sm">
+                <div className="text-xs text-gray-700 dark:text-gray-300 font-semibold my-1 px-4 py-1 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm">
                   {formatearFecha(fechaMsg)}
                 </div>
               )}
 
               <div
-                className={`flex ${isRight ? "justify-end" : "justify-start"} items-end w-full gap-1`}
+                className={`flex ${
+                  isRight ? "justify-end" : "justify-start"
+                } items-end w-full gap-1`}
               >
                 <div
                   className={`max-w-xl px-4 py-2 rounded-lg whitespace-pre-wrap text-sm ${
                     msg.from === "user"
-                      ? "bg-yellow-300 text-black"
+                      ? "bg-yellow-400 text-black"
                       : msg.from === "admin"
-                      ? "bg-violet-200 text-violet-800"
-                      : "bg-white text-gray-800 shadow"
+                      ? "bg-violet-600 text-white"
+                      : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 shadow"
                   }`}
                 >
                   {msg.text}
@@ -247,7 +243,7 @@ export default function ConversationView({ conversation }) {
                   )}
                 </div>
 
-                <span className="text-[11px] text-violet-500 mb-0.5 min-w-[35px] text-right">
+                <span className="text-[11px] text-gray-500 dark:text-gray-400 mb-0.5 min-w-[35px] text-right">
                   {formatearHora(msg.timestamp)}
                 </span>
               </div>
@@ -258,7 +254,7 @@ export default function ConversationView({ conversation }) {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-300 bg-violet-100 flex gap-2 relative">
+      <div className="p-4 border-t border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex gap-2 relative transition-colors duration-300">
         <input
           type="text"
           value={userInput}
@@ -269,7 +265,7 @@ export default function ConversationView({ conversation }) {
               ? "Escribí un mensaje..."
               : "Activá el modo manual para enviar mensajes"
           }
-          className="flex-1 px-4 py-2 rounded-md border border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
+          className="flex-1 px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors duration-300"
           disabled={!adminActivo}
         />
         <button
@@ -278,8 +274,8 @@ export default function ConversationView({ conversation }) {
           className={`px-4 py-2 rounded-md text-white font-medium ${
             adminActivo
               ? "bg-violet-600 hover:bg-violet-700"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
+              : "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
+          } transition-colors duration-300`}
         >
           Enviar
         </button>
@@ -287,7 +283,7 @@ export default function ConversationView({ conversation }) {
         {notaInterna && (
           <button
             onClick={() => setShowNota((prev) => !prev)}
-            className="absolute top-1 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full hover:bg-red-600 transition"
+            className="absolute top-1 left-1/2 transform -translate-x-1/2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full hover:bg-red-700 transition"
           >
             Esta conversación tiene una nota interna
           </button>

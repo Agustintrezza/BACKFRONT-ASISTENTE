@@ -1,4 +1,3 @@
-// App.jsx actualizado
 import {
   BrowserRouter as Router,
   Routes,
@@ -46,7 +45,7 @@ function AppContent() {
   const hideNavbar = hideNavbarRoutes.includes(location.pathname);
 
   return (
-    <>
+    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
       {isAuthenticated && !hideNavbar && <Navbar />}
 
       <Routes>
@@ -67,13 +66,21 @@ function AppContent() {
         <Route
           path="/productos-entrenados"
           element={
-            isAuthenticated ? <ProductosEntrenados /> : <Navigate to="/login" replace />
+            isAuthenticated ? (
+              <ProductosEntrenados />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
         <Route
           path="/productos-sin-entrenamiento"
           element={
-            isAuthenticated ? <ProductosSinEntrenamiento /> : <Navigate to="/login" replace />
+            isAuthenticated ? (
+              <ProductosSinEntrenamiento />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
         <Route
@@ -98,19 +105,31 @@ function AppContent() {
         <Route
           path="/secciones-entrenadas"
           element={
-            isAuthenticated ? <SeccionesEntrenadas /> : <Navigate to="/login" replace />
+            isAuthenticated ? (
+              <SeccionesEntrenadas />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
         <Route
           path="/secciones-sin-entrenamiento"
           element={
-            isAuthenticated ? <SeccionesSinEntrenamiento /> : <Navigate to="/login" replace />
+            isAuthenticated ? (
+              <SeccionesSinEntrenamiento />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
         <Route
           path="/secciones/:categoria/*"
           element={
-            isAuthenticated ? <SeccionesPorCategoria /> : <Navigate to="/login" replace />
+            isAuthenticated ? (
+              <SeccionesPorCategoria />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
 
@@ -131,7 +150,11 @@ function AppContent() {
         <Route
           path="/usuarios"
           element={
-            isAuthenticated ? <UsuariosDashboard /> : <Navigate to="/login" replace />
+            isAuthenticated ? (
+              <UsuariosDashboard />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
 
@@ -142,7 +165,7 @@ function AppContent() {
           }
         />
       </Routes>
-    </>
+    </div>
   );
 }
 

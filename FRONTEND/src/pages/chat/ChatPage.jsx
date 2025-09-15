@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { HiArrowLeft } from "react-icons/hi";
 import { Card } from "flowbite-react";
 // import { useNavigate } from "react-router-dom";
@@ -80,12 +80,12 @@ export default function ChatPage() {
   }, [conversationSelected]);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-gray-100">
+    <div className="h-screen w-screen flex flex-col bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* Header */}
-      {/* <div className="flex items-center p-4 bg-white shadow">
+      {/* <div className="flex items-center p-4 bg-white dark:bg-gray-900 shadow">
         <button
           onClick={() => navigate("/admin")}
-          className="flex items-center gap-2 text-sm text-gray-700 hover:text-violet-600"
+          className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200 hover:text-violet-600"
         >
           <HiArrowLeft className="text-xl" />
           Volver
@@ -95,7 +95,7 @@ export default function ChatPage() {
       {/* Layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="w-80 border-r border-gray-300 bg-white overflow-y-auto">
+        <div className="w-80 border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-y-auto transition-colors duration-300">
           <Sidebar
             conversaciones={conversaciones}
             selected={conversationSelected}
@@ -104,15 +104,15 @@ export default function ChatPage() {
         </div>
 
         {/* Vista de conversación */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
           {conversationSelected ? (
             <ConversationView
               conversation={conversationSelected}
               socket={socket}
             />
           ) : (
-            <Card className="m-4">
-              <p className="text-gray-600">
+            <Card className="m-4 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+              <p className="text-gray-600 dark:text-gray-400">
                 Seleccioná una conversación para comenzar.
               </p>
             </Card>

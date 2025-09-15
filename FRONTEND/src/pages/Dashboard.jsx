@@ -33,7 +33,6 @@ const labelToSectionKey = Object.fromEntries(
 const TRAINED_SECTION_KEY_SET = new Set(SECTION_KEYS);
 
 // ----- Productos (labels ↔ keys) -----
-// (Tus labels de productos siguen en sections.trained)
 const PRODUCT_LABELS = clientConfig.sections?.trained || [];
 const PRODUCT_KEYS =
   clientConfig.products?.trainedKeys?.length
@@ -98,7 +97,7 @@ function Dashboard() {
     fetchData();
   }, []);
 
-  // ===== Contadores por label (usan mapping label→key) =====
+  // ===== Contadores por label =====
   const countProductosByLabel = (label) => {
     const key = labelToProductKey[label] || slug(label);
     return allProducts.filter((p) => getProductKey(p) === key).length;
@@ -109,7 +108,7 @@ function Dashboard() {
     return allSections.filter((s) => getSectionKey(s) === key).length;
   };
 
-  // ===== “Sin entrenamiento” por key estable =====
+  // ===== “Sin entrenamiento” =====
   const productosSinEntrenarItems = allProducts.filter(
     (p) => !TRAINED_PRODUCT_KEY_SET.has(getProductKey(p))
   );
@@ -121,11 +120,7 @@ function Dashboard() {
   const emojiVariants = {
     animate: {
       x: [0, 3, 0],
-      transition: {
-        repeat: Infinity,
-        repeatDelay: 2,
-        duration: 0.8,
-      },
+      transition: { repeat: Infinity, repeatDelay: 2, duration: 0.8 },
     },
   };
 
@@ -136,12 +131,16 @@ function Dashboard() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
       whileHover={{ scale: 1.01 }}
-      className="cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
+      className="cursor-pointer bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-violet-200 dark:hover:shadow-violet-800 flex flex-col justify-between"
     >
       <div>
-        <h2 className="text-lg font-semibold mb-4 flex justify-between items-center px-4 py-2 rounded-md bg-gradient-to-r from-gray-100 to-gray-50 text-black">
+        <h2 className="text-lg font-semibold mb-4 flex justify-between items-center px-4 py-2 rounded-md bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-700 text-black dark:text-white">
           {title}
-          <motion.span className="text-4xl ml-2" variants={emojiVariants} animate="animate">
+          <motion.span
+            className="text-4xl ml-2"
+            variants={emojiVariants}
+            animate="animate"
+          >
             {icon}
           </motion.span>
         </h2>
@@ -151,7 +150,7 @@ function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-violet-100 text-white p-4">
+    <div className="min-h-screen bg-gradient-to-br from-white to-violet-100 dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 p-4">
       {loading ? (
         <div className="min-h-[300px] flex justify-center items-center">
           <Spinner size="xl" className="w-16 h-16 text-purple-600" />
@@ -160,25 +159,25 @@ function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
           {/* Productos */}
           <Card title="Productos" icon="📦">
-            <p className="text-gray-700 mb-3 text-sm">
+            <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm">
               Gestioná tus productos según su entrenamiento.
             </p>
             <div className="flex flex-col md:flex-row gap-4">
               <motion.div
                 onClick={() => navigate("/productos-entrenados")}
                 whileHover={{ scale: 1.01 }}
-                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md cursor-pointer"
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md cursor-pointer"
               >
-                <h3 className="text-md font-semibold mb-2 text-violet-800">
+                <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
                   ✅ Productos Entrenados
                 </h3>
-                <ul className="list-disc list-inside text-sm text-gray-800">
+                <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
                   {PRODUCT_LABELS.map((catLabel) => (
                     <li key={catLabel}>
                       {catLabel} (
-                        <span className="font-bold">
-                          {countProductosByLabel(catLabel)}
-                        </span>
+                      <span className="font-bold">
+                        {countProductosByLabel(catLabel)}
+                      </span>
                       )
                     </li>
                   ))}
@@ -188,12 +187,12 @@ function Dashboard() {
               <motion.div
                 onClick={() => navigate("/productos-sin-entrenamiento")}
                 whileHover={{ scale: 1.01 }}
-                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md cursor-pointer"
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md cursor-pointer"
               >
-                <h3 className="text-md font-semibold mb-2 text-violet-800">
+                <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
                   ⚙️ Productos Sin Entrenamiento
                 </h3>
-                <ul className="list-disc list-inside text-sm text-gray-800 max-h-[120px] overflow-y-auto">
+                <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200 max-h-[120px] overflow-y-auto">
                   {productosSinEntrenarItems.map((p) => (
                     <li key={p._id}>{p.title}</li>
                   ))}
@@ -204,25 +203,25 @@ function Dashboard() {
 
           {/* Secciones */}
           <Card title="Secciones" icon="🧩">
-            <p className="text-gray-700 mb-3 text-sm">
+            <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm">
               Gestioná las secciones entrenadas o libres.
             </p>
             <div className="flex flex-col md:flex-row gap-4">
               <motion.div
                 onClick={() => navigate("/secciones-entrenadas")}
                 whileHover={{ scale: 1.01 }}
-                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md cursor-pointer"
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md cursor-pointer"
               >
-                <h3 className="text-md font-semibold mb-2 text-violet-800">
+                <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
                   ✅ Secciones Entrenadas
                 </h3>
-                <ul className="list-disc list-inside text-sm text-gray-800">
+                <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
                   {SECTION_LABELS.map((secLabel) => (
                     <li key={secLabel}>
                       {secLabel} (
-                        <span className="font-bold">
-                          {countSeccionesByLabel(secLabel)}
-                        </span>
+                      <span className="font-bold">
+                        {countSeccionesByLabel(secLabel)}
+                      </span>
                       )
                     </li>
                   ))}
@@ -231,12 +230,12 @@ function Dashboard() {
               <motion.div
                 onClick={() => navigate("/secciones-sin-entrenamiento")}
                 whileHover={{ scale: 1.01 }}
-                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md cursor-pointer"
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md cursor-pointer"
               >
-                <h3 className="text-md font-semibold mb-2 text-violet-800">
+                <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
                   🧪 Secciones Sin Entrenamiento
                 </h3>
-                <ul className="list-disc list-inside text-sm text-gray-800 max-h-[120px] overflow-y-auto">
+                <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200 max-h-[120px] overflow-y-auto">
                   {seccionesSinEntrenarItems.map((s) => (
                     <li key={s._id}>{s.title || "Sin título"}</li>
                   ))}
@@ -246,16 +245,39 @@ function Dashboard() {
           </Card>
 
           {/* Reservas */}
-          <Card title={`Reservas (${reservas.length})`} icon="🗓️" onClick={() => navigate("/reservas")}>
-            <p className="text-gray-700 text-sm mb-2">
+          <Card
+            title={`Reservas (${reservas.length})`}
+            icon="🗓️"
+            onClick={() => navigate("/reservas")}
+          >
+            <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
               Administrá las reservas con IA personalizada.
             </p>
-            <div className="bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md text-gray-800 text-sm">
-              <h3 className="text-md font-semibold mb-2 text-violet-800">Reservas por estado</h3>
+            <div className="bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md text-gray-800 dark:text-gray-200 text-sm">
+              <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
+                Reservas por estado
+              </h3>
               <ul className="list-disc list-inside leading-relaxed">
-                <li>🟡 Pendientes: <span className="font-bold">{reservas.filter((r) => r.estado === "pendiente").length}</span></li>
-                <li>🟢 Atendidas: <span className="font-bold">{reservas.filter((r) => r.estado === "atendida").length}</span></li>
-                <li>⚫ Cerradas: <span className="font-bold">{reservas.filter((r) => r.estado === "cerrada").length}</span></li>
+                <li>
+                  🟡 Pendientes:{" "}
+                  <span className="font-bold">
+                    {
+                      reservas.filter((r) => r.estado === "pendiente").length
+                    }
+                  </span>
+                </li>
+                <li>
+                  🟢 Atendidas:{" "}
+                  <span className="font-bold">
+                    {reservas.filter((r) => r.estado === "atendida").length}
+                  </span>
+                </li>
+                <li>
+                  ⚫ Cerradas:{" "}
+                  <span className="font-bold">
+                    {reservas.filter((r) => r.estado === "cerrada").length}
+                  </span>
+                </li>
               </ul>
             </div>
           </Card>
@@ -265,26 +287,54 @@ function Dashboard() {
             <div className="flex flex-col md:flex-row gap-4">
               {/* Chat */}
               <div
-                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md text-sm text-gray-800 cursor-pointer"
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md text-sm text-gray-800 dark:text-gray-200 cursor-pointer"
                 onClick={() => navigate("/chat")}
               >
-                <h3 className="text-md font-semibold mb-2 text-violet-800">💬 Chat</h3>
+                <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
+                  💬 Chat
+                </h3>
                 <ul className="list-disc list-inside leading-relaxed">
-                  <li>🟢 Activas: <span className="font-bold">{conversaciones.length}</span></li>
-                  <li>🟡 Pendientes: <span className="font-bold">{conversaciones.filter((c) => !c.respondido).length}</span></li>
-                  <li>📨 Último mensaje: <span className="font-bold">{conversaciones[0]?.lastMessage?.slice(0, 50) || "Sin mensajes"}</span></li>
+                  <li>
+                    🟢 Activas:{" "}
+                    <span className="font-bold">{conversaciones.length}</span>
+                  </li>
+                  <li>
+                    🟡 Pendientes:{" "}
+                    <span className="font-bold">
+                      {conversaciones.filter((c) => !c.respondido).length}
+                    </span>
+                  </li>
+                  <li>
+                    📨 Último mensaje:{" "}
+                    <span className="font-bold">
+                      {conversaciones[0]?.lastMessage?.slice(0, 50) ||
+                        "Sin mensajes"}
+                    </span>
+                  </li>
                 </ul>
               </div>
 
               {/* Estado del asistente */}
               <div
-                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md text-sm text-gray-800 cursor-pointer"
+                className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md text-sm text-gray-800 dark:text-gray-200 cursor-pointer"
                 onClick={() => setShowModal(true)}
               >
-                <h3 className="text-md font-semibold mb-2 text-violet-800">📡 Estado del Asistente</h3>
+                <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
+                  📡 Estado del Asistente
+                </h3>
                 <ul className="list-disc list-inside leading-relaxed">
-                  <li>🔘 Estado: <span className="font-bold capitalize">{asistenteStatus}</span></li>
-                  <li>📣 Mensaje offline: <span className="font-bold italic">"{mensajeOffline}"</span></li>
+                  <li>
+                    🔘 Estado:{" "}
+                    <span className="font-bold capitalize">
+                      {asistenteStatus}
+                    </span>
+                  </li>
+                  <li>
+                    📣 Mensaje offline:{" "}
+                    <span className="font-bold italic">
+                      "{mensajeOffline}"
+                    </span>
+                  </li>
                 </ul>
               </div>
             </div>

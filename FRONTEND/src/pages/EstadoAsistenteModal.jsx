@@ -76,12 +76,16 @@ function EstadoAsistenteModal({ open, onClose, onSave }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -60 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-50 bg-gray-200 flex justify-center items-center px-2"
+      className="fixed inset-0 z-50 bg-black/70 flex justify-center items-center px-2"
     >
-      <div className="relative w-full max-w-3xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 shadow-xl p-10 overflow-y-auto max-h-[90vh]">
+      <div className="relative w-full max-w-3xl rounded-3xl 
+                      bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 
+                      shadow-xl p-10 overflow-y-auto max-h-[90vh] 
+                      text-gray-900 dark:text-gray-100 transition-colors duration-300">
+        {/* Botón cerrar */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 transition"
+          className="absolute top-5 right-5 text-3xl text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-600 transition"
           title="Cerrar"
         >
           <HiX />
@@ -91,15 +95,17 @@ function EstadoAsistenteModal({ open, onClose, onSave }) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="space-y-10 text-gray-900"
+          className="space-y-10"
         >
+          {/* Título */}
           <h2 className="text-4xl font-extrabold flex justify-center items-center gap-3">
             <span className="text-5xl">🧠</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-300 dark:to-purple-400">
               Estado del Asistente
             </span>
           </h2>
 
+          {/* Opciones */}
           <div className="space-y-6">
             <div className="flex items-center gap-4">
               <input
@@ -107,11 +113,11 @@ function EstadoAsistenteModal({ open, onClose, onSave }) {
                 id="modoOffline"
                 checked={modoOffline}
                 onChange={() => setModoOffline(!modoOffline)}
-                className="w-5 h-5 text-violet-600 rounded focus:ring-violet-500"
+                className="w-5 h-5 text-violet-600 dark:text-violet-500 rounded focus:ring-violet-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
               />
               <Label
                 htmlFor="modoOffline"
-                className="text-lg font-medium text-violet-800"
+                className="text-lg font-medium text-violet-700 dark:text-violet-300"
               >
                 ¿El asistente está en modo offline?
               </Label>
@@ -121,22 +127,24 @@ function EstadoAsistenteModal({ open, onClose, onSave }) {
               <div>
                 <Label
                   value="Mensaje automático cuando está offline"
-                  className="text-violet-800 font-semibold mb-1"
+                  className="text-violet-700 dark:text-violet-300 font-semibold mb-1"
                 />
                 <TextareaWithEditor
                   value={mensajeOffline}
                   onChange={setMensajeOffline}
                   rows={8}
+                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg"
                 />
               </div>
             )}
           </div>
 
+          {/* Botones */}
           <div className="flex justify-end gap-4 mt-2">
             <Button
               type="button"
               onClick={onClose}
-              className="bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
+              className="bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold px-6 py-2 rounded-full shadow-md hover:scale-105 transition"
             >
               Cancelar
             </Button>

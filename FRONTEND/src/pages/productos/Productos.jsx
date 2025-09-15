@@ -51,14 +51,14 @@ function Productos() {
     setLoading(true);
     try {
       if (isKey) {
-        // Traigo todos y filtro por categoryKey en el front (no requiere tocar backend)
+        // Traigo todos y filtro por categoryKey en el front
         const { data } = await axios.get(`${API_URL}/productos`);
         const filtered = data.filter(
           (p) => (p.categoryKey || slug(p.category)) === param
         );
         setProductos(filtered);
       } else {
-        // Legacy por label exacto (case-insensitive en backend)
+        // Legacy por label exacto
         const { data } = await axios.get(
           `${API_URL}/productos?category=${encodeURIComponent(param)}`
         );
@@ -129,7 +129,7 @@ function Productos() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <Spinner size="xl" className="w-16 h-16 text-purple-600" />
       </div>
     );
@@ -137,7 +137,7 @@ function Productos() {
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-white to-violet-200 text-gray-800 p-6"
+      className="min-h-screen bg-gradient-to-br from-white to-violet-200 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
@@ -148,7 +148,7 @@ function Productos() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-blue-400 dark:to-violet-400">
           {displayTitle}
         </h1>
         <div className="flex gap-3">
@@ -179,7 +179,7 @@ function Productos() {
 
       {productos.length === 0 && (
         <motion.div
-          className="bg-yellow-200 text-yellow-800 text-center py-4 mb-6 rounded"
+          className="bg-yellow-200 dark:bg-yellow-600 text-yellow-800 dark:text-yellow-100 text-center py-4 mb-6 rounded"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
@@ -197,7 +197,7 @@ function Productos() {
         {productos.map((p) => (
           <motion.div
             key={p._id}
-            className="relative cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
+            className="relative cursor-pointer bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200 dark:hover:shadow-violet-800"
             whileHover={{ scale: 1.01 }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -222,16 +222,16 @@ function Productos() {
                   ) : (
                     <span
                       key={index}
-                      className="text-transparent text-[17px] bg-clip-text bg-gradient-to-r from-black via-blue-900 to-violet-800"
+                      className="text-transparent text-[17px] bg-clip-text bg-gradient-to-r from-black via-blue-900 to-violet-800 dark:from-white dark:via-blue-400 dark:to-violet-400"
                     >
                       {part}
                     </span>
                   );
                 })}
             </h2>
-            <p className="text-gray-600 text-sm mb-1 truncate">💰 Precio: ${p.price}</p>
-            <p className="text-gray-600 text-sm mb-1 truncate">📦 Stock: {p.stock}</p>
-            <p className="text-gray-600 text-sm truncate">⏳ Duración: {p.duration}</p>
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-1 truncate">💰 Precio: ${p.price}</p>
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-1 truncate">📦 Stock: {p.stock}</p>
+            <p className="text-gray-600 dark:text-gray-300 text-sm truncate">⏳ Duración: {p.duration}</p>
             <div className="absolute bottom-2 right-3 flex space-x-3">
               <motion.span
                 whileHover={{ scale: 1.2 }}
@@ -259,27 +259,49 @@ function Productos() {
         ))}
       </motion.div>
 
-      <Modal show={viewModal} size="6xl" className="bg-black" onClose={() => setViewModal(false)}>
-        <div className="p-6 relative bg-white text-gray-900 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+      {/* Modal vista previa */}
+      <Modal show={viewModal} size="6xl" onClose={() => setViewModal(false)}>
+        <div className="p-6 relative bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg w-full max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">{selected?.title}</h2>
-            <span className="text-red-500 hover:text-red-700 cursor-pointer text-2xl" onClick={() => setViewModal(false)}>
+            <span
+              className="text-red-500 hover:text-red-700 cursor-pointer text-2xl"
+              onClick={() => setViewModal(false)}
+            >
               ❌
             </span>
           </div>
 
           {selected?.image && (
-            <img src={selected.image} alt={selected.title} className="w-full h-64 object-cover rounded-lg mb-6" />
+            <img
+              src={selected.image}
+              alt={selected.title}
+              className="w-full h-64 object-cover rounded-lg mb-6"
+            />
           )}
 
-          {selected?.description && <p className="text-gray-700 text-base mb-6">{selected.description}</p>}
+          {selected?.description && (
+            <p className="text-gray-700 dark:text-gray-300 text-base mb-6">
+              {selected.description}
+            </p>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-            <div className="border-b border-yellow-400 pb-2"><strong>💰 Precio:</strong> ${selected?.price}</div>
-            <div className="border-b border-yellow-400 pb-2"><strong>📦 Stock:</strong> {selected?.stock}</div>
-            <div className="border-b border-yellow-400 pb-2"><strong>⏳ Duración:</strong> {selected?.duration}</div>
-            <div className="border-b border-yellow-400 pb-2"><strong>📍 Ubicación:</strong> {selected?.location || "No especificada"}</div>
-            <div className="border-b border-yellow-400 pb-2"><strong>📂 Categoría:</strong> {selected?.category}</div>
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>💰 Precio:</strong> ${selected?.price}
+            </div>
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>📦 Stock:</strong> {selected?.stock}
+            </div>
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>⏳ Duración:</strong> {selected?.duration}
+            </div>
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>📍 Ubicación:</strong> {selected?.location || "No especificada"}
+            </div>
+            <div className="border-b border-yellow-400 pb-2">
+              <strong>📂 Categoría:</strong> {selected?.category}
+            </div>
             {selected?.availableDates?.length > 0 && (
               <div className="border-b border-yellow-400 pb-2 col-span-2">
                 <strong>📅 Fechas disponibles:</strong> {selected.availableDates.join(", ")}
@@ -289,11 +311,11 @@ function Productos() {
         </div>
       </Modal>
 
-      <Modal show={showFormModal} size="7xl" className="bg-white" onClose={() => setShowFormModal(false)}>
-        <div className="text-gray-900 p-6 rounded-lg w-full max-h-[100vh] overflow-y-auto">
+      {/* Modal formulario */}
+      <Modal show={showFormModal} size="7xl" onClose={() => setShowFormModal(false)}>
+        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 rounded-lg w-full max-h-[100vh] overflow-y-auto">
           <ProductoModal
             producto={selected}
-            // Para crear, mandamos el label visible (el modal actual trabaja por label)
             category={displayTitle}
             onClose={() => setShowFormModal(false)}
             onSuccess={() => {

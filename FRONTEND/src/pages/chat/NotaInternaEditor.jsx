@@ -71,15 +71,15 @@ export default function NotaInternaEditor({ sender, onClose }) {
 
   if (cargandoInicial) {
     return (
-      <div className="p-4 bg-gray-100 rounded shadow text-sm text-gray-500">
+      <div className="p-4 bg-gray-800 rounded shadow text-sm text-gray-400">
         Cargando notas internas...
       </div>
     );
   }
 
   return (
-    <div className="p-4 bg-white border border-gray-200 shadow rounded space-y-4 max-h-[60vh] overflow-y-auto">
-      <h3 className="text-sm font-semibold text-gray-700">Historial de notas</h3>
+    <div className="p-4 bg-gray-900 border border-gray-700 shadow rounded space-y-4 max-h-[60vh] overflow-y-auto text-gray-200">
+      <h3 className="text-sm font-semibold text-gray-300">Historial de notas</h3>
 
       {notas.length === 0 && (
         <p className="text-sm text-gray-500">Sin notas internas aún.</p>
@@ -87,9 +87,9 @@ export default function NotaInternaEditor({ sender, onClose }) {
 
       <ul className="space-y-3">
         {notas.map((nota, i) => (
-          <li key={i} className="border p-2 rounded text-sm bg-gray-50">
-            <p className="whitespace-pre-wrap text-gray-800">{nota.texto}</p>
-            <div className="text-xs text-gray-500 mt-1 flex justify-between">
+          <li key={i} className="border border-gray-700 p-2 rounded text-sm bg-gray-800">
+            <p className="whitespace-pre-wrap text-gray-200">{nota.texto}</p>
+            <div className="text-xs text-gray-400 mt-1 flex justify-between">
               <span>{nota.autor}</span>
               <span>{formatearFecha(nota.fecha)}</span>
             </div>
@@ -100,7 +100,7 @@ export default function NotaInternaEditor({ sender, onClose }) {
       {editando ? (
         <div className="space-y-2">
           <textarea
-            className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+            className="w-full p-2 border border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-800 text-gray-200"
             rows={3}
             value={nuevaNota}
             onChange={handleChange}
@@ -114,7 +114,7 @@ export default function NotaInternaEditor({ sender, onClose }) {
             <button
               onClick={guardarNota}
               disabled={cargando}
-              className="px-3 py-1 bg-green-100 text-green-800 border border-green-300 rounded hover:bg-green-200 text-sm"
+              className="px-3 py-1 bg-green-600 text-white border border-green-700 rounded hover:bg-green-700 text-sm"
             >
               Guardar
             </button>
@@ -123,7 +123,7 @@ export default function NotaInternaEditor({ sender, onClose }) {
                 setEditando(false);
                 setNuevaNota("");
               }}
-              className="px-3 py-1 bg-gray-100 text-gray-700 border border-gray-300 rounded hover:bg-gray-200 text-sm"
+              className="px-3 py-1 bg-gray-700 text-gray-200 border border-gray-600 rounded hover:bg-gray-600 text-sm"
             >
               Cancelar
             </button>
@@ -131,22 +131,22 @@ export default function NotaInternaEditor({ sender, onClose }) {
         </div>
       ) : (
         <button
-  onClick={() => setEditando(true)}
-  className="flex items-center gap-1 px-3 py-1 text-black border border-yellow-300 rounded-2xl  text-sm 
-             bg-yellow-200 hover:to-yellow-400"
->
-  <HiPencil /> Agregar nota
-</button>
+          onClick={() => setEditando(true)}
+          className="flex items-center gap-1 px-3 py-1 border border-yellow-500 rounded-2xl text-sm 
+                     bg-yellow-600 text-black hover:bg-yellow-500"
+        >
+          <HiPencil /> Agregar nota
+        </button>
       )}
 
       <div className="text-right">
-      <button
-  onClick={onClose}
-  className="mt-4 px-3 py-1 text-white border border-red-300 rounded-2xl text-sm 
-             bg-red-500 hover:from-red-200 hover:to-red-400"
->
-  Cerrar
-</button>
+        <button
+          onClick={onClose}
+          className="mt-4 px-3 py-1 text-white border border-red-700 rounded-2xl text-sm 
+                     bg-red-600 hover:bg-red-700"
+        >
+          Cerrar
+        </button>
       </div>
     </div>
   );

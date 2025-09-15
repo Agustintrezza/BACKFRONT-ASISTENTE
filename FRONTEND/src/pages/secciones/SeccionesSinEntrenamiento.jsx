@@ -27,12 +27,12 @@ const slug = (s) =>
 // Labels visibles (UI)
 const SPECIAL_LABELS = clientConfig.sections?.special || [];
 
-// Keys estables (si no están en JSON, caemos a labels→slug)
+// Keys estables
 const SPECIAL_KEYS = clientConfig.sections?.specialKeys?.length
   ? clientConfig.sections.specialKeys
   : SPECIAL_LABELS.map(slug);
 
-// Set para membership O(1)
+// Set para membership
 const specialKeySet = new Set(SPECIAL_KEYS);
 
 function SeccionesSinEntrenamiento() {
@@ -47,22 +47,17 @@ function SeccionesSinEntrenamiento() {
     setLoading(true);
     try {
       const res = await axios.get("http://localhost:5000/api/secciones");
-      // Filtramos por KEY estable (evita depender del título exacto)
       const sin = res.data.filter((s) => {
         const key = s?.sectionKey || slug(s?.title);
         return !specialKeySet.has(key);
       });
       setSecciones(sin);
-      console.log(secciones)
-
     } catch (err) {
       console.error("Error cargando secciones:", err);
     } finally {
       setLoading(false);
     }
   };
-
-  
 
   useEffect(() => {
     fetchSecciones();
@@ -123,14 +118,14 @@ function SeccionesSinEntrenamiento() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-violet-200 text-gray-900">
-        <Spinner size="xl" className="w-16 h-16 text-purple-600 mb-6" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-violet-200 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
+        <Spinner size="xl" className="w-16 h-16 text-purple-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-white to-violet-200 text-gray-900">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-white to-violet-200 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
       <div className="flex justify-between items-center mb-8 flex-wrap gap-2">
         <motion.h1
           className="text-4xl font-extrabold"
@@ -138,7 +133,7 @@ function SeccionesSinEntrenamiento() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-violet-400 dark:to-purple-500">
             Secciones Sin Entrenamiento
           </span>
         </motion.h1>
@@ -149,12 +144,9 @@ function SeccionesSinEntrenamiento() {
               setSelected(null);
               setShowFormModal(true);
             }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            className="px-6 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
+            className="px-6 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
           >
             <FaPlusCircle className="text-yellow-300 text-2xl" />
             <span className="text-sm">Crear sección</span>
@@ -162,12 +154,9 @@ function SeccionesSinEntrenamiento() {
 
           <motion.button
             onClick={() => navigate("/secciones-entrenadas")}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-violet-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-violet-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
           >
             <span className="text-xl">🧠</span>
             <span className="text-sm">Ir a entrenadas</span>
@@ -175,12 +164,9 @@ function SeccionesSinEntrenamiento() {
 
           <motion.button
             onClick={() => navigate("/dashboard")}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-500 ease-in-out flex items-center gap-2"
+            className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
           >
             <span className="text-xl">⬅️</span>
             <span className="text-sm">Volver</span>
@@ -189,7 +175,9 @@ function SeccionesSinEntrenamiento() {
       </div>
 
       {secciones.length === 0 ? (
-        <p className="text-gray-600">No hay secciones sin entrenamiento.</p>
+        <p className="text-gray-600 dark:text-gray-300">
+          No hay secciones sin entrenamiento.
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {secciones.map((s, i) => (
@@ -198,13 +186,13 @@ function SeccionesSinEntrenamiento() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05, duration: 0.5 }}
-              className="cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
+              className="cursor-pointer bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow transition-all flex flex-col justify-between hover:shadow-violet-200 dark:hover:shadow-violet-900"
               onClick={() => {
                 setSelected(s);
                 setViewModal(true);
               }}
             >
-              <h2 className="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+              <h2 className="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-violet-400 dark:to-purple-500">
                 {s.title}
               </h2>
               <div className="text-sm space-y-1">
@@ -240,19 +228,13 @@ function SeccionesSinEntrenamiento() {
         </div>
       )}
 
+      {/* Modal Vista previa */}
       <Modal
         show={viewModal}
         size="lg"
         onClose={() => setViewModal(false)}
-        theme={{
-          root: {
-            show: {
-              on: "fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm",
-            },
-          },
-        }}
       >
-        <div className="p-6 relative bg-white rounded-lg">
+        <div className="p-6 relative bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg">
           <HiX
             className="absolute top-4 right-4 cursor-pointer"
             size={24}
@@ -262,10 +244,12 @@ function SeccionesSinEntrenamiento() {
             <>
               <h2 className="text-2xl font-bold mb-4">{selected.title}</h2>
               {selected.description && (
-                <p className="text-gray-700 mb-4">{selected.description}</p>
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  {selected.description}
+                </p>
               )}
               {selected.menuItems?.length > 0 && (
-                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                <ul className="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1">
                   {selected.menuItems.map((item, idx) => (
                     <li key={idx}>
                       <strong>{item.title}:</strong> {item.detail}
@@ -300,19 +284,13 @@ function SeccionesSinEntrenamiento() {
         </div>
       </Modal>
 
+      {/* Modal Formulario */}
       <Modal
         show={showFormModal}
         size="6xl"
         onClose={() => setShowFormModal(false)}
-        theme={{
-          root: {
-            show: {
-              on: "fixed inset-0 z-50 flex items-center justify-center bg-white",
-            },
-          },
-        }}
       >
-        <div className="bg-white text-gray-900 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded-lg w-full max-h-[90vh] overflow-y-auto">
           <SeccionModal
             seccion={selected}
             onClose={() => setShowFormModal(false)}

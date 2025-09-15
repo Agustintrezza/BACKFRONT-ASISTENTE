@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar as FlowbiteNavbar, Button } from "flowbite-react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-import { FiPower } from "react-icons/fi";
+import { FiPower, FiMoon, FiSun } from "react-icons/fi";
 import { useUser } from "../context/UserContext"; // 👈 Importar el hook
 import clientConfig from "../../client-config.json";
 
@@ -12,6 +12,21 @@ function Navbar() {
   const navigate = useNavigate();
   const [showAdminMenu, setShowAdminMenu] = useState(false);
   const { user, setUser } = useUser(); // 👈 Usar user desde contexto
+
+  // 🌙 Dark Mode
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
 
   const handleLogout = async () => {
     const result = await Swal.fire({
@@ -21,8 +36,8 @@ function Navbar() {
       showCancelButton: true,
       confirmButtonText: "✅ Sí, cerrar sesión",
       cancelButtonText: "❌ Cancelar",
-      background: "#171717",
-      color: "#f3f4f6",
+      background: darkMode ? "#1f2937" : "#f9fafb",
+      color: darkMode ? "#f3f4f6" : "#111827",
       iconColor: "#facc15",
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#6b7280",
@@ -52,17 +67,17 @@ function Navbar() {
     >
       <FlowbiteNavbar
         fluid
-        className="bg-white border-gray-200 sticky top-0 z-50 shadow"
+        className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 sticky top-0 z-50 shadow"
       >
         <FlowbiteNavbar.Brand href="/">
-        <img
-  src={clientConfig.brand.logoUrl}
-  className="mr-2 h-7"
-  alt={clientConfig.brand.name}
-/>
-<span className="text-xl font-semibold text-violet-600 whitespace-nowrap">
-  {clientConfig.brand.name}
-</span>
+          <img
+            src={clientConfig.brand.logoUrl}
+            className="mr-2 h-7"
+            alt={clientConfig.brand.name}
+          />
+          <span className="text-xl font-semibold text-violet-600 dark:text-violet-400 whitespace-nowrap">
+            {clientConfig.brand.name}
+          </span>
         </FlowbiteNavbar.Brand>
 
         <FlowbiteNavbar.Toggle />
@@ -70,7 +85,7 @@ function Navbar() {
         <FlowbiteNavbar.Collapse>
           <li className="mt-2 lg:mt-0 text-sm flex items-center gap-3 relative">
             {/* 👤 Email del usuario */}
-            <span className="text-sm text-gray-600 font-semibold">
+            <span className="text-sm text-gray-600 dark:text-gray-300 font-semibold">
               👤 {user?.email || "Usuario"}
             </span>
 
@@ -78,19 +93,19 @@ function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setShowAdminMenu((prev) => !prev)}
-                className="text-sm text-violet-600 font-semibold hover:underline"
+                className="text-sm text-violet-600 dark:text-violet-400 font-semibold hover:underline"
               >
                 Administrar
               </button>
 
               {showAdminMenu && (
-                <div className="absolute right-0 mt-2 bg-white border rounded shadow-lg p-2 z-50 w-52">
+                <div className="absolute right-0 mt-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow-lg p-2 z-50 w-52">
                   <button
                     onClick={() => {
                       setShowAdminMenu(false);
                       navigate("/usuarios");
                     }}
-                    className="block w-full text-sm py-2 px-3 text-left hover:bg-violet-100"
+                    className="block w-full text-sm py-2 px-3 text-left hover:bg-violet-100 dark:hover:bg-violet-700 dark:text-gray-200"
                   >
                     📋 Usuarios
                   </button>
@@ -98,7 +113,21 @@ function Navbar() {
               )}
             </div>
 
-            {/* Botón logout */}
+            {/* 🌙 Botón Dark Mode */}
+            <Button
+              color="gray"
+              size="sm"
+              onClick={() => setDarkMode(!darkMode)}
+              className="flex items-center justify-center"
+            >
+              {darkMode ? (
+                <FiSun className="text-yellow-400 text-lg" />
+              ) : (
+                <FiMoon className="text-gray-800 text-lg" />
+              )}
+            </Button>
+
+            {/* 🔴 Botón logout */}
             <Button
               onClick={handleLogout}
               color="failure"

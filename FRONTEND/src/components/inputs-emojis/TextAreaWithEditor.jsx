@@ -18,23 +18,14 @@ function TextareaWithEditor({ value, onChange }) {
 
   const autoFormatText = () => {
     let formatted = value;
-  
-    // 1. Reemplazar cualquier lista estilo "- - [ ]" o numerada con separadores
-    formatted = formatted.replace(/^- - \[ \] \d+\.\s*/gm, '--------------\n');
-  
-    // 2. Eliminar múltiples líneas vacías
-    formatted = formatted.replace(/\n{3,}/g, '\n\n');
-  
-    // 3. Eliminar espacios innecesarios
+
+    formatted = formatted.replace(/^- - \[ \] \d+\.\s*/gm, "--------------\n");
+    formatted = formatted.replace(/\n{3,}/g, "\n\n");
     formatted = formatted.trim();
-  
-    // 4. Asegurarse que todos los bloques estén separados por "--------------"
-    formatted = formatted.replace(/\n(?=\S)/g, '\n'); // Normalizar quiebres de línea simples
-    formatted = formatted.replace(/\n\n/g, '\n--------------\n');
-  
-    // 5. No poner separador arriba del título
-    formatted = formatted.replace(/(📅.*?\nLunes a Domingos)/, '$1');
-  
+    formatted = formatted.replace(/\n(?=\S)/g, "\n");
+    formatted = formatted.replace(/\n\n/g, "\n--------------\n");
+    formatted = formatted.replace(/(📅.*?\nLunes a Domingos)/, "$1");
+
     onChange(formatted);
   };
 
@@ -49,7 +40,12 @@ function TextareaWithEditor({ value, onChange }) {
   }, []);
 
   return (
-    <div className="relative w-full shadow-md rounded-md bg-white" ref={ref}>
+    <div
+      className="relative w-full shadow-md rounded-md 
+                 bg-white dark:bg-gray-900 
+                 transition-colors duration-300"
+      ref={ref}
+    >
       <ReactMde
         value={value}
         onChange={onChange}
@@ -57,7 +53,7 @@ function TextareaWithEditor({ value, onChange }) {
         onTabChange={setSelectedTab}
         generateMarkdownPreview={(markdown) =>
           Promise.resolve(
-            <div className="text-gray-800 bg-white p-2 rounded whitespace-pre-line">
+            <div className="text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900 p-2 rounded whitespace-pre-line transition-colors duration-300">
               {markdown}
             </div>
           )
@@ -66,11 +62,16 @@ function TextareaWithEditor({ value, onChange }) {
         maxHeight={170}
         classes={{
           textArea:
-            "text-sm text-gray-800 bg-white rounded-md border border-gray-300 focus:ring-2 focus:ring-violet-400",
-          preview: "text-sm text-gray-800 bg-white whitespace-pre-line",
-          toolbar: "bg-violet-50 border border-violet-100 text-violet-800",
+            "text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900 rounded-md border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-violet-400 transition-colors duration-300",
+          preview:
+            "text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900 whitespace-pre-line transition-colors duration-300",
+          toolbar:
+            "bg-violet-50 dark:bg-gray-800 border border-violet-100 dark:border-gray-700 text-violet-800 dark:text-gray-200",
         }}
-        className="rounded-md border border-violet-200 text-sm shadow-sm [&_.mde-tabs]:bg-violet-50 [&_.mde-tabs]:text-violet-700 [&_.mde-tabs button]:hover:bg-violet-100"
+        className="rounded-md border border-violet-200 dark:border-gray-700 text-sm shadow-sm 
+                   [&_.mde-tabs]:bg-violet-50 dark:[&_.mde-tabs]:bg-gray-800 
+                   [&_.mde-tabs]:text-violet-700 dark:[&_.mde-tabs]:text-gray-200 
+                   [&_.mde-tabs_button:hover]:bg-violet-100 dark:[&_.mde-tabs_button:hover]:bg-gray-700"
       />
 
       {/* Emoji */}
@@ -95,7 +96,11 @@ function TextareaWithEditor({ value, onChange }) {
 
       {showEmoji && (
         <div className="absolute z-50 top-[105%] right-0">
-          <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="light" />
+          <Picker
+            data={data}
+            onEmojiSelect={handleEmojiSelect}
+            theme="auto" // 👈 ahora se adapta al modo global
+          />
         </div>
       )}
     </div>

@@ -26,13 +26,23 @@ function InputWithEmoji({
   }, []);
 
   return (
-    <div className="relative w-full shadow-md rounded-md bg-white" ref={ref}>
+    <div
+      className="relative w-full shadow-md rounded-md 
+                 bg-white dark:bg-gray-900 
+                 transition-colors duration-300"
+      ref={ref}
+    >
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full px-4 py-2 pr-10 rounded-md border border-gray-300 text-sm text-gray-800 focus:ring-2 focus:ring-violet-400 focus:outline-none"
+        className="w-full px-4 py-2 pr-10 rounded-md border 
+                   border-gray-300 dark:border-gray-700 
+                   text-sm text-gray-800 dark:text-gray-200 
+                   bg-white dark:bg-gray-900
+                   focus:ring-2 focus:ring-violet-400 focus:outline-none 
+                   transition-colors duration-300"
       />
       <button
         type="button"
@@ -44,7 +54,11 @@ function InputWithEmoji({
       </button>
       {showEmoji && (
         <div className="absolute z-50 top-[105%] right-0">
-          <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="light" />
+          <Picker
+            data={data}
+            onEmojiSelect={handleEmojiSelect}
+            theme="auto" // 👈 cambia según el modo del sistema / storage
+          />
         </div>
       )}
     </div>

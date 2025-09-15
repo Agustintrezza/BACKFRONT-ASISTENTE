@@ -10,9 +10,9 @@ import { useNavigate } from "react-router-dom";
 
 const estados = {
   none: { emoji: "➖", bg: "" },
-  pendiente: { emoji: "⏰", bg: "bg-yellow-100" },
-  urgente: { emoji: "🔥", bg: "bg-red-100" },
-  resuelto: { emoji: "✅", bg: "bg-green-100" },
+  pendiente: { emoji: "⏰", bg: "bg-yellow-100 dark:bg-yellow-900/30" },
+  urgente: { emoji: "🔥", bg: "bg-red-100 dark:bg-red-900/30" },
+  resuelto: { emoji: "✅", bg: "bg-green-100 dark:bg-green-900/30" },
 };
 
 export default function Sidebar({ selected, onSelect }) {
@@ -74,11 +74,14 @@ export default function Sidebar({ selected, onSelect }) {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/chat/conversaciones/${sender}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/chat/conversaciones/${sender}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       setConversations((prev) => prev.filter((c) => c.sender !== sender));
       if (selected?.sender === sender) {
         onSelect(null);
@@ -133,28 +136,29 @@ export default function Sidebar({ selected, onSelect }) {
   };
 
   return (
-    <div className="h-screen flex flex-col relative z-10">
-      <div className="px-4 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
+    <div className="h-screen flex flex-col relative z-10 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 transition-colors duration-300">
+      {/* Header */}
+      <div className="px-4 py-4 border-b border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-between transition-colors duration-300">
         <div className="flex items-center gap-2">
-          <HiChatAlt2 className="text-2xl text-violet-600" />
-          <h2 className="text-xl font-semibold text-gray-800">Conversaciones</h2>
+          <HiChatAlt2 className="text-2xl text-violet-600 dark:text-violet-400" />
+          <h2 className="text-xl font-semibold">Conversaciones</h2>
         </div>
         <motion.button
           onClick={() => navigate("/dashboard")}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="px-2 py-2 text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-md font-medium shadow-md hover:shadow-lg flex items-center gap-2"
+          className="px-2 py-2 text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-md font-medium shadow-md hover:shadow-lg flex items-center gap-2"
         >
           ⬅️
         </motion.button>
       </div>
 
+      {/* Lista de conversaciones */}
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
-          <div className="text-center py-10 text-gray-400">No hay conversaciones activas.</div>
+          <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+            No hay conversaciones activas.
+          </div>
         ) : (
           conversations.map((conv, idx) => {
             const isSelected = selected?.sender === conv.sender;
@@ -169,14 +173,14 @@ export default function Sidebar({ selected, onSelect }) {
                 key={idx}
                 whileHover={{ scale: 1.01 }}
                 onClick={() => onSelect(conv)}
-                className={`px-4 py-3 cursor-pointer border-b border-gray-100 transition-all relative z-0 ${
+                className={`px-4 py-3 cursor-pointer border-b border-gray-200 dark:border-gray-800 transition-all relative z-0 ${
                   isSelected
-                    ? "bg-violet-100 border-l-4 border-violet-500"
+                    ? "bg-violet-100 dark:bg-violet-800/40 border-l-4 border-violet-500"
                     : estados[status].bg
                 }`}
               >
                 <div className="flex justify-between items-center mb-1">
-                  <h3 className="text-sm font-semibold text-gray-800 truncate flex items-center gap-2">
+                  <h3 className="text-sm font-semibold truncate flex items-center gap-2">
                     👤 {conv.sender}
                     <button
                       onClick={(e) => {
@@ -189,14 +193,16 @@ export default function Sidebar({ selected, onSelect }) {
                       🗑️
                     </button>
                   </h3>
-                  <span className="text-xs text-gray-400">{time}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {time}
+                  </span>
                 </div>
 
-                <div className="flex justify-between items-center text-xs text-gray-600 relative">
+                <div className="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400 relative">
                   <div className="flex flex-col w-3/4">
                     <p className="truncate">{lastMsg.slice(0, 70)}...</p>
                     {conv.responsable && (
-                      <span className="text-[10px] text-blue-500 mt-0.5 italic">
+                      <span className="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5 italic">
                         {conv.responsable}
                       </span>
                     )}
@@ -237,7 +243,7 @@ export default function Sidebar({ selected, onSelect }) {
                             setResponsableOpenId(null);
                           }}
                           value={conv.responsable || ""}
-                          className="absolute top-6 right-0 bg-white border text-xs border-gray-300 rounded shadow z-50"
+                          className="absolute top-6 right-0 bg-white dark:bg-gray-800 border text-xs border-gray-300 dark:border-gray-600 rounded shadow z-50 text-gray-900 dark:text-gray-200"
                         >
                           <option value="">Sin responsable</option>
                           {usuarios.map((u) => (
@@ -250,7 +256,7 @@ export default function Sidebar({ selected, onSelect }) {
                     </div>
 
                     {conv.respondido && (
-                      <BsCheck2All className="text-green-500 ml-1 text-base" />
+                      <BsCheck2All className="text-green-600 dark:text-green-400 ml-1 text-base" />
                     )}
                   </div>
                 </div>

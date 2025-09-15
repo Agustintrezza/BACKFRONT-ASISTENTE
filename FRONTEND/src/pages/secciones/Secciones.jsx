@@ -139,7 +139,7 @@ function Secciones() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-violet-200 dark:from-gray-900 dark:to-gray-800">
         <Spinner size="xl" className="w-16 h-16 text-purple-600" />
       </div>
     );
@@ -147,18 +147,19 @@ function Secciones() {
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-white to-violet-200 text-gray-800 p-6"
+      className="min-h-screen bg-gradient-to-br from-white to-violet-200 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
+      {/* Header */}
       <motion.div
         className="flex justify-between items-center mb-6"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-violet-400 dark:to-purple-500">
           {displayTitle}
         </h1>
 
@@ -188,9 +189,10 @@ function Secciones() {
         </div>
       </motion.div>
 
+      {/* Sin datos */}
       {secciones.length === 0 && (
         <motion.div
-          className="bg-yellow-200 text-yellow-800 text-center py-4 mb-6 rounded"
+          className="bg-yellow-200 dark:bg-yellow-700 text-yellow-800 dark:text-yellow-100 text-center py-4 mb-6 rounded"
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
@@ -199,6 +201,7 @@ function Secciones() {
         </motion.div>
       )}
 
+      {/* Grid */}
       <motion.div
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
         initial="hidden"
@@ -208,7 +211,7 @@ function Secciones() {
         {secciones.map((s) => (
           <motion.div
             key={s._id}
-            className="relative cursor-pointer bg-white text-gray-900 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
+            className="relative cursor-pointer bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow transition-all flex flex-col justify-between hover:shadow-violet-200 dark:hover:shadow-violet-900"
             whileHover={{ scale: 1.01 }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -228,14 +231,14 @@ function Secciones() {
                 return (
                   <>
                     <span>{emoji}</span>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-violet-400 dark:to-purple-500">
                       {text}
                     </span>
                   </>
                 );
               })()}
             </h2>
-            <p className="text-gray-600 text-sm min-h-[70px]">
+            <p className="text-gray-600 dark:text-gray-300 text-sm min-h-[70px]">
               {esEntrenada
                 ? s.menuItems?.[0]?.detail?.slice(0, 140) + (s.menuItems?.[0]?.detail?.length > 80 ? '...' : '') || 'Sin contenido'
                 : `🧩Ítems: ${s.menuItems?.length || 0}`}
@@ -270,25 +273,27 @@ function Secciones() {
       {/* Modales */}
       {viewModal && selected && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4">
-          <div className="p-6 bg-white text-gray-900 rounded-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto relative">
+          <div className="p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto relative">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">{esEntrenada ? selected.menuItems?.[0]?.title || selected.title : selected.title}</h2>
+              <h2 className="text-2xl font-bold">
+                {esEntrenada ? selected.menuItems?.[0]?.title || selected.title : selected.title}
+              </h2>
               <span className="text-red-500 hover:text-red-700 cursor-pointer text-2xl" onClick={() => setViewModal(false)}>❌</span>
             </div>
             {esEntrenada ? (
-              <div className="p-4 bg-gray-100 border border-gray-300 rounded-xl text-gray-800">
+              <div className="p-4 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-100">
                 {selected.menuItems?.[0]?.detail ? (
                   <p className="leading-relaxed">{selected.menuItems[0].detail}</p>
                 ) : (
-                  <p className="italic text-gray-500">Sin contenido cargado.</p>
+                  <p className="italic text-gray-500 dark:text-gray-300">Sin contenido cargado.</p>
                 )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 {selected.menuItems?.map((item, idx) => (
-                  <div key={idx} className="p-4 border border-gray-300 rounded">
+                  <div key={idx} className="p-4 border border-gray-300 dark:border-gray-600 rounded">
                     <h3 className="text-base font-semibold mb-1">{item.title}</h3>
-                    <p className="text-gray-700 mb-1">{item.detail}</p>
+                    <p className="text-gray-700 dark:text-gray-300 mb-1">{item.detail}</p>
                     {item.link && (
                       <a href={item.link} className="text-blue-500 underline break-all" target="_blank" rel="noopener noreferrer">
                         {item.link}
