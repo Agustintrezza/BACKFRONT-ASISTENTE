@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import { FiPower } from "react-icons/fi";
 import { useUser } from "../context/UserContext"; // 👈 Importar el hook
+import clientConfig from "../../client-config.json";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -54,14 +55,14 @@ function Navbar() {
         className="bg-white border-gray-200 sticky top-0 z-50 shadow"
       >
         <FlowbiteNavbar.Brand href="/">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-            className="mr-2 h-7"
-            alt="Chatbot Logo"
-          />
-          <span className="text-xl font-semibold text-violet-600 whitespace-nowrap">
-            Asistente IA
-          </span>
+        <img
+  src={clientConfig.brand.logoUrl}
+  className="mr-2 h-7"
+  alt={clientConfig.brand.name}
+/>
+<span className="text-xl font-semibold text-violet-600 whitespace-nowrap">
+  {clientConfig.brand.name}
+</span>
         </FlowbiteNavbar.Brand>
 
         <FlowbiteNavbar.Toggle />

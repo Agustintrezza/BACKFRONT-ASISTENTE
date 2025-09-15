@@ -4,58 +4,68 @@ import { Spinner } from "flowbite-react";
 import axios from "axios";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import clientConfig from "../../../client-config.json";
 
-const entrenadas = [
-  "Guía Turístico",
-  "Tipo de cambio",
-  "Preguntas Frecuentes",
-  "Nosotros",
-  "Contacto",
-];
+// ===== Helpers =====
+const slug = (s) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
 
-const emojis = {
-  "Guía Turístico": "🧭",
-  "Tipo de cambio": "💱",
-  "Preguntas Frecuentes": "📚",
-  Nosotros: "🧑‍🤝‍🧑",
-  Contacto: "📞",
+// Labels (UI) y Keys (estables)
+const SPECIAL_LABELS = clientConfig.sections?.special || [];
+const SPECIAL_KEYS = clientConfig.sections?.specialKeys?.length
+  ? clientConfig.sections.specialKeys
+  : SPECIAL_LABELS.map(slug);
+
+// key → label
+const keyToLabel = Object.fromEntries(
+  SPECIAL_LABELS.map((lbl, i) => [SPECIAL_KEYS[i] || slug(lbl), lbl])
+);
+
+// Emojis
+const emojisByLabel = clientConfig.ui?.emojiDefaults || {};
+const DEFAULT_EMOJI = "🧩";
+
+const computeEmoji = (label, key) => {
+  if (emojisByLabel[label]) return emojisByLabel[label];
+  const altLabel = keyToLabel[key];
+  if (altLabel && emojisByLabel[altLabel]) return emojisByLabel[altLabel];
+  const stripped = label.replace(/\d+$/u, "").trim();
+  if (emojisByLabel[stripped]) return emojisByLabel[stripped];
+  return DEFAULT_EMOJI;
 };
 
 const emojiVariants = {
   animate: {
     x: [0, 3, 0],
-    transition: {
-      repeat: Infinity,
-      repeatDelay: 2,
-      duration: 0.8,
-    },
+    transition: { repeat: Infinity, repeatDelay: 2, duration: 0.8 },
   },
 };
 
 function SeccionesEntrenadas() {
   const navigate = useNavigate();
-  const [counts, setCounts] = useState({});
+  const [countsByKey, setCountsByKey] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchCounts() {
       try {
         const { data } = await axios.get("http://localhost:5000/api/secciones");
-        const cnt = {};
-        entrenadas.forEach((t) => (cnt[t] = 0));
+        const init = {};
+        SPECIAL_KEYS.forEach((k) => (init[k] = 0));
 
         data.forEach((s) => {
-          const normalizedTitle = s.title
-            ?.toLowerCase()
-            .replace(/[📚]/gu, "")
-            .trim();
-          const match = entrenadas.find(
-            (t) => t.toLowerCase().trim() === normalizedTitle
-          );
-          if (match) cnt[match]++;
+          const k = s?.sectionKey || slug(s?.title);
+          if (k in init) init[k] = (init[k] || 0) + 1;
         });
 
-        setCounts(cnt);
+        setCountsByKey(init);
       } catch (err) {
         console.error(err);
       } finally {
@@ -80,17 +90,12 @@ function SeccionesEntrenadas() {
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
             {title}
           </span>
-          <motion.span
-            className="text-4xl ml-2"
-            variants={emojiVariants}
-            animate="animate"
-          >
+          <motion.span className="text-4xl ml-2" variants={emojiVariants} animate="animate">
             {icon}
           </motion.span>
         </h2>
         <p className="text-gray-700 text-sm">
-          Total de registros:{" "}
-          <span className="font-bold text-blue-600">{count}</span>
+          Total de registros: <span className="font-bold text-blue-600">{count}</span>
         </p>
       </div>
     </motion.div>
@@ -106,7 +111,7 @@ function SeccionesEntrenadas() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-violet-200 text-gray-800 p-6">
-      {/* Header */}
+      {/* Header + botones */}
       <div className="flex justify-between items-center mb-6">
         <motion.h1
           className="text-4xl font-extrabold"
@@ -115,7 +120,7 @@ function SeccionesEntrenadas() {
           transition={{ duration: 0.3 }}
         >
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
-            Secciones Entrenadas ({entrenadas.length})
+            Secciones Entrenadas ({SPECIAL_LABELS.length})
           </span>
         </motion.h1>
         <div className="flex space-x-2">
@@ -146,17 +151,23 @@ function SeccionesEntrenadas() {
         </div>
       </div>
 
-      {/* Grid de secciones */}
+      {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {entrenadas.map((cat) => (
-          <Card
-            key={cat}
-            title={cat}
-            icon={emojis[cat]}
-            count={counts[cat] || 0}
-            onClick={() => navigate(`/secciones/${encodeURIComponent(cat)}`)}
-          />
-        ))}
+        {SPECIAL_LABELS.map((label, i) => {
+          const key = SPECIAL_KEYS[i] || slug(label);
+          const count = countsByKey[key] || 0;
+          const icon = computeEmoji(label, key);
+          return (
+            <Card
+              key={key}
+              title={label}
+              icon={icon}
+              count={count}
+              // 👉 Navegar por KEY
+              onClick={() => navigate(`/secciones/${encodeURIComponent(key)}`)}
+            />
+          );
+        })}
       </div>
     </div>
   );

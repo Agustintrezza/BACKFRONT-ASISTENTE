@@ -9,8 +9,31 @@ import withReactContent from "sweetalert2-react-content";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { FaPlusCircle } from "react-icons/fa";
+import clientConfig from "../../../client-config.json";
 
 const MySwal = withReactContent(Swal);
+
+// ===== Helpers =====
+const slug = (s) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
+
+// Labels visibles (UI)
+const SPECIAL_LABELS = clientConfig.sections?.special || [];
+
+// Keys estables (si no están en JSON, caemos a labels→slug)
+const SPECIAL_KEYS = clientConfig.sections?.specialKeys?.length
+  ? clientConfig.sections.specialKeys
+  : SPECIAL_LABELS.map(slug);
+
+// Set para membership O(1)
+const specialKeySet = new Set(SPECIAL_KEYS);
 
 function SeccionesSinEntrenamiento() {
   const navigate = useNavigate();
@@ -20,28 +43,26 @@ function SeccionesSinEntrenamiento() {
   const [showFormModal, setShowFormModal] = useState(false);
   const [selected, setSelected] = useState(null);
 
-  const entrenadas = [
-    "Guía Turístico",
-    "Tipo de Cambio",
-    "Preguntas Frecuentes",
-    "Nosotros",
-    "Contacto",
-  ];
-
   const fetchSecciones = async () => {
     setLoading(true);
     try {
       const res = await axios.get("http://localhost:5000/api/secciones");
-      const sin = res.data.filter(
-        (s) => !entrenadas.includes(s.title.replace(/\s*📚|\s*📘/, "").trim())
-      );
+      // Filtramos por KEY estable (evita depender del título exacto)
+      const sin = res.data.filter((s) => {
+        const key = s?.sectionKey || slug(s?.title);
+        return !specialKeySet.has(key);
+      });
       setSecciones(sin);
+      console.log(secciones)
+
     } catch (err) {
       console.error("Error cargando secciones:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  
 
   useEffect(() => {
     fetchSecciones();

@@ -3,25 +3,52 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Spinner } from "flowbite-react";
 import axios from "axios";
-import EstadoAsistenteModal from "../pages/EstadoAsistenteModal"; // 🔄 Asegurate que el path sea correcto
+import EstadoAsistenteModal from "../pages/EstadoAsistenteModal";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import clientConfig from "../../client-config.json";
 
-const productosEntrenadas = [
-  "Tours y Excursiones",
-  "Alojamiento",
-  "Shows de Tango",
-  "Programas",
-  "Traslados",
-];
+// ========= Helpers =========
+const slug = (s) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
 
-const seccionesEntrenadas = [
-  "Guía Turístico",
-  "Tipo de cambio",
-  "Preguntas Frecuentes",
-  "Nosotros",
-  "Contacto",
-];
+// ----- Secciones (labels ↔ keys) -----
+const SECTION_LABELS = clientConfig.sections?.special || [];
+const SECTION_KEYS =
+  clientConfig.sections?.specialKeys?.length
+    ? clientConfig.sections.specialKeys
+    : SECTION_LABELS.map(slug);
+
+const labelToSectionKey = Object.fromEntries(
+  SECTION_LABELS.map((lbl, i) => [lbl, SECTION_KEYS[i] || slug(lbl)])
+);
+
+const TRAINED_SECTION_KEY_SET = new Set(SECTION_KEYS);
+
+// ----- Productos (labels ↔ keys) -----
+// (Tus labels de productos siguen en sections.trained)
+const PRODUCT_LABELS = clientConfig.sections?.trained || [];
+const PRODUCT_KEYS =
+  clientConfig.products?.trainedKeys?.length
+    ? clientConfig.products.trainedKeys
+    : PRODUCT_LABELS.map(slug);
+
+const labelToProductKey = Object.fromEntries(
+  PRODUCT_LABELS.map((lbl, i) => [lbl, PRODUCT_KEYS[i] || slug(lbl)])
+);
+
+const TRAINED_PRODUCT_KEY_SET = new Set(PRODUCT_KEYS);
+
+// ----- Getters de key en docs -----
+const getProductKey = (p) => p?.categoryKey || slug(p?.category);
+const getSectionKey = (s) => s?.key || slug(s?.title);
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -42,7 +69,7 @@ function Dashboard() {
         const { data } = await axios.get(`${API_URL}/chat/conversaciones`);
         setConversaciones(data);
         if (data.length > 0) {
-          const conv = data[0]; // Suponemos que hay una sola config global
+          const conv = data[0];
           setAsistenteStatus(conv.modoOffline ? "offline" : "online");
           setMensajeOffline(conv.mensajeOffline || "");
         }
@@ -59,9 +86,9 @@ function Dashboard() {
         const resProd = await axios.get(`${API_URL}/productos`);
         const resSec = await axios.get(`${API_URL}/secciones`);
         const resRes = await axios.get(`${API_URL}/reservas`);
-        setAllProducts(resProd.data);
-        setAllSections(resSec.data);
-        setReservas(resRes.data);
+        setAllProducts(resProd.data || []);
+        setAllSections(resSec.data || []);
+        setReservas(resRes.data || []);
       } catch (err) {
         console.error("Error al traer datos:", err);
       } finally {
@@ -71,23 +98,24 @@ function Dashboard() {
     fetchData();
   }, []);
 
-  const countProductosByCategory = (cat) =>
-    allProducts.filter((p) => p.category === cat).length;
+  // ===== Contadores por label (usan mapping label→key) =====
+  const countProductosByLabel = (label) => {
+    const key = labelToProductKey[label] || slug(label);
+    return allProducts.filter((p) => getProductKey(p) === key).length;
+  };
 
-  const countSeccionesByTitle = (title) =>
-    allSections.filter((s) =>
-      (s.title || "").toLowerCase().trim().includes(title.toLowerCase().trim())
-    ).length;
+  const countSeccionesByLabel = (label) => {
+    const key = labelToSectionKey[label] || slug(label);
+    return allSections.filter((s) => getSectionKey(s) === key).length;
+  };
 
+  // ===== “Sin entrenamiento” por key estable =====
   const productosSinEntrenarItems = allProducts.filter(
-    (p) => !productosEntrenadas.includes(p.category)
+    (p) => !TRAINED_PRODUCT_KEY_SET.has(getProductKey(p))
   );
 
   const seccionesSinEntrenarItems = allSections.filter(
-    (s) =>
-      !seccionesEntrenadas.some((ent) =>
-        (s.title || "").toLowerCase().includes(ent.toLowerCase())
-      )
+    (s) => !TRAINED_SECTION_KEY_SET.has(getSectionKey(s))
   );
 
   const emojiVariants = {
@@ -145,13 +173,18 @@ function Dashboard() {
                   ✅ Productos Entrenados
                 </h3>
                 <ul className="list-disc list-inside text-sm text-gray-800">
-                  {productosEntrenadas.map((cat) => (
-                    <li key={cat}>
-                      {cat} (<span className="font-bold">{countProductosByCategory(cat)}</span>)
+                  {PRODUCT_LABELS.map((catLabel) => (
+                    <li key={catLabel}>
+                      {catLabel} (
+                        <span className="font-bold">
+                          {countProductosByLabel(catLabel)}
+                        </span>
+                      )
                     </li>
                   ))}
                 </ul>
               </motion.div>
+
               <motion.div
                 onClick={() => navigate("/productos-sin-entrenamiento")}
                 whileHover={{ scale: 1.01 }}
@@ -184,9 +217,13 @@ function Dashboard() {
                   ✅ Secciones Entrenadas
                 </h3>
                 <ul className="list-disc list-inside text-sm text-gray-800">
-                  {seccionesEntrenadas.map((sec) => (
-                    <li key={sec}>
-                      {sec} (<span className="font-bold">{countSeccionesByTitle(sec)}</span>)
+                  {SECTION_LABELS.map((secLabel) => (
+                    <li key={secLabel}>
+                      {secLabel} (
+                        <span className="font-bold">
+                          {countSeccionesByLabel(secLabel)}
+                        </span>
+                      )
                     </li>
                   ))}
                 </ul>
@@ -229,7 +266,8 @@ function Dashboard() {
               {/* Chat */}
               <div
                 className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 p-4 rounded-md shadow-md text-sm text-gray-800 cursor-pointer"
-                onClick={() => navigate("/chat")}>
+                onClick={() => navigate("/chat")}
+              >
                 <h3 className="text-md font-semibold mb-2 text-violet-800">💬 Chat</h3>
                 <ul className="list-disc list-inside leading-relaxed">
                   <li>🟢 Activas: <span className="font-bold">{conversaciones.length}</span></li>
@@ -254,13 +292,13 @@ function Dashboard() {
         </div>
       )}
       <EstadoAsistenteModal
-  open={showModal}
-  onClose={() => setShowModal(false)}
-  onSave={(updated) => {
-    setAsistenteStatus(updated.modoOffline ? "offline" : "online");
-    setMensajeOffline(updated.mensajeOffline || "");
-  }}
-/>
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onSave={(updated) => {
+          setAsistenteStatus(updated.modoOffline ? "offline" : "online");
+          setMensajeOffline(updated.mensajeOffline || "");
+        }}
+      />
     </div>
   );
 }

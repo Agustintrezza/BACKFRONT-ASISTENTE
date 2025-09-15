@@ -9,8 +9,34 @@ import withReactContent from "sweetalert2-react-content";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { FaPlusCircle } from "react-icons/fa";
+import clientConfig from "../../../client-config.json";
 
 const MySwal = withReactContent(Swal);
+
+// ===== Helpers =====
+const slug = (s) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
+
+const PRODUCT_LABELS = clientConfig.sections?.trained || [];
+const PRODUCT_KEYS =
+  clientConfig.products?.trainedKeys?.length
+    ? clientConfig.products.trainedKeys
+    : PRODUCT_LABELS.map(slug);
+
+// const labelToProductKey = Object.fromEntries(
+//   PRODUCT_LABELS.map((lbl, i) => [lbl, PRODUCT_KEYS[i] || slug(lbl)])
+// );
+
+const TRAINED_PRODUCT_KEY_SET = new Set(PRODUCT_KEYS);
+
+const getProductKey = (p) => p?.categoryKey || slug(p?.category);
 
 function ProductosSinEntrenamiento() {
   const navigate = useNavigate();
@@ -26,14 +52,12 @@ function ProductosSinEntrenamiento() {
     setLoading(true);
     try {
       const res = await axios.get("http://localhost:5000/api/productos");
-      const entrenadas = [
-        "Tours y Excursiones",
-        "Alojamiento",
-        "Shows de Tango",
-        "Programas",
-        "Traslados",
-      ];
-      const sin = res.data.filter((p) => !entrenadas.includes(p.category));
+
+      // 👇 usamos key estable
+      const sin = res.data.filter(
+        (p) => !TRAINED_PRODUCT_KEY_SET.has(getProductKey(p))
+      );
+
       setProductos(sin);
     } catch (err) {
       console.error("Error cargando productos:", err);
@@ -47,8 +71,9 @@ function ProductosSinEntrenamiento() {
   }, []);
 
   const productosAgrupados = productos.reduce((acc, p) => {
-    acc[p.category] = acc[p.category] || [];
-    acc[p.category].push(p);
+    const key = getProductKey(p);
+    acc[key] = acc[key] || [];
+    acc[key].push(p);
     return acc;
   }, {});
 
@@ -131,7 +156,7 @@ function ProductosSinEntrenamiento() {
           <motion.button
             onClick={() => {
               setSelected(null);
-              setCategoriaFijada(null); // ← permite elegir o crear nueva
+              setCategoriaFijada(null);
               setShowFormModal(true);
             }}
             initial={{ opacity: 0, y: -10 }}
@@ -176,10 +201,10 @@ function ProductosSinEntrenamiento() {
       {productos.length === 0 ? (
         <p className="text-gray-600">No hay productos sin entrenamiento.</p>
       ) : (
-        Object.entries(productosAgrupados).map(([categoria, lista]) => (
-          <div key={categoria} className="mb-10">
+        Object.entries(productosAgrupados).map(([categoriaKey, lista]) => (
+          <div key={categoriaKey} className="mb-10">
             <h2 className="text-2xl font-bold mb-4 text-violet-800">
-              {categoria}
+              {lista[0]?.category || categoriaKey}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {lista.map((p, i) => (
@@ -215,7 +240,7 @@ function ProductosSinEntrenamiento() {
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelected(p);
-                        setCategoriaFijada(p.category); // ← mantiene categoría al editar
+                        setCategoriaFijada(p.category);
                         setShowFormModal(true);
                       }}
                     >

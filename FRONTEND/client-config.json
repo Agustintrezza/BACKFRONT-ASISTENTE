@@ -1,0 +1,53 @@
+{
+  "brand": {
+    "name": "Turismo Ejemplo",
+    "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
+    "primaryColor": "#0BB37B"
+  },
+  "products": {
+    "trainedKeys": [
+      "tours-y-excursiones",
+      "alojamiento",
+      "shows-de-tango",
+      "programas",
+      "traslados"
+    ]
+  },
+  "sections": {
+    "trained": [
+      "Tours y Excursioness",
+      "Alojamiento",
+      "Shows de Tango",
+      "Programas",
+      "Traslados"
+    ],
+    "special": [
+      "Guía Turístico22",
+      "Tipo de Cambio",
+      "Preguntas Frecuentes",
+      "Nosotross",
+      "Contacto"
+    ],
+    "specialKeys": [
+      "guia-turistico",
+      "tipo-de-cambio",
+      "preguntas-frecuentes",
+      "nosotros",
+      "contacto"
+    ]
+  },
+  "ui": {
+    "emojiDefaults": {
+      "Tours y Excursiones": "🧭",
+      "Alojamiento": "🏨",
+      "Shows de Tango": "💃",
+      "Programas": "🗓️",
+      "Traslados": "🚐",
+      "Guía Turístico": "👨‍✈️",
+      "Tipo de Cambio": "💱",
+      "Preguntas Frecuentes": "❓",
+      "Nosotros": "ℹ️",
+      "Contacto": "📞"
+    }
+  }
+}

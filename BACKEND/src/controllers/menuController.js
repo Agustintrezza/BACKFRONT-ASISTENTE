@@ -1,3 +1,4 @@
+// controllers/menu.controller.js
 const Producto = require('../models/Productos');
 const Seccion = require('../models/Secciones');
 
@@ -8,22 +9,23 @@ exports.getMenu = async (req, res) => {
 
     const menuItems = [];
 
-    // 🧩 Agrupar productos por categoría
+    // 🧩 Agrupar productos por categoryKey (clave estable)
     const categoriasMap = {};
-
     productos.forEach((producto) => {
-      const categoriaNombre = producto.category?.trim() || "Sin categoría";
+      const key = (producto.categoryKey || "").trim() || "sin-categoria";
+      const visibleName = (producto.category || "Sin categoría").trim();
 
-      if (!categoriasMap[categoriaNombre]) {
-        categoriasMap[categoriaNombre] = {
-          categoria: categoriaNombre,
+      if (!categoriasMap[key]) {
+        categoriasMap[key] = {
+          key,                                        // clave estable
+          categoria: visibleName,                     // rótulo visible
           type: "categoria_producto",
           link: null,
           children: [],
         };
       }
 
-      categoriasMap[categoriaNombre].children.push({
+      categoriasMap[key].children.push({
         id: producto._id,
         title: producto.title,
         description: producto.description,
@@ -39,24 +41,26 @@ exports.getMenu = async (req, res) => {
     // Insertar categorías de productos al menú
     Object.values(categoriasMap).forEach((cat) => menuItems.push(cat));
 
-    // 🧩 Agrupar secciones por título (para evitar duplicados)
+    // 🧩 Agrupar secciones por key (clave estable)
     const seccionesMap = {};
-
     secciones.forEach((seccion) => {
-      const titulo = seccion.title.trim();
+      const key = (seccion.key || "").trim();
+      const titulo = (seccion.title || "").trim();
 
-      if (!seccionesMap[titulo]) {
-        seccionesMap[titulo] = {
+      if (!key) return; // sanity
+
+      if (!seccionesMap[key]) {
+        seccionesMap[key] = {
           id: seccion._id,
-          title: titulo,
+          key,                 // clave estable
+          title: titulo,       // rótulo visible
           type: "section",
           link: seccion.link,
           children: [],
         };
       }
 
-      // Agregar ítems (si hay)
-      seccionesMap[titulo].children.push(
+      seccionesMap[key].children.push(
         ...(seccion.menuItems || []).map((item) => ({
           title: item.title,
           detail: item.detail,

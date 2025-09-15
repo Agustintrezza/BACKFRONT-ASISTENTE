@@ -7,23 +7,57 @@ import InputWithEmoji from "../inputs-emojis/InputWithEmoji";
 import TextareaWithEditor from "../inputs-emojis/TextAreaWithEditor";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import clientConfig from "../../../client-config.json";
 
-function SeccionEntrenadaModal({ seccion, onClose, onSuccess }) {
-  const [sectionTitle, setSectionTitle] = useState("");
+// ===== Helpers =====
+const slug = (s) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
+
+// Labels visibles + keys (secciones entrenadas)
+const SPECIAL_LABELS = clientConfig.sections?.special || [];
+const SPECIAL_KEYS = clientConfig.sections?.specialKeys?.length
+  ? clientConfig.sections.specialKeys
+  : SPECIAL_LABELS.map(slug);
+
+const labelToKey = Object.fromEntries(
+  SPECIAL_LABELS.map((lbl, i) => [lbl, SPECIAL_KEYS[i] || slug(lbl)])
+);
+const keyToLabel = Object.fromEntries(
+  SPECIAL_LABELS.map((lbl, i) => [SPECIAL_KEYS[i] || slug(lbl), lbl])
+);
+
+function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
+  // Derivar la key estable y el label visible
+  const derivedKey =
+    seccion?.sectionKey ||
+    (category ? labelToKey[category] : null) ||
+    slug(seccion?.title || category || "");
+
+  const visibleLabel = keyToLabel[derivedKey] || category || seccion?.title || "";
+
+  const [sectionTitle, setSectionTitle] = useState(visibleLabel); // sólo display
   const [itemTitle, setItemTitle] = useState("");
   const [detail, setDetail] = useState("");
 
   useEffect(() => {
+    // Prefill
+    setSectionTitle(visibleLabel);
     if (seccion) {
-      setSectionTitle(seccion.title || "");
       setItemTitle(seccion.menuItems?.[0]?.title || "");
       setDetail(seccion.menuItems?.[0]?.detail || "");
     } else {
-      setSectionTitle("");
       setItemTitle("");
       setDetail("");
     }
-  }, [seccion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seccion?._id, category]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,8 +71,10 @@ function SeccionEntrenadaModal({ seccion, onClose, onSuccess }) {
       });
     }
 
+    // IMPORTANTE: enviar sectionKey para estabilidad
     const payload = {
-      title: sectionTitle.trim(),
+      title: visibleLabel,          // para UI
+      sectionKey: derivedKey,       // 🔑 clave estable
       menuItems: [
         {
           title: itemTitle.trim(),

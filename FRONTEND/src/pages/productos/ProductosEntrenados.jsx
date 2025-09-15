@@ -4,51 +4,69 @@ import { Spinner } from "flowbite-react";
 import axios from "axios";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import clientConfig from "../../../client-config.json";
 
-const entrenadas = [
-  "Tours y Excursiones",
-  "Alojamiento",
-  "Shows de Tango",
-  "Programas",
-  "Traslados",
-];
+// ===== Helpers =====
+const slug = (s) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
 
-const emojis = {
-  "Tours y Excursiones": "🗺️",
-  Alojamiento: "🏨",
-  "Shows de Tango": "💃",
-  Programas: "📝",
-  Traslados: "🚐",
+// Labels (UI) y Keys (estables)
+const TRAINED_LABELS = clientConfig.sections?.trained || [];
+const TRAINED_KEYS = clientConfig.products?.trainedKeys?.length
+  ? clientConfig.products.trainedKeys
+  : TRAINED_LABELS.map(slug);
+
+// Mapeo key → label (por índice)
+const keyToLabel = Object.fromEntries(
+  TRAINED_LABELS.map((lbl, i) => [TRAINED_KEYS[i] || slug(lbl), lbl])
+);
+
+// Emojis configurados por LABEL
+const emojisByLabel = clientConfig.ui?.emojiDefaults || {};
+const DEFAULT_EMOJI = "📦";
+
+// Emoji con fallbacks
+const computeEmoji = (label, key) => {
+  if (emojisByLabel[label]) return emojisByLabel[label];
+  const altLabel = keyToLabel[key];
+  if (altLabel && emojisByLabel[altLabel]) return emojisByLabel[altLabel];
+  const stripped = label.replace(/\d+$/u, "").trim();
+  if (emojisByLabel[stripped]) return emojisByLabel[stripped];
+  return DEFAULT_EMOJI;
 };
 
 const emojiVariants = {
   animate: {
     x: [0, 3, 0],
-    transition: {
-      repeat: Infinity,
-      repeatDelay: 2,
-      duration: 0.8,
-    },
+    transition: { repeat: Infinity, repeatDelay: 2, duration: 0.8 },
   },
 };
 
 function ProductosEntrenados() {
   const navigate = useNavigate();
-  const [counts, setCounts] = useState({});
+  const [countsByKey, setCountsByKey] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchCounts() {
       try {
         const { data } = await axios.get("http://localhost:5000/api/productos");
-        const cnt = {};
-        entrenadas.forEach((cat) => (cnt[cat] = 0));
+        const initCounts = {};
+        TRAINED_KEYS.forEach((k) => (initCounts[k] = 0));
+
         data.forEach((p) => {
-          if (entrenadas.includes(p.category)) {
-            cnt[p.category]++;
-          }
+          const k = p?.categoryKey || slug(p?.category);
+          if (k in initCounts) initCounts[k] = (initCounts[k] || 0) + 1;
         });
-        setCounts(cnt);
+
+        setCountsByKey(initCounts);
       } catch (e) {
         console.error("Error fetching products:", e);
       } finally {
@@ -72,17 +90,12 @@ function ProductosEntrenados() {
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
             {title}
           </span>
-          <motion.span
-            className="text-4xl ml-2"
-            variants={emojiVariants}
-            animate="animate"
-          >
+          <motion.span className="text-4xl ml-2" variants={emojiVariants} animate="animate">
             {icon}
           </motion.span>
         </h2>
         <p className="text-gray-700 text-sm">
-          Total de productos:{" "}
-          <span className="font-bold text-blue-600">{count}</span>
+          Total de productos: <span className="font-bold text-blue-600">{count}</span>
         </p>
       </div>
     </motion.div>
@@ -107,7 +120,7 @@ function ProductosEntrenados() {
           transition={{ duration: 0.3 }}
         >
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
-            Productos Entrenados ({entrenadas.length})
+            Productos Entrenados ({TRAINED_LABELS.length})
           </span>
         </motion.h1>
         <div className="flex space-x-2">
@@ -138,17 +151,23 @@ function ProductosEntrenados() {
         </div>
       </div>
 
-      {/* Grid de productos */}
+      {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {entrenadas.map((cat) => (
-          <Card
-            key={cat}
-            title={cat}
-            icon={emojis[cat]}
-            count={counts[cat] || 0}
-            onClick={() => navigate(`/productos/${encodeURIComponent(cat)}`)}
-          />
-        ))}
+        {TRAINED_LABELS.map((label, i) => {
+          const key = TRAINED_KEYS[i] || slug(label);
+          const count = countsByKey[key] || 0;
+          const icon = computeEmoji(label, key);
+          return (
+            <Card
+              key={key}
+              title={label}
+              icon={icon}
+              count={count}
+              // 👉 Navegar por KEY (detalles filtran por key en front)
+              onClick={() => navigate(`/productos/${encodeURIComponent(key)}`)}
+            />
+          );
+        })}
       </div>
     </div>
   );

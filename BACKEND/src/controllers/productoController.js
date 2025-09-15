@@ -1,9 +1,15 @@
+// controllers/productos.controller.js
 const Producto = require('../models/Productos');
+const { slugify } = require('../utils/slugify');
 
 // Crear un nuevo producto
 exports.createProducto = async (req, res) => {
   try {
-    const producto = new Producto(req.body);
+    const body = { ...req.body };
+    if (body.category && !body.categoryKey) {
+      body.categoryKey = slugify(body.category);
+    }
+    const producto = new Producto(body);
     await producto.save();
     res.status(201).json(producto);
   } catch (error) {
@@ -11,13 +17,16 @@ exports.createProducto = async (req, res) => {
   }
 };
 
-// Obtener todos los productos (opcional filtro por categoría)
+// Obtener todos los productos (opcional filtro por categoría visible o por key)
 exports.getProductos = async (req, res) => {
   try {
-    const { category } = req.query;
-    let query = {};
-    if (category) {
-      query.category = new RegExp(`^${category}$`, 'i'); // Insensible a mayúsculas
+    const { category, categoryKey } = req.query;
+    const query = {};
+    if (categoryKey) {
+      query.categoryKey = categoryKey.toString().trim().toLowerCase();
+    } else if (category) {
+      // si filtran por visible, lo mapeamos a key para igualdad exacta
+      query.categoryKey = slugify(category);
     }
     const productos = await Producto.find(query);
     res.json(productos);
@@ -40,7 +49,15 @@ exports.getProductoById = async (req, res) => {
 // Actualizar un producto
 exports.updateProducto = async (req, res) => {
   try {
-    const producto = await Producto.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const update = { ...req.body };
+    if (typeof update.category === 'string') {
+      update.categoryKey = slugify(update.category);
+    }
+    const producto = await Producto.findByIdAndUpdate(
+      req.params.id,
+      update,
+      { new: true, runValidators: true }
+    );
     if (!producto) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json(producto);
   } catch (error) {
@@ -59,11 +76,12 @@ exports.deleteProducto = async (req, res) => {
   }
 };
 
-// Obtener lista única de categorías
+// Obtener lista única de categorías (visibles) + keys (opcional)
 exports.getCategorias = async (req, res) => {
   try {
-    const categorias = await Producto.distinct('category');
-    res.json(categorias);
+    const categories = await Producto.distinct('category');
+    const categoryKeys = await Producto.distinct('categoryKey');
+    res.json({ categories, categoryKeys });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

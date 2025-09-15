@@ -7,10 +7,39 @@ import Swal from "sweetalert2";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { FaPlusCircle } from "react-icons/fa";
+import clientConfig from "../../../client-config.json";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// ===== Helpers =====
+const slug = (s) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
+
+const TRAINED_LABELS = clientConfig.sections?.trained || [];
+const TRAINED_KEYS = clientConfig.products?.trainedKeys?.length
+  ? clientConfig.products.trainedKeys
+  : TRAINED_LABELS.map(slug);
+
+const keyToLabel = Object.fromEntries(
+  TRAINED_LABELS.map((lbl, i) => [TRAINED_KEYS[i] || slug(lbl), lbl])
+);
+const trainedKeySet = new Set(TRAINED_KEYS);
 
 function Productos() {
   const { categoria } = useParams();
   const navigate = useNavigate();
+  const param = decodeURIComponent(categoria || "");
+  const isKey = trainedKeySet.has(param);
+
+  // Título visible en header
+  const displayTitle = isKey ? keyToLabel[param] || param : param;
 
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,12 +50,20 @@ function Productos() {
   const fetchProductos = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/productos?category=${encodeURIComponent(
-          categoria
-        )}`
-      );
-      setProductos(res.data);
+      if (isKey) {
+        // Traigo todos y filtro por categoryKey en el front (no requiere tocar backend)
+        const { data } = await axios.get(`${API_URL}/productos`);
+        const filtered = data.filter(
+          (p) => (p.categoryKey || slug(p.category)) === param
+        );
+        setProductos(filtered);
+      } else {
+        // Legacy por label exacto (case-insensitive en backend)
+        const { data } = await axios.get(
+          `${API_URL}/productos?category=${encodeURIComponent(param)}`
+        );
+        setProductos(data);
+      }
     } catch (err) {
       console.error("Error cargando productos:", err);
     } finally {
@@ -36,7 +73,8 @@ function Productos() {
 
   useEffect(() => {
     fetchProductos();
-  }, [categoria]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [param]);
 
   const handleDelete = async (producto) => {
     const confirm = await Swal.fire({
@@ -63,9 +101,7 @@ function Productos() {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(
-          `http://localhost:5000/api/productos/${producto._id}`
-        );
+        await axios.delete(`${API_URL}/productos/${producto._id}`);
         fetchProductos();
         Swal.fire({
           title: "Eliminado",
@@ -113,7 +149,7 @@ function Productos() {
         transition={{ duration: 0.6 }}
       >
         <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800">
-          {decodeURIComponent(categoria)}
+          {displayTitle}
         </h1>
         <div className="flex gap-3">
           <motion.button
@@ -148,8 +184,7 @@ function Productos() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
         >
-          ⚠️ Aún no hay productos cargados para la categoría{" "}
-          <strong>{decodeURIComponent(categoria)}</strong>.
+          ⚠️ Aún no hay productos cargados para <strong>{displayTitle}</strong>.
         </motion.div>
       )}
 
@@ -157,14 +192,7 @@ function Productos() {
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
         initial="hidden"
         animate="visible"
-        variants={{
-          hidden: {},
-          visible: {
-            transition: {
-              staggerChildren: 0.1,
-            },
-          },
-        }}
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
       >
         {productos.map((p) => (
           <motion.div
@@ -181,7 +209,7 @@ function Productos() {
           >
             <h2 className="text-xl font-semibold mb-1 flex flex-wrap items-center">
               {[
-                ...[...p.title].slice(0, 40), // Trunca a los primeros 40 caracteres visuales
+                ...[...p.title].slice(0, 40),
               ]
                 .join("")
                 .match(/(\p{Emoji}+|[^\p{Emoji}]+)/gu)
@@ -201,15 +229,9 @@ function Productos() {
                   );
                 })}
             </h2>
-            <p className="text-gray-600 text-sm mb-1 truncate">
-              💰 Precio: ${p.price}
-            </p>
-            <p className="text-gray-600 text-sm mb-1 truncate">
-              📦 Stock: {p.stock}
-            </p>
-            <p className="text-gray-600 text-sm truncate">
-              ⏳ Duración: {p.duration}
-            </p>
+            <p className="text-gray-600 text-sm mb-1 truncate">💰 Precio: ${p.price}</p>
+            <p className="text-gray-600 text-sm mb-1 truncate">📦 Stock: {p.stock}</p>
+            <p className="text-gray-600 text-sm truncate">⏳ Duración: {p.duration}</p>
             <div className="absolute bottom-2 right-3 flex space-x-3">
               <motion.span
                 whileHover={{ scale: 1.2 }}
@@ -237,74 +259,42 @@ function Productos() {
         ))}
       </motion.div>
 
-      <Modal
-        show={viewModal}
-        size="6xl"
-        className="bg-black"
-        onClose={() => setViewModal(false)}
-      >
+      <Modal show={viewModal} size="6xl" className="bg-black" onClose={() => setViewModal(false)}>
         <div className="p-6 relative bg-white text-gray-900 rounded-lg w-full max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">{selected?.title}</h2>
-            <span
-              className="text-red-500 hover:text-red-700 cursor-pointer text-2xl"
-              onClick={() => setViewModal(false)}
-            >
+            <span className="text-red-500 hover:text-red-700 cursor-pointer text-2xl" onClick={() => setViewModal(false)}>
               ❌
             </span>
           </div>
 
           {selected?.image && (
-            <img
-              src={selected.image}
-              alt={selected.title}
-              className="w-full h-64 object-cover rounded-lg mb-6"
-            />
+            <img src={selected.image} alt={selected.title} className="w-full h-64 object-cover rounded-lg mb-6" />
           )}
 
-          {selected?.description && (
-            <p className="text-gray-700 text-base mb-6">
-              {selected.description}
-            </p>
-          )}
+          {selected?.description && <p className="text-gray-700 text-base mb-6">{selected.description}</p>}
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-            <div className="border-b border-yellow-400 pb-2">
-              <strong>💰 Precio:</strong> ${selected?.price}
-            </div>
-            <div className="border-b border-yellow-400 pb-2">
-              <strong>📦 Stock:</strong> {selected?.stock}
-            </div>
-            <div className="border-b border-yellow-400 pb-2">
-              <strong>⏳ Duración:</strong> {selected?.duration}
-            </div>
-            <div className="border-b border-yellow-400 pb-2">
-              <strong>📍 Ubicación:</strong>{" "}
-              {selected?.location || "No especificada"}
-            </div>
-            <div className="border-b border-yellow-400 pb-2">
-              <strong>📂 Categoría:</strong> {selected?.category}
-            </div>
+            <div className="border-b border-yellow-400 pb-2"><strong>💰 Precio:</strong> ${selected?.price}</div>
+            <div className="border-b border-yellow-400 pb-2"><strong>📦 Stock:</strong> {selected?.stock}</div>
+            <div className="border-b border-yellow-400 pb-2"><strong>⏳ Duración:</strong> {selected?.duration}</div>
+            <div className="border-b border-yellow-400 pb-2"><strong>📍 Ubicación:</strong> {selected?.location || "No especificada"}</div>
+            <div className="border-b border-yellow-400 pb-2"><strong>📂 Categoría:</strong> {selected?.category}</div>
             {selected?.availableDates?.length > 0 && (
               <div className="border-b border-yellow-400 pb-2 col-span-2">
-                <strong>📅 Fechas disponibles:</strong>{" "}
-                {selected.availableDates.join(", ")}
+                <strong>📅 Fechas disponibles:</strong> {selected.availableDates.join(", ")}
               </div>
             )}
           </div>
         </div>
       </Modal>
 
-      <Modal
-        show={showFormModal}
-        size="7xl"
-        className="bg-white"
-        onClose={() => setShowFormModal(false)}
-      >
+      <Modal show={showFormModal} size="7xl" className="bg-white" onClose={() => setShowFormModal(false)}>
         <div className="text-gray-900 p-6 rounded-lg w-full max-h-[100vh] overflow-y-auto">
           <ProductoModal
             producto={selected}
-            category={decodeURIComponent(categoria)}
+            // Para crear, mandamos el label visible (el modal actual trabaja por label)
+            category={displayTitle}
             onClose={() => setShowFormModal(false)}
             onSuccess={() => {
               setShowFormModal(false);

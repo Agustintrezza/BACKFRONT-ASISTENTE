@@ -7,30 +7,77 @@ import InputWithEmoji from "../inputs-emojis/InputWithEmoji";
 import TextareaWithEditor from "../inputs-emojis/TextAreaWithEditor";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import clientConfig from "../../../client-config.json";
+
+// ===== Helpers =====
+const slug = (s) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
+
+// Labels visibles + keys (productos entrenados)
+const TRAINED_LABELS = clientConfig.sections?.trained || [];
+const TRAINED_KEYS = clientConfig.products?.trainedKeys?.length
+  ? clientConfig.products.trainedKeys
+  : TRAINED_LABELS.map(slug);
+
+const labelToKey = Object.fromEntries(
+  TRAINED_LABELS.map((lbl, i) => [lbl, TRAINED_KEYS[i] || slug(lbl)])
+);
+const keyToLabel = Object.fromEntries(
+  TRAINED_LABELS.map((lbl, i) => [TRAINED_KEYS[i] || slug(lbl), lbl])
+);
+const trainedKeySet = new Set(TRAINED_KEYS);
 
 function ProductoModal({ producto, category, onClose, onSuccess }) {
+  // Key estable de categoría para este producto
+  const derivedKey =
+    producto?.categoryKey ||
+    (category ? labelToKey[category] : null) ||
+    slug(producto?.category || category || "");
+
+  const isEntrenado = trainedKeySet.has(derivedKey);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [categoria, setCategoria] = useState(""); // label visible para no entrenados
   const [categoriasDisponibles, setCategoriasDisponibles] = useState([]);
   const [nuevaCategoria, setNuevaCategoria] = useState("");
 
-  const entrenadas = [
-    "Tours y Excursiones",
-    "Alojamiento",
-    "Shows de Tango",
-    "Programas",
-    "Traslados",
-  ];
+  // Prefill
+  useEffect(() => {
+    if (producto && producto._id) {
+      setTitle(producto.title ?? "");
+      setDescription(producto.description ?? "");
+      // Para entrenados usamos el label de la key; para no entrenados, la categoría guardada
+      const labelFromKey = keyToLabel[producto.categoryKey || ""] || producto.category || "";
+      setCategoria(labelFromKey);
+    } else if (category) {
+      setTitle("");
+      setDescription("");
+      setCategoria(category); // viene de la ruta
+    } else {
+      setTitle("");
+      setDescription("");
+      setCategoria("");
+    }
+  }, [producto?._id, category]);
 
-  const isEntrenado = producto && entrenadas.includes(producto.category);
-
+  // Cargar categorías existentes (sólo no entrenadas)
   const fetchCategorias = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/productos");
       const categoriasUnicas = [
         ...new Set(res.data.map((p) => p.category)),
-      ].filter((cat) => !entrenadas.includes(cat));
+      ].filter((cat) => {
+        const k = pKeyFromLabelOrValue(cat);
+        return !trainedKeySet.has(k);
+      });
       setCategoriasDisponibles(categoriasUnicas);
     } catch (err) {
       console.error("Error cargando categorías", err);
@@ -41,21 +88,12 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
     fetchCategorias();
   }, []);
 
-  useEffect(() => {
-    if (producto && producto._id) {
-      setTitle(producto.title ?? "");
-      setDescription(producto.description ?? "");
-      setCategoria(producto.category ?? "");
-    } else if (category) {
-      setTitle("");
-      setDescription("");
-      setCategoria(category);
-    } else {
-      setTitle("");
-      setDescription("");
-      setCategoria("");
-    }
-  }, [producto?._id, category]);
+  // helper: obtener key desde label o valor crudo
+  const pKeyFromLabelOrValue = (val) => {
+    // si es un label entrenado, devuelvo su key; si no, hago slug
+    if (labelToKey[val]) return labelToKey[val];
+    return slug(val);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,9 +107,16 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
       });
     }
 
-    const categoriaFinal =
-      categoria === "nueva" ? nuevaCategoria.trim() : categoria.trim();
-    if (!categoriaFinal) {
+    // categoría visible y key estable
+    const categoriaVisible = isEntrenado
+      ? (keyToLabel[derivedKey] || categoria || "")
+      : (categoria === "nueva" ? nuevaCategoria.trim() : categoria.trim());
+
+    const categoriaKey = isEntrenado
+      ? derivedKey
+      : pKeyFromLabelOrValue(categoriaVisible);
+
+    if (!categoriaVisible) {
       return Swal.fire({
         icon: "warning",
         title: "Categoría requerida",
@@ -83,7 +128,8 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
     const payload = {
       title,
       description,
-      category: categoriaFinal,
+      category: categoriaVisible,  // se mantiene para compatibilidad UI/reportes
+      categoryKey: categoriaKey,   // 🔑 clave estable para matching
       price: 0,
       duration: "",
       location: null,
@@ -109,7 +155,6 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
       if (categoria === "nueva") {
         setCategoria(nuevaCategoria.trim());
       }
-
       setNuevaCategoria("");
 
       Swal.fire({
@@ -159,18 +204,15 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
             <span className="text-5xl">📦</span>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-violet-700 to-violet-700">
               {producto ? "Editar Producto" : "Nuevo Producto"}
-              {isEntrenado && producto?.category
-                ? ` (${producto.category})`
+              {isEntrenado && (keyToLabel[derivedKey] || categoria)
+                ? ` (${keyToLabel[derivedKey] || categoria})`
                 : ""}
             </span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <Label
-                value="Título del producto"
-                className="text-violet-800 font-semibold mb-1"
-              />
+              <Label value="Título del producto" className="text-violet-800 font-semibold mb-1" />
               <InputWithEmoji
                 value={title}
                 onChange={setTitle}
@@ -179,24 +221,14 @@ function ProductoModal({ producto, category, onClose, onSuccess }) {
             </div>
 
             <div className="md:col-span-2">
-              <Label
-                value="Descripción detallada"
-                className="text-violet-800 font-semibold mb-1"
-              />
-              <TextareaWithEditor
-                value={description}
-                onChange={setDescription}
-                rows={12}
-              />
+              <Label value="Descripción detallada" className="text-violet-800 font-semibold mb-1" />
+              <TextareaWithEditor value={description} onChange={setDescription} rows={12} />
             </div>
 
             {!isEntrenado && (
               <>
                 <div className="md:col-span-2">
-                  <Label
-                    value="Categoría"
-                    className="text-violet-800 font-semibold mb-1"
-                  />
+                  <Label value="Categoría" className="text-violet-800 font-semibold mb-1" />
                   <select
                     value={categoria}
                     onChange={(e) => setCategoria(e.target.value)}
