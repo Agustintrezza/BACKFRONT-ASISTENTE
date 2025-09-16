@@ -3,12 +3,10 @@ import {
   Routes,
   Route,
   Navigate,
+  Outlet,
   useLocation,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-// 🧩 Componentes
-import Navbar from "./components/Navbar";
 
 // 🧠 Contexto global
 import { UserProvider } from "./context/UserContext";
@@ -29,143 +27,108 @@ import Reservas from "./pages/reservas/Reservas";
 import Login from "./pages/Login";
 import UsuariosDashboard from "./UsuariosDashboard";
 
+// 🆕 Layouts
+import SidebarButtons from "./components/layout/SidebarButtons";
+import SidebarMain from "./components/layout/SidebarMain";
+
 // 🧪 Estilos
 import "./index.css";
 import "flowbite/dist/flowbite.css";
 
+// 🆕 Layout estilo Discord
+function AppLayout() {
+  const [isMainOpen, setIsMainOpen] = useState(true);
+
+  return (
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
+      {/* Sidebar angosto */}
+      <SidebarButtons
+        isMainOpen={isMainOpen}
+        onToggleMainSidebar={() => setIsMainOpen((prev) => !prev)}
+      />
+
+      {/* Sidebar principal con transición */}
+      <div
+        className={`transition-all duration-300 ease-in-out overflow-hidden ${
+          isMainOpen ? "max-w-[240px] opacity-100" : "max-w-0 opacity-0"
+        }`}
+      >
+        <SidebarMain />
+      </div>
+
+      {/* Contenido principal */}
+      <main className="flex-1 overflow-y-auto">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
 function AppContent() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const location = useLocation();
 
   useEffect(() => {
     setIsAuthenticated(!!localStorage.getItem("token"));
   }, [location]);
 
-  const hideNavbarRoutes = ["/chat"];
-  const hideNavbar = hideNavbarRoutes.includes(location.pathname);
+  if (isAuthenticated === null) {
+    return <div className="text-center text-gray-500 p-6">Cargando...</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
-      {isAuthenticated && !hideNavbar && <Navbar />}
+    <Routes>
+      {/* Login fuera del layout */}
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+        }
+      />
 
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
-          }
-        />
+      {/* Layout principal con sidebars */}
+      <Route
+        element={isAuthenticated ? <AppLayout /> : <Navigate to="/login" replace />}
+      >
+        <Route path="/dashboard" element={<Dashboard />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />
-          }
-        />
-
-        <Route
-          path="/productos-entrenados"
-          element={
-            isAuthenticated ? (
-              <ProductosEntrenados />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
+        {/* Productos */}
+        <Route path="/productos-entrenados" element={<ProductosEntrenados />} />
         <Route
           path="/productos-sin-entrenamiento"
-          element={
-            isAuthenticated ? (
-              <ProductosSinEntrenamiento />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
+          element={<ProductosSinEntrenamiento />}
         />
-        <Route
-          path="/producto/nuevo"
-          element={
-            isAuthenticated ? <ProductoNuevo /> : <Navigate to="/login" replace />
-          }
-        />
-        <Route
-          path="/producto/editar/:id"
-          element={
-            isAuthenticated ? <ProductoNuevo /> : <Navigate to="/login" replace />
-          }
-        />
-        <Route
-          path="/productos/:categoria/*"
-          element={
-            isAuthenticated ? <Productos /> : <Navigate to="/login" replace />
-          }
-        />
+        <Route path="/producto/nuevo" element={<ProductoNuevo />} />
+        <Route path="/producto/editar/:id" element={<ProductoNuevo />} />
+        <Route path="/productos/:categoria/*" element={<Productos />} />
 
-        <Route
-          path="/secciones-entrenadas"
-          element={
-            isAuthenticated ? (
-              <SeccionesEntrenadas />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
+        {/* Secciones */}
+        <Route path="/secciones-entrenadas" element={<SeccionesEntrenadas />} />
         <Route
           path="/secciones-sin-entrenamiento"
-          element={
-            isAuthenticated ? (
-              <SeccionesSinEntrenamiento />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
+          element={<SeccionesSinEntrenamiento />}
         />
-        <Route
-          path="/secciones/:categoria/*"
-          element={
-            isAuthenticated ? (
-              <SeccionesPorCategoria />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
+        <Route path="/secciones/:categoria/*" element={<SeccionesPorCategoria />} />
 
-        <Route
-          path="/chat"
-          element={
-            isAuthenticated ? <ChatPage /> : <Navigate to="/login" replace />
-          }
-        />
+        {/* Reservas */}
+        <Route path="/reservas" element={<Reservas />} />
 
-        <Route
-          path="/reservas"
-          element={
-            isAuthenticated ? <Reservas /> : <Navigate to="/login" replace />
-          }
-        />
+        {/* Chat y estado asistente */}
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/asistente-estado" element={<UsuariosDashboard />} />
 
-        <Route
-          path="/usuarios"
-          element={
-            isAuthenticated ? (
-              <UsuariosDashboard />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
+        {/* Fallback */}
         <Route
           path="*"
           element={
-            <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
+            <Navigate
+              to={isAuthenticated ? "/dashboard" : "/login"}
+              replace
+            />
           }
         />
-      </Routes>
-    </div>
+      </Route>
+    </Routes>
   );
 }
 
