@@ -136,9 +136,9 @@ export default function Sidebar({ selected, onSelect }) {
   };
 
   return (
-    <div className="h-screen flex flex-col relative z-10 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 transition-colors duration-300">
+    <div className="h-screen flex flex-col relative z-10 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200">
       {/* Header */}
-      <div className="px-4 py-4 border-b border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-between transition-colors duration-300">
+      <div className="px-4 py-4 border-b border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <HiChatAlt2 className="text-2xl text-violet-600 dark:text-violet-400" />
           <h2 className="text-xl font-semibold">Conversaciones</h2>

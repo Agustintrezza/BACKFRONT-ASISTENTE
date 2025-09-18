@@ -124,7 +124,7 @@ export default function ConversationView({ conversation }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen justify-center items-center bg-white dark:bg-gray-900 transition-colors duration-300">
+      <div className="flex h-screen justify-center items-center bg-white dark:bg-gray-900">
         <Spinner size="xl" className="text-violet-500" />
       </div>
     );
@@ -133,9 +133,9 @@ export default function ConversationView({ conversation }) {
   let ultimaFechaMostrada = null;
 
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 transition-colors duration-300">
+    <div className="h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200">
       {/* Header */}
-      <div className="p-4 border-b border-gray-300 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800 shadow-sm transition-colors duration-300">
+      <div className="p-4 border-b border-gray-300 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800 shadow-sm">
         <div className="flex items-center gap-3">
           <HiUserCircle className="text-3xl text-violet-600 dark:text-violet-400" />
           <div>
@@ -192,7 +192,7 @@ export default function ConversationView({ conversation }) {
       </div>
 
       {/* Mensajes */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gray-100 dark:bg-gray-900">
         {messages.map((msg, i) => {
           const fechaMsg = new Date(msg.timestamp);
           const fechaActual = fechaMsg.toDateString();
@@ -254,7 +254,7 @@ export default function ConversationView({ conversation }) {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex gap-2 relative transition-colors duration-300">
+      <div className="p-4 border-t border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex gap-2 relative">
         <input
           type="text"
           value={userInput}
@@ -265,7 +265,7 @@ export default function ConversationView({ conversation }) {
               ? "Escribí un mensaje..."
               : "Activá el modo manual para enviar mensajes"
           }
-          className="flex-1 px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors duration-300"
+          className="flex-1 px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
           disabled={!adminActivo}
         />
         <button
@@ -275,7 +275,7 @@ export default function ConversationView({ conversation }) {
             adminActivo
               ? "bg-violet-600 hover:bg-violet-700"
               : "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
-          } transition-colors duration-300`}
+          }`}
         >
           Enviar
         </button>
