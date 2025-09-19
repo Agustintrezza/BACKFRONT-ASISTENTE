@@ -1,121 +1,124 @@
+// backend/controllers/userController.js
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 
-// ✅ Obtener todos los usuarios (solo admin)
-exports.getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find().select("-password");
-    res.json(users);
-  } catch (error) {
-    console.error("❌ Error al obtener usuarios:", error.message);
-    res.status(500).json({ error: "Error al obtener usuarios" });
-  }
-};
-
-// ✅ Crear nuevo usuario (solo admin puede crear admin)
+// 🔹 Crear usuario (solo admin)
 exports.createUser = async (req, res) => {
-  const { email, password, role } = req.body;
-
   try {
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ error: "El email ya está en uso" });
+    const { email, password, role, plan, billingCycle } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "El usuario ya existe" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const userRole = role === "admin" && req.user.role === "admin" ? "admin" : "user";
-
-    const newUser = new User({
+    const user = new User({
       email,
       password: hashedPassword,
-      role: userRole,
-      ownerId: req.user.id,
+      role,
+      plan,
+      billingCycle,
     });
 
-    await newUser.save();
-    res.status(201).json({ message: "Usuario creado exitosamente" });
-  } catch (error) {
-    console.error("❌ Error al crear usuario:", error.message);
-    res.status(500).json({ error: "Error al crear usuario" });
-  }
-};
-
-// ✅ Editar usuario (según permisos)
-exports.updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { email, password, role } = req.body;
-
-  try {
-    const user = await User.findById(id);
-    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-
-    const esAdmin = req.user.role === "admin";
-    const esMismoUsuario = req.user.id === id;
-
-    // 🔒 Solo el usuario puede cambiar su email o password
-    if (email && !esMismoUsuario) {
-      return res.status(403).json({ error: "No podés cambiar el email de otro usuario" });
-    }
-
-    if (password && !esMismoUsuario) {
-      return res.status(403).json({ error: "No podés cambiar la contraseña de otro usuario" });
-    }
-
-    // ✏️ Si edita su propio email
-    if (email && esMismoUsuario) {
-      if (email !== user.email) {
-        const emailInUse = await User.findOne({ email });
-        if (emailInUse) {
-          return res.status(400).json({ error: "El email ya está en uso" });
-        }
-        user.email = email;
-      }
-    }
-
-    // 🔑 Si edita su propia password
-    if (password && esMismoUsuario) {
-      user.password = await bcrypt.hash(password, 10);
-    }
-
-    // ✅ Admin puede cambiar el rol de cualquier usuario
-    if (esAdmin && role && user.role !== role) {
-      user.role = role;
-    }
-
     await user.save();
-
-    const userResponse = {
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt,
-    };
-
-    res.json({ message: "Perfil actualizado", user: userResponse });
+    res.status(201).json({
+      message: "Usuario creado exitosamente",
+      user: { ...user._doc, password: undefined },
+    });
   } catch (error) {
-    console.error("❌ Error al actualizar perfil:", error.message);
-    res.status(500).json({ error: "Error al actualizar perfil" });
+    console.error("Error creando usuario:", error);
+    res.status(500).json({ message: "Error del servidor" });
   }
 };
 
-// ✅ Eliminar usuario (solo admin)
-exports.deleteUser = async (req, res) => {
-  const { id } = req.params;
-
+// 🔹 Obtener todos los usuarios (admin)
+exports.getAllUsers = async (_req, res) => {
   try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "No autorizado para eliminar usuarios" });
+    const users = await User.find().select("-password");
+    res.json(users);
+  } catch (error) {
+    console.error("Error listando usuarios:", error);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+// 🔹 Obtener perfil del usuario autenticado
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error("Error obteniendo perfil:", error);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+// 🔹 Obtener usuario por ID
+exports.getUserById = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.id !== req.params.id) {
+      return res.status(403).json({ message: "No autorizado" });
     }
 
-    const deleted = await User.findByIdAndDelete(id);
-    if (!deleted) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error obteniendo usuario:", error);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+// 🔹 Actualizar usuario
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== "admin" && req.user.id !== id) {
+      return res.status(403).json({ message: "No autorizado" });
+    }
+
+    const updates = { ...req.body };
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password, 10);
+    }
+
+    const user = await User.findByIdAndUpdate(id, updates, {
+      new: true,
+    }).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.json({ message: "Usuario actualizado", user });
+  } catch (error) {
+    console.error("Error actualizando usuario:", error);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+// 🔹 Eliminar usuario
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userDeleted = await User.findByIdAndDelete(id);
+
+    if (!userDeleted) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
     res.json({ message: "Usuario eliminado correctamente" });
   } catch (error) {
-    console.error("❌ Error al eliminar usuario:", error.message);
-    res.status(500).json({ error: "Error al eliminar usuario" });
+    console.error("Error eliminando usuario:", error);
+    res.status(500).json({ message: "Error del servidor" });
   }
 };
