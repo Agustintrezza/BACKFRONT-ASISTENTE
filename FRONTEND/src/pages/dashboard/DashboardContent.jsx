@@ -1,8 +1,12 @@
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import clientConfig from "../../../client-config.json";
-import PlanCard from "./PlanCard";
 
+import PlanCard from "./PlanCard";
+import ProductCard from "./ProductCards";
+import SectionCard from "./SectionCard";
+
+// ========= Helpers =========
 const slug = (s) =>
   (s || "")
     .toLowerCase()
@@ -13,7 +17,7 @@ const slug = (s) =>
     .replace(/\s+/g, "-")
     .trim();
 
-// ----- Labels/Keys -----
+// ----- Secciones (labels ↔ keys) -----
 const SECTION_LABELS = clientConfig.sections?.special || [];
 const SECTION_KEYS = clientConfig.sections?.specialKeys?.length
   ? clientConfig.sections.specialKeys
@@ -24,6 +28,7 @@ const labelToSectionKey = Object.fromEntries(
 );
 const TRAINED_SECTION_KEY_SET = new Set(SECTION_KEYS);
 
+// ----- Productos (labels ↔ keys) -----
 const PRODUCT_LABELS = clientConfig.sections?.trained || [];
 const PRODUCT_KEYS = clientConfig.products?.trainedKeys?.length
   ? clientConfig.products.trainedKeys
@@ -34,40 +39,9 @@ const labelToProductKey = Object.fromEntries(
 );
 const TRAINED_PRODUCT_KEY_SET = new Set(PRODUCT_KEYS);
 
+// ----- Getters -----
 const getProductKey = (p) => p?.categoryKey || slug(p?.category);
 const getSectionKey = (s) => s?.key || slug(s?.title);
-
-const emojiVariants = {
-  animate: {
-    x: [0, 3, 0],
-    transition: { repeat: Infinity, repeatDelay: 2, duration: 0.8 },
-  },
-};
-
-const Card = ({ title, icon, children, onClick, className = "" }) => (
-  <motion.div
-    onClick={onClick}
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3, ease: "easeOut" }}
-    whileHover={{ scale: 1.01 }}
-    className={`cursor-pointer bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:shadow-violet-200 dark:hover:shadow-violet-800 flex flex-col justify-between ${className}`}
-  >
-    <div>
-      <h2 className="text-lg font-semibold mb-4 flex justify-between items-center px-4 py-2 rounded-md bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-700 text-black dark:text-white">
-        {title}
-        <motion.span
-          className="text-4xl ml-2"
-          variants={emojiVariants}
-          animate="animate"
-        >
-          {icon}
-        </motion.span>
-      </h2>
-      {children}
-    </div>
-  </motion.div>
-);
 
 function DashboardContent({
   navigate,
@@ -80,6 +54,7 @@ function DashboardContent({
   setShowModal,
   planData,
 }) {
+  // ===== Contadores por label =====
   const countProductosByLabel = (label) => {
     const key = labelToProductKey[label] || slug(label);
     return allProducts.filter((p) => getProductKey(p) === key).length;
@@ -90,168 +65,142 @@ function DashboardContent({
     return allSections.filter((s) => getSectionKey(s) === key).length;
   };
 
+  // ===== Filtrar sin entrenar =====
   const productosSinEntrenarItems = allProducts.filter(
     (p) => !TRAINED_PRODUCT_KEY_SET.has(getProductKey(p))
   );
+
   const seccionesSinEntrenarItems = allSections.filter(
     (s) => !TRAINED_SECTION_KEY_SET.has(getSectionKey(s))
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-      {/* 🔹 Tu Plan (ocupa todo el ancho) */}
-      <div className="col-span-full">
-        <PlanCard
+    <div className="grid grid-cols-1 gap-6">
+      {/* Tu Plan - ocupa fila completa */}
+      <PlanCard
+        planData={planData}
+        allProducts={allProducts}
+        allSections={allSections}
+        productosSinEntrenarItems={productosSinEntrenarItems}
+        seccionesSinEntrenarItems={seccionesSinEntrenarItems}
+      />
+
+      {/* Cards en 2 columnas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ProductCard
+          navigate={navigate}
+          productosSinEntrenarItems={productosSinEntrenarItems}
+          countProductosByLabel={countProductosByLabel}
+          PRODUCT_LABELS={PRODUCT_LABELS}
           planData={planData}
-          allProducts={allProducts}
-          allSections={allSections}
+        />
+
+        <SectionCard
+          navigate={navigate}
+          seccionesSinEntrenarItems={seccionesSinEntrenarItems}
+          countSeccionesByLabel={countSeccionesByLabel}
+          SECTION_LABELS={SECTION_LABELS}
+          planData={planData}
         />
       </div>
 
-      {/* Productos */}
-      <Card title="Productos" icon="📦">
-        <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm">
-          Gestioná tus productos según su entrenamiento.
-        </p>
-        <div className="flex flex-col md:flex-row gap-4">
-          <motion.div
-            onClick={() => navigate("/productos-entrenados")}
-            whileHover={{ scale: 1.01 }}
-            className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md cursor-pointer"
-          >
-            <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
-              ✅ Productos Entrenados
-            </h3>
-            <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
-              {PRODUCT_LABELS.map((catLabel) => (
-                <li key={catLabel}>
-                  {catLabel} (
-                  <span className="font-bold">
-                    {countProductosByLabel(catLabel)}
-                  </span>
-                  )
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          <motion.div
-            onClick={() => navigate("/productos-sin-entrenamiento")}
-            whileHover={{ scale: 1.01 }}
-            className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md cursor-pointer"
-          >
-            <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
-              ⚙️ Productos Sin Entrenamiento
-            </h3>
-            <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200 max-h-[120px] overflow-y-auto">
-              {productosSinEntrenarItems.map((p) => (
-                <li key={p._id}>{p.title}</li>
-              ))}
-            </ul>
-          </motion.div>
-        </div>
-      </Card>
-
-      {/* Secciones */}
-      <Card title="Secciones" icon="🧩">
-        <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm">
-          Gestioná las secciones entrenadas o libres.
-        </p>
-        <div className="flex flex-col md:flex-row gap-4">
-          <motion.div
-            onClick={() => navigate("/secciones-entrenadas")}
-            whileHover={{ scale: 1.01 }}
-            className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md cursor-pointer"
-          >
-            <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
-              ✅ Secciones Entrenadas
-            </h3>
-            <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200">
-              {SECTION_LABELS.map((secLabel) => (
-                <li key={secLabel}>
-                  {secLabel} (
-                  <span className="font-bold">
-                    {countSeccionesByLabel(secLabel)}
-                  </span>
-                  )
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-          <motion.div
-            onClick={() => navigate("/secciones-sin-entrenamiento")}
-            whileHover={{ scale: 1.01 }}
-            className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md cursor-pointer"
-          >
-            <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
-              🧪 Secciones Sin Entrenamiento
-            </h3>
-            <ul className="list-disc list-inside text-sm text-gray-800 dark:text-gray-200 max-h-[120px] overflow-y-auto">
-              {seccionesSinEntrenarItems.map((s) => (
-                <li key={s._id}>{s.title || "Sin título"}</li>
-              ))}
-            </ul>
-          </motion.div>
-        </div>
-      </Card>
-
-      {/* Reservas */}
-      <Card
-        title={`Reservas (${reservas.length})`}
-        icon="🗓️"
-        onClick={() => navigate("/reservas")}
-      >
-        <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
-          Administrá las reservas con IA personalizada.
-        </p>
-        <div className="bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md text-gray-800 dark:text-gray-200 text-sm">
-          <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
-            Reservas por estado
-          </h3>
-          <ul className="list-disc list-inside leading-relaxed">
-            <li>
-              🟡 Pendientes:{" "}
-              <span className="font-bold">
-                {reservas.filter((r) => r.estado === "pendiente").length}
-              </span>
-            </li>
-            <li>
-              🟢 Atendidas:{" "}
-              <span className="font-bold">
-                {reservas.filter((r) => r.estado === "atendida").length}
-              </span>
-            </li>
-            <li>
-              ⚫ Cerradas:{" "}
-              <span className="font-bold">
-                {reservas.filter((r) => r.estado === "cerrada").length}
-              </span>
-            </li>
-          </ul>
-        </div>
-      </Card>
-
-      {/* Chat y Estado Asistente */}
-      <Card title="Asistente Virtual" icon="🤖">
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Chat */}
-          <div
-            className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md text-sm text-gray-800 dark:text-gray-200 cursor-pointer"
-            onClick={() => navigate("/chat")}
-          >
-            <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
-              💬 Chat
-            </h3>
-            <ul className="list-disc list-inside leading-relaxed">
-              <li>
-                🟢 Activas:{" "}
-                <span className="font-bold">{conversaciones.length}</span>
-              </li>
+      {/* Reservas + Conversaciones */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Reservas */}
+        <motion.div
+          onClick={() => navigate("/reservas")}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          whileHover={{ scale: 1.01 }}
+          className="cursor-pointer bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow hover:shadow-violet-200 dark:hover:shadow-violet-800"
+        >
+          <div className="bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md h-full">
+            <h2 className="text-lg font-semibold mb-4">
+              🗓️ Reservas ({reservas.length})
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
+              Administrá las reservas con IA personalizada.
+            </p>
+            <ul className="list-disc list-inside leading-relaxed text-sm">
               <li>
                 🟡 Pendientes:{" "}
                 <span className="font-bold">
-                  {conversaciones.filter((c) => !c.respondido).length}
+                  {reservas.filter((r) => r.estado === "pendiente").length}
                 </span>
+              </li>
+              <li>
+                🟢 Atendidas:{" "}
+                <span className="font-bold">
+                  {reservas.filter((r) => r.estado === "atendida").length}
+                </span>
+              </li>
+              <li>
+                ⚫ Cerradas:{" "}
+                <span className="font-bold">
+                  {reservas.filter((r) => r.estado === "cerrada").length}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </motion.div>
+
+        {/* Conversaciones */}
+        <motion.div
+          onClick={() => navigate("/conversaciones")}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          whileHover={{ scale: 1.01 }}
+          className="cursor-pointer bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow hover:shadow-violet-200 dark:hover:shadow-violet-800"
+        >
+          <div className="bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md h-full">
+            <h2 className="text-lg font-semibold mb-4">
+              💬 Conversaciones ({conversaciones.length})
+            </h2>
+            <ul className="list-disc list-inside leading-relaxed text-sm">
+              <li>
+                🕒 Última:{" "}
+                <span className="font-bold">
+                  {conversaciones[0]?.lastMessage?.slice(0, 50) ||
+                    "Sin mensajes"}
+                </span>
+              </li>
+              <li>
+                👥 Participantes únicos:{" "}
+                <span className="font-bold">
+                  {new Set(conversaciones.map((c) => c.userId)).size}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Asistente Virtual */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div
+          onClick={() => setShowModal(true)}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          whileHover={{ scale: 1.01 }}
+          className="cursor-pointer bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow hover:shadow-violet-200 dark:hover:shadow-violet-800"
+        >
+          <div className="bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md h-full">
+            <h2 className="text-lg font-semibold mb-4">🤖 Asistente Virtual</h2>
+            <ul className="list-disc list-inside leading-relaxed text-sm">
+              <li>
+                🔘 Estado:{" "}
+                <span className="font-bold capitalize">{asistenteStatus}</span>
+              </li>
+              <li>
+                📣 Mensaje offline:{" "}
+                <span className="font-bold italic">"{mensajeOffline}"</span>
+              </li>
+              <li>
+                💬 Conversaciones activas:{" "}
+                <span className="font-bold">{conversaciones.length}</span>
               </li>
               <li>
                 📨 Último mensaje:{" "}
@@ -262,30 +211,8 @@ function DashboardContent({
               </li>
             </ul>
           </div>
-
-          {/* Estado del asistente */}
-          <div
-            className="flex-1 bg-gradient-to-r from-violet-50 to-violet-100 dark:from-gray-800 dark:to-gray-700 p-4 rounded-md shadow-md text-sm text-gray-800 dark:text-gray-200 cursor-pointer"
-            onClick={() => setShowModal(true)}
-          >
-            <h3 className="text-md font-semibold mb-2 text-violet-800 dark:text-violet-400">
-              📡 Estado del Asistente
-            </h3>
-            <ul className="list-disc list-inside leading-relaxed">
-              <li>
-                🔘 Estado:{" "}
-                <span className="font-bold capitalize">{asistenteStatus}</span>
-              </li>
-              <li>
-                📣 Mensaje offline:{" "}
-                <span className="font-bold italic">
-                  "{mensajeOffline}"
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </Card>
+        </motion.div>
+      </div>
     </div>
   );
 }
