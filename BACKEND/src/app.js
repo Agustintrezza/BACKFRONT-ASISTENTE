@@ -1,4 +1,3 @@
-// app.js
 const express = require('express');
 const cors = require('cors');
 
@@ -20,6 +19,7 @@ const enviarManualRoute = require('./routes/enviarManual'); // Para simular resp
 const enviarAdminRoute = require('./routes/enviarAdmin');   // Para mensajes escritos por un operador humano
 const modoAdminRoutes = require('./routes/modoAdmin');
 const usuariosRoutes = require('./routes/userRoutes');     // 👤 Usuarios
+const planesRoutes = require('./routes/planes');           // 🆕 Planes
 
 // ✅ Definir prefijos de rutas
 app.use('/api/productos', productosRoutes);
@@ -37,6 +37,9 @@ app.use('/api/chat', modoAdminRoutes);
 
 // ✅ Usuarios
 app.use("/api/usuarios", usuariosRoutes);
+
+// ✅ Planes
+app.use("/api/planes", planesRoutes);
 
 // ✅ Ruta raíz de prueba
 app.get('/', (req, res) => {

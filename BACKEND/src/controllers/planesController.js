@@ -1,8 +1,7 @@
-// controllers/planesController.js
 const path = require("path");
 const fs = require("fs");
 
-// __dirname ya existe en CommonJS, no hace falta fileURLToPath
+// ✅ Controlador para devolver los planes desde el JSON de config
 const getPlanes = (req, res) => {
   try {
     const filePath = path.join(__dirname, "../config/plans-config.json");

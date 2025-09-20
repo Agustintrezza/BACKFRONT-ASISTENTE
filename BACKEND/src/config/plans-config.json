@@ -1,39 +1,38 @@
 {
-    "basic": {
-      "name": "Básico",
-      "maxUsers": 10,
-      "maxConsultas": 1000,
-      "maxConversaciones": 20,
-      "maxReservas": 20,
-      "channels": ["web", "whatsapp"],
-      "maxProductosComodines": 3,
-      "maxSeccionesComodines": 1,
-      "maxProductosTotales": 50,
-      "maxSeccionesTotales": 1
-    },
-    "premium": {
-      "name": "Premium",
-      "maxUsers": 20,
-      "maxConsultas": 1500,
-      "maxConversaciones": 30,
-      "maxReservas": 50,
-      "channels": ["web", "whatsapp"],
-      "maxProductosComodines": 5,
-      "maxSeccionesComodines": 5,
-      "maxProductosTotales": 60,
-      "maxSeccionesTotales": 20
-    },
-    "advanced": {
-      "name": "Avanzado",
-      "maxUsers": 40,
-      "maxConsultas": 3000,
-      "maxConversaciones": 40,
-      "maxReservas": 90,
-      "channels": ["web", "whatsapp", "instagram"],
-      "maxProductosComodines": 5,
-      "maxSeccionesComodines": 5,
-      "maxProductosTotales": 75,
-      "maxSeccionesTotales": 50
-    }
+  "basic": {
+    "name": "Básico",
+    "maxUsers": 10,
+    "maxConsultas": 1000,
+    "maxConversaciones": 20,
+    "maxReservas": 20,
+    "channels": ["web", "whatsapp"],
+    "maxProductosComodines": 3,
+    "maxSeccionesComodines": 1,
+    "maxProductosTotales": 50,
+    "maxSeccionesTotales": 1
+  },
+  "premium": {
+    "name": "Premium",
+    "maxUsers": 20,
+    "maxConsultas": 1500,
+    "maxConversaciones": 30,
+    "maxReservas": 50,
+    "channels": ["web", "whatsapp"],
+    "maxProductosComodines": 5,
+    "maxSeccionesComodines": 5,
+    "maxProductosTotales": 60,
+    "maxSeccionesTotales": 20
+  },
+  "advanced": {
+    "name": "Avanzado",
+    "maxUsers": 40,
+    "maxConsultas": 3000,
+    "maxConversaciones": 40,
+    "maxReservas": 90,
+    "channels": ["web", "whatsapp", "instagram"],
+    "maxProductosComodines": 5,
+    "maxSeccionesComodines": 5,
+    "maxProductosTotales": 75,
+    "maxSeccionesTotales": 50
   }
-  
+}

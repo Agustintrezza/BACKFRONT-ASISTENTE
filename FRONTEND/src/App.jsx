@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { UserProvider } from "./context/UserContext";
 
 // 🖥️ Páginas
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/dashboard/Dashboard";
 import ProductosEntrenados from "./pages/productos/ProductosEntrenados";
 import Productos from "./pages/productos/Productos";
 import ProductosSinEntrenamiento from "./pages/productos/ProductosSinEntrenamiento";
