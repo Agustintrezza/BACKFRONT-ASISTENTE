@@ -4,13 +4,6 @@
 @tailwind utilities;
 
 
-html,
-body {
-  height: 100%;
-  margin: 0;
-  @apply transition-colors duration-300 ease-in-out;
-}
-
 /* Light mode */
 :root {
   --bg-color: theme("colors.white");

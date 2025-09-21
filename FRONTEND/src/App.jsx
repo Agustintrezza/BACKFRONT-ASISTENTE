@@ -17,7 +17,8 @@ import { useUserPlan } from "./hooks/useUserPlan";
 import Dashboard from "./pages/dashboard/Dashboard";
 import ProductosEntrenados from "./pages/productos/productos-entrenados/ProductosEntrenados";
 import Productos from "./pages/productos/Productos";
-import ProductosSinEntrenamiento from "./pages/productos/ProductosSinEntrenamiento";
+import ProductosSinEntrenamiento from "./pages/productos/productos-sin-entrenamiento/ProductosSinEntrenamiento";
+import ProductosSinEntrenamientoDetalle from "./pages/productos/productos-sin-entrenamiento/ProductoSinEntrenamientoDetalle";
 import ProductoNuevo from "./pages/productos/ProductoNuevo";
 
 import SeccionesPorCategoria from "./pages/secciones/Secciones";
@@ -124,7 +125,16 @@ function AppContent() {
         />
         <Route
           path="/productos-sin-entrenamiento"
-          element={<ProductosSinEntrenamiento />}
+          element={
+            <ProductosSinEntrenamiento
+              allProducts={allProducts}
+              planData={planData}
+            />
+          }
+        />
+        <Route
+          path="/productos-sin-entrenamiento/:categoriaKey"
+          element={<ProductosSinEntrenamientoDetalle />}
         />
         <Route path="/producto/nuevo" element={<ProductoNuevo />} />
         <Route path="/producto/editar/:id" element={<ProductoNuevo />} />

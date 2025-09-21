@@ -86,13 +86,14 @@ function ProductosEntrenados({ planData, allProducts = [] }) {
     <div className="min-h-screen bg-gradient-to-br from-white to-violet-200 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 p-6">
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
+        {/* Solo el bloque del título se anima */}
         <motion.h1
           className="text-4xl font-extrabold"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <span className="text-[34px] bold text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-blue-400 dark:to-violet-400">
+          <span className="text-[30px] bold text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-blue-400 dark:to-violet-400">
             Productos Entrenados ({TRAINED_LABELS.length})
           </span>
 
@@ -116,30 +117,21 @@ function ProductosEntrenados({ planData, allProducts = [] }) {
           </div>
         </motion.h1>
 
+        {/* Botones estáticos */}
         <div className="flex space-x-2">
-          <motion.button
+          <button
             onClick={() => navigate("/productos-sin-entrenamiento")}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
             className="py-3 px-4 text-sm bg-violet-600 text-white rounded-lg font-semibold shadow-md hover:opacity-90"
           >
             Tus listas
-          </motion.button>
+          </button>
 
-          <motion.button
+          <button
             onClick={() => navigate("/dashboard")}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
             className="px-6 py-3 text-sm bg-yellow-400 text-black rounded-lg font-medium shadow-md hover:shadow-lg flex items-center gap-2"
           >
             <span className="text-md">Volver</span>
-          </motion.button>
+          </button>
         </div>
       </div>
 
