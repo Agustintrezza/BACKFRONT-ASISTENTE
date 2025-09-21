@@ -81,7 +81,7 @@ function EstadoAsistenteModal({ open, onClose, onSave }) {
       <div className="relative w-full max-w-3xl rounded-3xl 
                       bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 
                       shadow-xl p-10 overflow-y-auto max-h-[90vh] 
-                      text-gray-900 dark:text-gray-100 transition-colors duration-300">
+                      text-gray-900 dark:text-gray-100 duration-300">
         {/* Botón cerrar */}
         <button
           onClick={onClose}

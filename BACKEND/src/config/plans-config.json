@@ -7,9 +7,9 @@
     "maxReservas": 20,
     "channels": ["web", "whatsapp"],
     "maxProductosComodines": 3,
-    "maxSeccionesComodines": 1,
+    "maxSeccionesComodines": 3,
     "maxProductosTotales": 50,
-    "maxSeccionesTotales": 1
+    "maxSeccionesTotales": 20
   },
   "premium": {
     "name": "Premium",

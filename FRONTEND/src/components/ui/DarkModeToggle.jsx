@@ -18,7 +18,7 @@ function DarkModeToggle() {
   return (
     <button
       onClick={() => setDarkMode(!darkMode)}
-      className="w-12 h-12 rounded-lg bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-2xl transition-colors"
+      className="w-12 h-12 rounded-lg bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-2xl"
       title="Cambiar tema"
     >
       {darkMode ? "🌙" : "☀️"}

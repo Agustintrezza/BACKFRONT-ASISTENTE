@@ -8,7 +8,7 @@ function SidebarMain() {
     return (
       <Link
         to={to}
-        className={`rounded-md p-2 flex items-center gap-2 transition-colors ${
+        className={`rounded-md p-2 flex items-center gap-2 ${
           active
             ? "bg-gradient-to-r from-violet-600 to-violet-800 text-white shadow-md"
             : "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
@@ -20,7 +20,7 @@ function SidebarMain() {
   };
 
   return (
-    <aside className="w-60 h-screen bg-white dark:bg-gray-900 border-r border-gray-300 dark:border-gray-800 p-4 flex flex-col gap-2 overflow-y-auto transition-colors">
+    <aside className="w-60 h-screen bg-white dark:bg-gray-900 border-r border-gray-300 dark:border-gray-800 p-4 flex flex-col gap-2 overflow-y-auto">
       <h2 className="text-xs uppercase text-gray-500 dark:text-gray-400">
         Administración
       </h2>

@@ -7,13 +7,15 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 // 🧠 Contexto global
 import { UserProvider } from "./context/UserContext";
+import { useUserPlan } from "./hooks/useUserPlan";
 
 // 🖥️ Páginas
 import Dashboard from "./pages/dashboard/Dashboard";
-import ProductosEntrenados from "./pages/productos/ProductosEntrenados";
+import ProductosEntrenados from "./pages/productos/productos-entrenados/ProductosEntrenados";
 import Productos from "./pages/productos/Productos";
 import ProductosSinEntrenamiento from "./pages/productos/ProductosSinEntrenamiento";
 import ProductoNuevo from "./pages/productos/ProductoNuevo";
@@ -40,7 +42,7 @@ function AppLayout() {
   const [isMainOpen, setIsMainOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
       {/* Sidebar angosto */}
       <SidebarButtons
         isMainOpen={isMainOpen}
@@ -68,6 +70,24 @@ function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const location = useLocation();
 
+  // === Plan del usuario ===
+  const planData = useUserPlan();
+
+  // === Productos globales ===
+  const [allProducts, setAllProducts] = useState([]);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/productos");
+        setAllProducts(data);
+      } catch (err) {
+        console.error("❌ Error al cargar productos:", err);
+      }
+    }
+    fetchProducts();
+  }, []);
+
   useEffect(() => {
     setIsAuthenticated(!!localStorage.getItem("token"));
   }, [location]);
@@ -93,7 +113,15 @@ function AppContent() {
         <Route path="/dashboard" element={<Dashboard />} />
 
         {/* Productos */}
-        <Route path="/productos-entrenados" element={<ProductosEntrenados />} />
+        <Route
+          path="/productos-entrenados"
+          element={
+            <ProductosEntrenados
+              allProducts={allProducts}
+              planData={planData}
+            />
+          }
+        />
         <Route
           path="/productos-sin-entrenamiento"
           element={<ProductosSinEntrenamiento />}
