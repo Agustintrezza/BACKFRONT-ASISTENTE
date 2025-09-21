@@ -16,7 +16,7 @@ import { useUserPlan } from "./hooks/useUserPlan";
 // 🖥️ Páginas
 import Dashboard from "./pages/dashboard/Dashboard";
 import ProductosEntrenados from "./pages/productos/productos-entrenados/ProductosEntrenados";
-import Productos from "./pages/productos/Productos";
+import ProductosEntrenadosDetalle from "./pages/productos/productos-entrenados-detalle/ProductosEntrenadosDetalle";
 import ProductosSinEntrenamiento from "./pages/productos/productos-sin-entrenamiento/ProductosSinEntrenamiento";
 import ProductosSinEntrenamientoDetalle from "./pages/productos/productos-sin-entrenamiento/ProductoSinEntrenamientoDetalle";
 import ProductoNuevo from "./pages/productos/ProductoNuevo";
@@ -135,17 +135,25 @@ function AppContent() {
         />
         <Route
           path="/productos-sin-entrenamiento/:categoriaKey"
-          element={<ProductosSinEntrenamientoDetalle 
-            allProducts={allProducts}
+          element={
+            <ProductosSinEntrenamientoDetalle 
+              allProducts={allProducts}
               planData={planData}
-          />}
+            />
+          }
         />
         {/* <Route path="/producto/nuevo" element={<ProductoNuevo />} /> */}
-        <Route path="/producto/editar/:id" element={ <ProductoModal
-    mode="producto"
-    isEditing={true}
-  />} />
-        <Route path="/productos/:categoria/*" element={<Productos />} />
+        <Route
+          path="/producto/editar/:id"
+          element={<ProductoModal mode="producto" isEditing={true} />}
+        />
+        <Route
+          path="/productos/:categoria/*"
+          element={<ProductosEntrenadosDetalle 
+            allProducts={allProducts}
+            planData={planData}
+          />}
+        />
 
         {/* Secciones */}
         <Route path="/secciones-entrenadas" element={<SeccionesEntrenadas />} />
