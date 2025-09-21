@@ -20,6 +20,7 @@ import Productos from "./pages/productos/Productos";
 import ProductosSinEntrenamiento from "./pages/productos/productos-sin-entrenamiento/ProductosSinEntrenamiento";
 import ProductosSinEntrenamientoDetalle from "./pages/productos/productos-sin-entrenamiento/ProductoSinEntrenamientoDetalle";
 import ProductoNuevo from "./pages/productos/ProductoNuevo";
+import ProductoModal from "./components/productos/ProductoModal";
 
 import SeccionesPorCategoria from "./pages/secciones/Secciones";
 import SeccionesSinEntrenamiento from "./pages/secciones/SeccionesSinEntrenamiento";
@@ -134,10 +135,16 @@ function AppContent() {
         />
         <Route
           path="/productos-sin-entrenamiento/:categoriaKey"
-          element={<ProductosSinEntrenamientoDetalle />}
+          element={<ProductosSinEntrenamientoDetalle 
+            allProducts={allProducts}
+              planData={planData}
+          />}
         />
-        <Route path="/producto/nuevo" element={<ProductoNuevo />} />
-        <Route path="/producto/editar/:id" element={<ProductoNuevo />} />
+        {/* <Route path="/producto/nuevo" element={<ProductoNuevo />} /> */}
+        <Route path="/producto/editar/:id" element={ <ProductoModal
+    mode="producto"
+    isEditing={true}
+  />} />
         <Route path="/productos/:categoria/*" element={<Productos />} />
 
         {/* Secciones */}

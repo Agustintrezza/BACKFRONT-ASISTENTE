@@ -39,51 +39,63 @@ const NotaInternaSchema = new mongoose.Schema({
 });
 
 // Esquema principal de conversación
-const ConversacionSchema = new mongoose.Schema({
-  sender: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  mensajes: [MensajeSchema],
-  lastMessage: {
-    type: String,
-    default: '',
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now,
-  },
-  adminActivo: {
-    type: Boolean,
-    default: false,
-  },
-  status: {
-    type: String,
-    enum: ['pendiente', 'urgente', 'prioritario', 'seguimiento', 'cerrado', 'resuelto', null],
-    default: null,
-  },
-  notasInternas: {
-    type: [NotaInternaSchema],
-    default: [],
-  },
+const ConversacionSchema = new mongoose.Schema(
+  {
+    sender: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    mensajes: [MensajeSchema],
+    lastMessage: {
+      type: String,
+      default: '',
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now,
+    },
+    adminActivo: {
+      type: Boolean,
+      default: false,
+    },
+    status: {
+      type: String,
+      enum: [
+        'pendiente',
+        'urgente',
+        'prioritario',
+        'seguimiento',
+        'cerrado',
+        'resuelto',
+        'none', // 👈 agregado
+        null,
+      ],
+      default: 'none', // 👈 ahora el valor por defecto es válido
+    },
+    notasInternas: {
+      type: [NotaInternaSchema],
+      default: [],
+    },
 
-  // ✅ CAMPO NUEVO
-  responsable: {
-    type: String,
-    default: null,
-  },
+    // ✅ CAMPO NUEVO: responsable asignado
+    responsable: {
+      type: String,
+      default: null,
+    },
 
-  leido: {
-    type: Boolean,
-    default: false,
+    leido: {
+      type: Boolean,
+      default: false,
+    },
+    respondido: {
+      type: Boolean,
+      default: false,
+    },
   },
-  respondido: {
-    type: Boolean,
-    default: false,
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = mongoose.model('Conversacion', ConversacionSchema);

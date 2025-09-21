@@ -5,13 +5,14 @@ import axios from "axios";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import clientConfig from "../../../../client-config.json";
+import ModalCategoria from "../../../components/productos/CategoriaModal";
+import Swal from "sweetalert2";
 
 const slug = (s) =>
   (s || "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
-    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .trim();
@@ -29,6 +30,9 @@ function ProductosSinEntrenamiento({ planData }) {
   const navigate = useNavigate();
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [showCategoriaModal, setShowCategoriaModal] = useState(false);
+  const [categoriaEditar, setCategoriaEditar] = useState(null);
 
   const maxComodines = planData?.maxProductosComodines || 0;
 
@@ -65,6 +69,35 @@ function ProductosSinEntrenamiento({ planData }) {
 
   const totalCategorias = categoriasArr.length;
 
+  // Eliminar categoría
+  const handleDeleteCategoria = async (cat) => {
+    const confirm = await Swal.fire({
+      title: `¿Eliminar categoría "${cat.categoria}"?`,
+      text: "Se eliminarán todos los productos de esta categoría.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await axios.delete(
+          `http://localhost:5000/api/productos/categoria/${cat.key}`
+        );
+        setProductos((prev) =>
+          prev.filter((p) => getProductKey(p) !== cat.key)
+        );
+        Swal.fire("Eliminada", `Categoría eliminada correctamente.`, "success");
+      } catch (err) {
+        console.error("Error eliminando categoría:", err);
+        Swal.fire("Error", "No se pudo eliminar la categoría.", "error");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
@@ -76,7 +109,7 @@ function ProductosSinEntrenamiento({ planData }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-violet-200 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 p-6">
       {/* Header */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex justify-between items-start mb-6 flex-wrap gap-2">
         <motion.h1
           className="text-4xl font-extrabold"
           initial={{ opacity: 0, y: -10 }}
@@ -109,32 +142,39 @@ function ProductosSinEntrenamiento({ planData }) {
 
         {/* Botones */}
         <div className="flex flex-wrap gap-2 ml-4">
-          <motion.button
-            onClick={() => navigate("/producto/nuevo")}
+
+          {/* Crear categoría */}
+          <button
+            onClick={() => {
+              setCategoriaEditar(null);
+              setShowCategoriaModal(true);
+            }}
             disabled={totalCategorias >= maxComodines}
-            className={`py-3 px-4 text-sm rounded-lg font-semibold shadow-md
+            className={`py-3 px-4 text-sm rounded-lg font-semibold shadow-md hover:scale-105 transition
               ${
                 totalCategorias >= maxComodines
                   ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:opacity-90"
+                  : "bg-blue-600 text-white"
               }`}
           >
-            Crear producto
-          </motion.button>
+            Crear Categoría
+          </button>
 
-          <motion.button
+          {/* Ir a entrenados */}
+          <button
             onClick={() => navigate("/productos-entrenados")}
-            className="py-3 px-4 text-sm bg-violet-600 text-white rounded-lg font-semibold shadow-md hover:opacity-90"
+            className="py-3 px-4 text-sm bg-violet-600 text-white rounded-lg font-semibold shadow-md hover:scale-105 transition"
           >
             Ir a entrenados
-          </motion.button>
+          </button>
 
-          <motion.button
+          {/* Volver */}
+          <button
             onClick={() => navigate("/dashboard")}
-            className="px-6 py-3 text-sm bg-yellow-400 text-black rounded-lg font-medium shadow-md hover:shadow-lg flex items-center gap-2"
+            className="py-3 px-4 text-sm bg-yellow-400 text-black rounded-lg font-medium shadow-md hover:scale-105 transition"
           >
-            <span className="text-md">Volver</span>
-          </motion.button>
+           Volver
+          </button>
         </div>
       </div>
 
@@ -143,21 +183,66 @@ function ProductosSinEntrenamiento({ planData }) {
         {categoriasArr.map((cat) => (
           <motion.div
             key={cat.key}
-            onClick={() =>
-              navigate(`/productos-sin-entrenamiento/${encodeURIComponent(cat.key)}`)
-            }
             whileHover={{ scale: 1.02 }}
-            className="cursor-pointer bg-white dark:bg-gray-800 rounded-2xl p-5 shadow hover:shadow-violet-200 dark:hover:shadow-violet-900"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow hover:shadow-violet-200 dark:hover:shadow-violet-900"
           >
-            <h2 className="text-xl font-bold mb-2 text-violet-800 dark:text-violet-400">
-              {cat.categoria}
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              {cat.count} productos sin entrenar
-            </p>
+            <div
+              className="cursor-pointer"
+              onClick={() =>
+                navigate(`/productos-sin-entrenamiento/${encodeURIComponent(cat.key)}`)
+              }
+            >
+              <h2 className="text-xl font-bold mb-2 text-violet-800 dark:text-violet-400">
+                {cat.categoria}
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                {cat.count} productos sin entrenar
+              </p>
+            </div>
+
+            {/* Botones editar/eliminar */}
+            <div className="flex">
+              <button
+                onClick={() => {
+                  setCategoriaEditar(cat);
+                  setShowCategoriaModal(true);
+                }}
+                className="p-2 text-white rounded-l hover:scale-105 transition"
+                title="Editar categoría"
+              >
+                ✏️
+              </button>
+              <button
+                onClick={() => handleDeleteCategoria(cat)}
+                className="p-2 text-white rounded-lg hover:scale-105 transition"
+                title="Eliminar categoría"
+              >
+                🗑️
+              </button>
+            </div>
           </motion.div>
         ))}
       </div>
+
+      {/* Modal de Categoría */}
+      {showCategoriaModal && (
+        <ModalCategoria
+          categoria={categoriaEditar}
+          onClose={() => setShowCategoriaModal(false)}
+          onSuccess={async () => {
+            setShowCategoriaModal(false);
+            try {
+              const { data } = await axios.get("http://localhost:5000/api/productos");
+              const sin = data.filter(
+                (p) => !TRAINED_PRODUCT_KEY_SET.has(getProductKey(p))
+              );
+              setProductos(sin);
+            } catch (err) {
+              console.error("Error recargando productos:", err);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -21,7 +21,7 @@ exports.getConversacion = async (req, res) => {
   }
 };
 
-// Crear o actualizar conversación
+// Crear o actualizar conversación con mensaje nuevo
 exports.saveMensaje = async (req, res) => {
   const { sender, from, text, buttons, modoOffline, mensajeOffline } = req.body;
 
@@ -30,32 +30,39 @@ exports.saveMensaje = async (req, res) => {
       from,
       text,
       buttons,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     let conv = await Conversacion.findOne({ sender });
 
     if (!conv) {
+      // 🔑 Conversación nueva
       conv = new Conversacion({
         sender,
         mensajes: [nuevaEntrada],
         lastMessage: text,
         timestamp: new Date(),
         modoOffline: modoOffline ?? false,
-        mensajeOffline: mensajeOffline ?? ''
+        mensajeOffline: mensajeOffline ?? '',
+        status: 'none', // 👈 aseguramos que arranque con un estado válido
       });
     } else {
+      // 🔑 Actualización de conversación existente
       conv.mensajes.push(nuevaEntrada);
       conv.lastMessage = text;
       conv.timestamp = new Date();
 
-      // Solo actualiza si vienen definidos
       if (typeof modoOffline === 'boolean') {
         conv.modoOffline = modoOffline;
       }
 
       if (typeof mensajeOffline === 'string') {
         conv.mensajeOffline = mensajeOffline;
+      }
+
+      // Si no tiene un status válido, lo forzamos a "none"
+      if (!conv.status) {
+        conv.status = 'none';
       }
     }
 
@@ -65,4 +72,3 @@ exports.saveMensaje = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-

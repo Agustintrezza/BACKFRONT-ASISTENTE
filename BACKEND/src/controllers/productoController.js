@@ -86,3 +86,45 @@ exports.getCategorias = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// Editar una categoría (actualiza todos los productos que tengan esa categoría)
+exports.updateCategoria = async (req, res) => {
+  try {
+    const { categoriaKey } = req.params;
+    const { newCategory, newCategoryKey } = req.body;
+
+    if (!newCategory || !newCategoryKey) {
+      return res.status(400).json({ error: "Faltan parámetros" });
+    }
+
+    const result = await Producto.updateMany(
+      { categoryKey: categoriaKey },
+      {
+        $set: {
+          category: newCategory,
+          categoryKey: newCategoryKey
+        }
+      }
+    );
+
+    res.json({ message: "Categoría actualizada correctamente", result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Eliminar una categoría (borra todos los productos de esa categoría)
+exports.deleteCategoria = async (req, res) => {
+  try {
+    const { categoriaKey } = req.params;
+
+    const result = await Producto.deleteMany({ categoryKey: categoriaKey });
+
+    res.json({
+      message: "Categoría eliminada correctamente",
+      eliminados: result.deletedCount
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
