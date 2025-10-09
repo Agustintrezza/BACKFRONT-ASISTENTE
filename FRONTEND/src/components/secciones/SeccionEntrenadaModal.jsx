@@ -33,6 +33,7 @@ const keyToLabel = Object.fromEntries(
 );
 
 function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
+  // === Preparar claves y etiquetas ===
   const derivedKey =
     seccion?.sectionKey ||
     (category ? labelToKey[category] : null) ||
@@ -40,22 +41,27 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
 
   const visibleLabel = keyToLabel[derivedKey] || category || seccion?.title || "";
 
+  // === Estados locales ===
   const [sectionTitle, setSectionTitle] = useState(visibleLabel);
   const [itemTitle, setItemTitle] = useState("");
   const [detail, setDetail] = useState("");
 
+  // === Pre-carga de datos al editar ===
   useEffect(() => {
-    setSectionTitle(visibleLabel);
     if (seccion) {
-      setItemTitle(seccion.menuItems?.[0]?.title || "");
-      setDetail(seccion.menuItems?.[0]?.detail || "");
+      const menuItem = seccion.menuItems?.[0];
+      setSectionTitle(seccion.title || visibleLabel);
+      setItemTitle(menuItem?.title || "");
+      setDetail(menuItem?.detail || "");
     } else {
+      // Reset limpio en modo "nuevo"
+      setSectionTitle(category || "");
       setItemTitle("");
       setDetail("");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seccion?._id, category]);
+  }, [seccion, category, visibleLabel]);
 
+  // === Guardar ===
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -69,7 +75,7 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
     }
 
     const payload = {
-      title: visibleLabel,
+      title: sectionTitle?.trim() || visibleLabel,
       sectionKey: derivedKey,
       menuItems: [
         {
@@ -107,13 +113,14 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
     }
   };
 
+  // === UI ===
   return (
     <motion.div
       initial={{ opacity: 0, y: 60 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -60 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 z-50 bg-gray-200 dark:bg-gray-900 flex justify-center items-center px-2"
+      className="fixed inset-0 z-50 bg-gray-200/70 dark:bg-gray-900/90 flex justify-center items-center px-2 backdrop-blur-sm"
     >
       <div className="relative w-full max-w-6xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-900 shadow-xl p-10 overflow-y-auto max-h-[95vh] text-gray-900 dark:text-gray-100">
         <button
@@ -143,6 +150,7 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
             </span>
           </h2>
 
+          {/* Campos */}
           <div className="grid grid-cols-1 gap-6">
             <div>
               <Label
@@ -152,7 +160,7 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
               <InputWithEmoji
                 value={itemTitle}
                 onChange={setItemTitle}
-                placeholder="Ej: Ingresa los detalles del registro"
+                placeholder="Ej: 🎭 5 teatros imperdibles de Buenos Aires"
               />
             </div>
 
@@ -169,6 +177,7 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
             </div>
           </div>
 
+          {/* Botones */}
           <div className="flex justify-end gap-4 mt-2">
             <Button
               type="button"

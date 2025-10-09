@@ -1,11 +1,15 @@
+// ==============================
+// src/pages/secciones/secciones-entrenadas/SeccionesEntrenadas.jsx
+// ==============================
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Spinner, Progress } from "flowbite-react";
 import axios from "axios";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-import clientConfig from "../../../client-config.json";
-import SeccionCardItem from "./SeccionCardItem";
+import clientConfig from "../../../../client-config.json";
+import { useUserPlan } from "../../../hooks/useUserPlan"; // ✅ importante para el plan del usuario
 
 // ===== Helpers =====
 const slug = (s) =>
@@ -18,7 +22,7 @@ const slug = (s) =>
     .replace(/\s+/g, "-")
     .trim();
 
-// Labels y Keys desde config
+// Labels (UI) y Keys (estables)
 const SPECIAL_LABELS = clientConfig.sections?.special || [];
 const SPECIAL_KEYS = clientConfig.sections?.specialKeys?.length
   ? clientConfig.sections.specialKeys
@@ -42,37 +46,52 @@ const computeEmoji = (label, key) => {
   return DEFAULT_EMOJI;
 };
 
-function SeccionesEntrenadas({ planData, allSections = [] }) {
+const emojiVariants = {
+  animate: {
+    x: [0, 3, 0],
+    transition: { repeat: Infinity, repeatDelay: 2, duration: 0.8 },
+  },
+};
+
+function SeccionesEntrenadas() {
   const navigate = useNavigate();
   const [countsByKey, setCountsByKey] = useState({});
+  const [allSections, setAllSections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const planData = useUserPlan(); // ✅ Traemos el plan actual
 
-  // Totales para progress
-  const totalSecciones = allSections.length || 0;
-  const maxSecciones = planData?.maxSeccionesTotales || 0;
-
+  // === Traer secciones del backend ===
   useEffect(() => {
-    async function fetchCounts() {
+    async function fetchSections() {
       try {
         const { data } = await axios.get("http://localhost:5000/api/secciones");
-        const init = {};
-        SPECIAL_KEYS.forEach((k) => (init[k] = 0));
+        setAllSections(data);
+
+        const initCounts = {};
+        SPECIAL_KEYS.forEach((k) => (initCounts[k] = 0));
 
         data.forEach((s) => {
           const k = s?.sectionKey || slug(s?.title);
-          if (k in init) init[k] = (init[k] || 0) + 1;
+          if (k in initCounts) initCounts[k] = (initCounts[k] || 0) + 1;
         });
 
-        setCountsByKey(init);
+        setCountsByKey(initCounts);
       } catch (err) {
-        console.error(err);
+        console.error("❌ Error al obtener secciones:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchCounts();
+    fetchSections();
   }, []);
+
+  // === Totales para progress bar ===
+  const totalSecciones = allSections.length || 0;
+  const maxSecciones = planData?.maxSeccionesTotales || 0;
+  const porcentaje = maxSecciones
+    ? Math.round((totalSecciones / maxSecciones) * 100)
+    : 0;
 
   if (loading) {
     return (
@@ -84,28 +103,24 @@ function SeccionesEntrenadas({ planData, allSections = [] }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-violet-200 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 p-6">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-6 flex-wrap gap-2">
+      {/* Header + botones */}
+      <div className="flex justify-between items-start mb-6 flex-wrap gap-3">
         <motion.h1
-          className="text-3xl font-extrabold text-violet-800 dark:text-violet-400"
+          className="text-4xl font-extrabold"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          Secciones Entrenadas ({SPECIAL_LABELS.length})
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-blue-400 dark:to-violet-400">
+            Secciones Entrenadas ({SPECIAL_LABELS.length})
+          </span>
+
+          {/* Progress bar */}
           <div className="mt-3">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
               Secciones totales globales creadas
             </p>
-            <Progress
-              progress={
-                maxSecciones
-                  ? Math.round((totalSecciones / maxSecciones) * 100)
-                  : 0
-              }
-              size="sm"
-              color="purple"
-            />
+            <Progress progress={porcentaje} size="sm" color="purple" />
             <span className="text-xs text-gray-600 dark:text-gray-400">
               {totalSecciones} / {maxSecciones} secciones usadas
             </span>
@@ -134,14 +149,40 @@ function SeccionesEntrenadas({ planData, allSections = [] }) {
           const key = SPECIAL_KEYS[i] || slug(label);
           const count = countsByKey[key] || 0;
           const icon = computeEmoji(label, key);
+
           return (
-            <SeccionCardItem
+            <motion.div
               key={key}
-              title={label}
-              icon={icon}
-              count={count}
-              onClick={() => navigate(`/secciones/${encodeURIComponent(key)}`)}
-            />
+              onClick={() =>
+                navigate(`/secciones/${encodeURIComponent(key)}`)
+              }
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              whileHover={{ scale: 1.01 }}
+              className="cursor-pointer bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all flex flex-col justify-between hover:shadow-violet-200"
+            >
+              <div>
+                <h2 className="text-2xl font-bold mb-4 flex justify-between items-center px-2 py-2">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-black via-blue-800 to-violet-800 dark:from-white dark:via-blue-400 dark:to-violet-400">
+                    {label}
+                  </span>
+                  <motion.span
+                    className="text-4xl ml-2"
+                    variants={emojiVariants}
+                    animate="animate"
+                  >
+                    {icon}
+                  </motion.span>
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  Total de registros:{" "}
+                  <span className="font-bold text-blue-600 dark:text-blue-400">
+                    {count}
+                  </span>
+                </p>
+              </div>
+            </motion.div>
           );
         })}
       </div>

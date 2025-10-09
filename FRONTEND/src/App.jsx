@@ -1,3 +1,7 @@
+// ==============================
+// src/App.jsx
+// ==============================
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -15,31 +19,37 @@ import { useUserPlan } from "./hooks/useUserPlan";
 
 // 🖥️ Páginas
 import Dashboard from "./pages/dashboard/Dashboard";
+
+// ==== PRODUCTOS ====
 import ProductosEntrenados from "./pages/productos/productos-entrenados/ProductosEntrenados";
 import ProductosEntrenadosDetalle from "./pages/productos/productos-entrenados-detalle/ProductosEntrenadosDetalle";
 import ProductosSinEntrenamiento from "./pages/productos/productos-sin-entrenamiento/ProductosSinEntrenamiento";
 import ProductosSinEntrenamientoDetalle from "./pages/productos/productos-sin-entrenamiento/ProductoSinEntrenamientoDetalle";
-import ProductoNuevo from "./pages/productos/ProductoNuevo";
 import ProductoModal from "./components/productos/ProductoModal";
 
-import SeccionesPorCategoria from "./pages/secciones/Secciones";
+// ==== SECCIONES ====
+import SeccionesEntrenadas from "./pages/secciones/secciones-entrenadas/SeccionesEntrenadas";
+import SeccionesEntrenadasDetalle from "./pages/secciones/secciones-entrenadas-detalle/SeccionEntrenadasDetalle.jsx";
 import SeccionesSinEntrenamiento from "./pages/secciones/SeccionesSinEntrenamiento";
-import SeccionesEntrenadas from "./pages/secciones/SeccionesEntrenadas";
+import SeccionesPorCategoria from "./pages/secciones/Secciones";
 
+// ==== OTRAS PÁGINAS ====
 import ChatPage from "./pages/chat/ChatPage";
 import Reservas from "./pages/reservas/Reservas";
 import Login from "./pages/Login";
 import UsuariosDashboard from "./UsuariosDashboard";
 
-// 🆕 Layouts
+// 🧱 Layouts
 import SidebarButtons from "./components/layout/SidebarButtons";
 import SidebarMain from "./components/layout/SidebarMain";
 
-// 🧪 Estilos
+// 🎨 Estilos
 import "./index.css";
 import "flowbite/dist/flowbite.css";
 
-// 🆕 Layout estilo Discord
+// ==============================
+// Layout principal (estilo Discord)
+// ==============================
 function AppLayout() {
   const [isMainOpen, setIsMainOpen] = useState(true);
 
@@ -68,6 +78,9 @@ function AppLayout() {
   );
 }
 
+// ==============================
+// AppContent (manejo de rutas)
+// ==============================
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const location = useLocation();
@@ -77,7 +90,10 @@ function AppContent() {
 
   // === Productos globales ===
   const [allProducts, setAllProducts] = useState([]);
+  // === Secciones globales ===
+  const [allSections, setAllSections] = useState([]);
 
+  // Cargar productos
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -88,6 +104,19 @@ function AppContent() {
       }
     }
     fetchProducts();
+  }, []);
+
+  // Cargar secciones
+  useEffect(() => {
+    async function fetchSections() {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/secciones");
+        setAllSections(data);
+      } catch (err) {
+        console.error("❌ Error al cargar secciones:", err);
+      }
+    }
+    fetchSections();
   }, []);
 
   useEffect(() => {
@@ -108,13 +137,16 @@ function AppContent() {
         }
       />
 
-      {/* Layout principal con sidebars */}
+      {/* Layout principal */}
       <Route
-        element={isAuthenticated ? <AppLayout /> : <Navigate to="/login" replace />}
+        element={
+          isAuthenticated ? <AppLayout /> : <Navigate to="/login" replace />
+        }
       >
+        {/* DASHBOARD */}
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Productos */}
+        {/* ==== PRODUCTOS ==== */}
         <Route
           path="/productos-entrenados"
           element={
@@ -136,37 +168,44 @@ function AppContent() {
         <Route
           path="/productos-sin-entrenamiento/:categoriaKey"
           element={
-            <ProductosSinEntrenamientoDetalle 
+            <ProductosSinEntrenamientoDetalle
               allProducts={allProducts}
               planData={planData}
             />
           }
         />
-        {/* <Route path="/producto/nuevo" element={<ProductoNuevo />} /> */}
         <Route
           path="/producto/editar/:id"
           element={<ProductoModal mode="producto" isEditing={true} />}
         />
         <Route
           path="/productos/:categoria/*"
-          element={<ProductosEntrenadosDetalle 
-            allProducts={allProducts}
-            planData={planData}
-          />}
+          element={
+            <ProductosEntrenadosDetalle
+              allProducts={allProducts}
+              planData={planData}
+            />
+          }
         />
 
-        {/* Secciones */}
+        {/* ==== SECCIONES ==== */}
         <Route path="/secciones-entrenadas" element={<SeccionesEntrenadas />} />
         <Route
           path="/secciones-sin-entrenamiento"
           element={<SeccionesSinEntrenamiento />}
         />
-        <Route path="/secciones/:categoria/*" element={<SeccionesPorCategoria />} />
+        <Route
+          path="/secciones/:categoria/*"
+          element={
+            <SeccionesEntrenadasDetalle
+              allSections={allSections}
+              planData={planData}
+            />
+          }
+        />
 
-        {/* Reservas */}
+        {/* ==== OTRAS RUTAS ==== */}
         <Route path="/reservas" element={<Reservas />} />
-
-        {/* Chat y estado asistente */}
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/asistente-estado" element={<UsuariosDashboard />} />
 
@@ -185,6 +224,9 @@ function AppContent() {
   );
 }
 
+// ==============================
+// App principal
+// ==============================
 function App() {
   return (
     <UserProvider>
