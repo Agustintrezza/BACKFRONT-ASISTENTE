@@ -30,7 +30,12 @@ import ProductoModal from "./components/productos/ProductoModal";
 // ==== SECCIONES ====
 import SeccionesEntrenadas from "./pages/secciones/secciones-entrenadas/SeccionesEntrenadas";
 import SeccionesEntrenadasDetalle from "./pages/secciones/secciones-entrenadas-detalle/SeccionEntrenadasDetalle.jsx";
-import SeccionesSinEntrenamiento from "./pages/secciones/SeccionesSinEntrenamiento";
+
+// 🔹 Nuevas páginas separadas de SECCIONES SIN ENTRENAMIENTO
+import SeccionesSinEntrenamiento from "./pages/secciones/secciones-sin-entrenamiento/SeccionesSinEntrenamiento";
+import SeccionesSinEntrenamientoDetalle from "./pages/secciones/secciones-sin-entrenamiento/SeccionesSinEntrenamientoDetalle";
+import SeccionSinEntrenamientoItem from "./pages/secciones/secciones-sin-entrenamiento/SeccionSinEntrenamientoItem";
+
 import SeccionesPorCategoria from "./pages/secciones/Secciones";
 
 // ==== OTRAS PÁGINAS ====
@@ -190,10 +195,28 @@ function AppContent() {
 
         {/* ==== SECCIONES ==== */}
         <Route path="/secciones-entrenadas" element={<SeccionesEntrenadas />} />
+
+        {/* 🔹 NUEVAS RUTAS — SECCIONES SIN ENTRENAMIENTO */}
         <Route
           path="/secciones-sin-entrenamiento"
-          element={<SeccionesSinEntrenamiento />}
+          element={
+            <SeccionesSinEntrenamiento
+              allSections={allSections}
+              planData={planData}
+            />
+          }
         />
+        <Route
+          path="/secciones-sin-entrenamiento/:categoriaKey"
+          element={
+            <SeccionesSinEntrenamientoDetalle
+              allSections={allSections}
+              planData={planData}
+            />
+          }
+        />
+
+        {/* 🔹 Ruta general para detalle entrenadas */}
         <Route
           path="/secciones/:categoria/*"
           element={

@@ -29,12 +29,16 @@ const SPECIAL_KEYS = clientConfig.sections?.specialKeys?.length
 const keyToLabel = Object.fromEntries(
   SPECIAL_LABELS.map((lbl, i) => [SPECIAL_KEYS[i] || slug(lbl), lbl])
 );
+
 const labelToKey = Object.fromEntries(
-  SPECIAL_LABELS.map((lbl, i) => [lbl, SPECIAL_KEYS[i] || slug(lbl), lbl])
+  SPECIAL_LABELS.map((lbl, i) => [lbl, SPECIAL_KEYS[i] || slug(lbl)])
 );
+
 const specialKeySet = new Set(SPECIAL_KEYS);
 
 function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
   const derivedKey =
     sectionKey ||
     seccion?.sectionKey ||
@@ -54,6 +58,7 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
   const [emojiField, setEmojiField] = useState("");
   const pickerRef = useRef();
 
+  // Cargar datos si existe la sección
   useEffect(() => {
     if (seccion) {
       setTitle(seccion.title || keyToLabel[derivedKey] || "");
@@ -65,6 +70,7 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seccion?._id, category, sectionKey]);
 
+  // ===== EMOJIS =====
   const handleEmojiSelect = (emoji) => {
     const value = emoji.native;
     switch (emojiField) {
@@ -83,6 +89,7 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
     setShowEmoji(false);
   };
 
+  // ===== Items =====
   const truncateText = (text, maxLength = 30) =>
     !text ? "" : text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 
@@ -127,22 +134,36 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
     }
   };
 
+  // ===== Guardar Sección =====
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = { title, sectionKey: derivedKey, menuItems };
+
+    const payload = {
+      title: title.trim(),
+      sectionKey: derivedKey,
+      category: category || title.trim(),
+      categoryKey: slug(category || title.trim()),
+      menuItems,
+    };
+
+    console.log("🟣 [create/update Sección] Payload enviado:", payload);
 
     try {
-      if (seccion) {
-        await axios.put(`http://localhost:5000/api/secciones/${seccion._id}`, payload);
+      if (seccion?._id) {
+        const { data } = await axios.put(`${API_URL}/secciones/${seccion._id}`, payload);
+        console.log("✅ [updateSeccion] Respuesta:", data);
       } else {
-        await axios.post("http://localhost:5000/api/secciones", payload);
+        const { data } = await axios.post(`${API_URL}/secciones`, payload);
+        console.log("✅ [createSeccion] Respuesta:", data);
       }
+
       onSuccess();
     } catch (err) {
       console.error("❌ Error al guardar la sección:", err.response?.data || err.message);
     }
   };
 
+  // ===== Render =====
   return (
     <motion.div
       initial={{ opacity: 0, y: 60 }}
@@ -154,11 +175,7 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
       <div className="relative w-full max-w-7xl rounded-3xl bg-gradient-to-br from-white via-violet-50 to-violet-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-900 shadow-xl p-10 overflow-y-auto max-h-[95vh] text-gray-900 dark:text-gray-100">
         {showEmoji && (
           <div ref={pickerRef} className="absolute z-50 right-5 top-5">
-            <Picker
-              data={data}
-              onEmojiSelect={handleEmojiSelect}
-              theme="auto" // 👈 detecta dark/light
-            />
+            <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="auto" />
           </div>
         )}
 
@@ -187,7 +204,10 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Columna izquierda */}
             <div className="space-y-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl p-6 shadow-sm">
-              <Label value="Título de la sección" className="text-violet-800 dark:text-violet-300 font-semibold mb-1" />
+              <Label
+                value="Título de la sección"
+                className="text-violet-800 dark:text-violet-300 font-semibold mb-1"
+              />
               <InputWithEmoji
                 value={title}
                 onChange={setTitle}
@@ -199,7 +219,10 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
                 }}
               />
 
-              <Label value="Título del ítem" className="text-violet-800 dark:text-violet-300 font-semibold mt-2" />
+              <Label
+                value="Título del ítem"
+                className="text-violet-800 dark:text-violet-300 font-semibold mt-2"
+              />
               <InputWithEmoji
                 value={itemTitle}
                 onChange={setItemTitle}
@@ -210,7 +233,10 @@ function SeccionModal({ seccion, category, sectionKey, onClose, onSuccess }) {
                 }}
               />
 
-              <Label value="Detalle del ítem" className="text-violet-800 dark:text-violet-300 font-semibold mt-2" />
+              <Label
+                value="Detalle del ítem"
+                className="text-violet-800 dark:text-violet-300 font-semibold mt-2"
+              />
               <TextareaWithEditor value={itemDetail} onChange={setItemDetail} rows={5} />
 
               <input

@@ -33,6 +33,8 @@ const keyToLabel = Object.fromEntries(
 );
 
 function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
   // === Preparar claves y etiquetas ===
   const derivedKey =
     seccion?.sectionKey ||
@@ -48,6 +50,7 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
 
   // === Pre-carga de datos al editar ===
   useEffect(() => {
+    console.log("🟣 useEffect => seccion:", seccion);
     if (seccion) {
       const menuItem = seccion.menuItems?.[0];
       setSectionTitle(seccion.title || visibleLabel);
@@ -74,9 +77,12 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
       });
     }
 
+    // 🟣 Payload con category y categoryKey
     const payload = {
       title: sectionTitle?.trim() || visibleLabel,
       sectionKey: derivedKey,
+      category: category || sectionTitle?.trim(),
+      categoryKey: slug(category || sectionTitle?.trim()),
       menuItems: [
         {
           title: itemTitle.trim(),
@@ -87,12 +93,20 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
     };
 
     const url = seccion
-      ? `http://localhost:5000/api/secciones/${seccion._id}`
-      : `http://localhost:5000/api/secciones`;
+      ? `${API_URL}/secciones/${seccion._id}`
+      : `${API_URL}/secciones`;
+
+    console.log("🟣 [SeccionEntrenadaModal] URL:", url);
+    console.log("🟣 [SeccionEntrenadaModal] Payload:", payload);
 
     try {
-      if (seccion) await axios.put(url, payload);
-      else await axios.post(url, payload);
+      if (seccion) {
+        const { data } = await axios.put(url, payload);
+        console.log("✅ PUT response:", data);
+      } else {
+        const { data } = await axios.post(url, payload);
+        console.log("✅ POST response:", data);
+      }
 
       Swal.fire({
         icon: "success",
@@ -103,11 +117,13 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
 
       onSuccess();
     } catch (err) {
-      console.error("Error al guardar tarjeta:", err);
+      console.error("❌ Error al guardar tarjeta:", err.response?.data || err.message);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Ocurrió un error al guardar.",
+        text:
+          err.response?.data?.error ||
+          "Ocurrió un error al guardar la tarjeta.",
         confirmButtonColor: "#ef4444",
       });
     }
@@ -169,11 +185,7 @@ function SeccionEntrenadaModal({ seccion, category, onClose, onSuccess }) {
                 value="Contenido / respuesta"
                 className="text-violet-800 dark:text-violet-300 font-semibold mb-1"
               />
-              <TextareaWithEditor
-                value={detail}
-                onChange={setDetail}
-                rows={10}
-              />
+              <TextareaWithEditor value={detail} onChange={setDetail} rows={10} />
             </div>
           </div>
 
