@@ -1,26 +1,30 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
   crearReserva,
   obtenerReservas,
   obtenerReservaPorId,
   actualizarEstado,
-  eliminarReserva
-} = require('../controllers/reservaController');
+  eliminarReserva,
+  descargarReservas,
+} = require("../controllers/reservaController");
 
 // ✅ Crear una nueva reserva
-router.post('/', crearReserva);
+router.post("/", crearReserva);
 
 // 📋 Obtener todas las reservas
-router.get('/', obtenerReservas);
+router.get("/", obtenerReservas);
 
-// 🔍 Obtener una reserva específica por ID
-router.get('/:id', obtenerReservaPorId);
+// 🔍 Obtener una reserva específica
+router.get("/:id", obtenerReservaPorId);
 
-// 🔄 Actualizar el estado de una reserva
-router.patch('/:id', actualizarEstado); // ✅ ahora coincide con el frontend
+// 🔄 Actualizar estado
+router.patch("/:id", actualizarEstado);
 
 // 🗑️ Eliminar una reserva
-router.delete('/:id', eliminarReserva);
+router.delete("/:id", eliminarReserva);
+
+// 📦 Descargar todas las reservas (Excel)
+router.get("/descargar/excel", descargarReservas);
 
 module.exports = router;
