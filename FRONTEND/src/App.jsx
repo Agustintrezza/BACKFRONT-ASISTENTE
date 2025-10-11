@@ -17,8 +17,10 @@ import axios from "axios";
 import { UserProvider } from "./context/UserContext";
 import { useUserPlan } from "./hooks/useUserPlan";
 
-// 🖥️ Páginas
+// 🖥️ Páginas principales
 import Dashboard from "./pages/dashboard/Dashboard";
+import Login from "./pages/Login";
+import UsuariosDashboard from "./UsuariosDashboard";
 
 // ==== PRODUCTOS ====
 import ProductosEntrenados from "./pages/productos/productos-entrenados/ProductosEntrenados";
@@ -30,19 +32,17 @@ import ProductoModal from "./components/productos/ProductoModal";
 // ==== SECCIONES ====
 import SeccionesEntrenadas from "./pages/secciones/secciones-entrenadas/SeccionesEntrenadas";
 import SeccionesEntrenadasDetalle from "./pages/secciones/secciones-entrenadas-detalle/SeccionEntrenadasDetalle.jsx";
-
-// 🔹 Nuevas páginas separadas de SECCIONES SIN ENTRENAMIENTO
 import SeccionesSinEntrenamiento from "./pages/secciones/secciones-sin-entrenamiento/SeccionesSinEntrenamiento";
 import SeccionesSinEntrenamientoDetalle from "./pages/secciones/secciones-sin-entrenamiento/SeccionesSinEntrenamientoDetalle";
 import SeccionSinEntrenamientoItem from "./pages/secciones/secciones-sin-entrenamiento/SeccionSinEntrenamientoItem";
-
 import SeccionesPorCategoria from "./pages/secciones/Secciones";
 
-// ==== OTRAS PÁGINAS ====
-import ChatPage from "./pages/chat/ChatPage";
+// ==== RESERVAS (nueva versión con cards) ====
 import Reservas from "./pages/reservas/Reservas";
-import Login from "./pages/Login";
-import UsuariosDashboard from "./UsuariosDashboard";
+import ReservaCard from "./pages/reservas/ReservasCard.jsx";
+
+// ==== CHAT ====
+import ChatPage from "./pages/chat/ChatPage";
 
 // 🧱 Layouts
 import SidebarButtons from "./components/layout/SidebarButtons";
@@ -66,7 +66,7 @@ function AppLayout() {
         onToggleMainSidebar={() => setIsMainOpen((prev) => !prev)}
       />
 
-      {/* Sidebar principal con transición */}
+      {/* Sidebar principal */}
       <div
         className={`transition-all duration-300 ease-in-out overflow-hidden ${
           isMainOpen ? "max-w-[240px] opacity-100" : "max-w-0 opacity-0"
@@ -89,16 +89,12 @@ function AppLayout() {
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const location = useLocation();
-
-  // === Plan del usuario ===
   const planData = useUserPlan();
 
-  // === Productos globales ===
   const [allProducts, setAllProducts] = useState([]);
-  // === Secciones globales ===
   const [allSections, setAllSections] = useState([]);
 
-  // Cargar productos
+  // === Cargar productos ===
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -111,7 +107,7 @@ function AppContent() {
     fetchProducts();
   }, []);
 
-  // Cargar secciones
+  // === Cargar secciones ===
   useEffect(() => {
     async function fetchSections() {
       try {
@@ -124,6 +120,7 @@ function AppContent() {
     fetchSections();
   }, []);
 
+  // === Autenticación ===
   useEffect(() => {
     setIsAuthenticated(!!localStorage.getItem("token"));
   }, [location]);
@@ -195,8 +192,6 @@ function AppContent() {
 
         {/* ==== SECCIONES ==== */}
         <Route path="/secciones-entrenadas" element={<SeccionesEntrenadas />} />
-
-        {/* 🔹 NUEVAS RUTAS — SECCIONES SIN ENTRENAMIENTO */}
         <Route
           path="/secciones-sin-entrenamiento"
           element={
@@ -215,8 +210,6 @@ function AppContent() {
             />
           }
         />
-
-        {/* 🔹 Ruta general para detalle entrenadas */}
         <Route
           path="/secciones/:categoria/*"
           element={
@@ -227,9 +220,13 @@ function AppContent() {
           }
         />
 
-        {/* ==== OTRAS RUTAS ==== */}
+        {/* ==== RESERVAS ==== */}
         <Route path="/reservas" element={<Reservas />} />
+
+        {/* ==== CHAT ==== */}
         <Route path="/chat" element={<ChatPage />} />
+
+        {/* ==== ESTADO DEL ASISTENTE ==== */}
         <Route path="/asistente-estado" element={<UsuariosDashboard />} />
 
         {/* Fallback */}

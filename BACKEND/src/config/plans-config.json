@@ -28,7 +28,7 @@
     "maxUsers": 40,
     "maxConsultas": 3000,
     "maxConversaciones": 40,
-    "maxReservas": 5,
+    "maxReservas": 8,
     "channels": ["web", "whatsapp", "instagram"],
     "maxProductosComodines": 5,
     "maxSeccionesComodines": 5,

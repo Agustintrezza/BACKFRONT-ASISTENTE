@@ -106,7 +106,7 @@ function SeccionesEntrenadas() {
       {/* Header + botones */}
       <div className="flex justify-between items-start mb-6 flex-wrap gap-3">
         <motion.h1
-          className="text-4xl font-extrabold"
+          className="text-3xl font-extrabold"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
