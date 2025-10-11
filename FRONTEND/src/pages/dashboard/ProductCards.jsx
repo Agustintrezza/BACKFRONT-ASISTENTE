@@ -1,4 +1,3 @@
-// src/pages/dashboard/ProductCards.jsx
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { Progress } from "flowbite-react";
@@ -16,7 +15,17 @@ const ProductCard = ({
     (acc, label) => acc + countProductosByLabel(label),
     0
   );
-  const totalSinEntrenar = productosSinEntrenarItems.length;
+
+  // ===== Agrupar productos sin entrenar por categoría =====
+  const categoriasCount = {};
+  productosSinEntrenarItems.forEach((p) => {
+    const cat = p.category || p.categoryKey || "Sin categoría";
+    if (!categoriasCount[cat]) categoriasCount[cat] = 0;
+    categoriasCount[cat]++;
+  });
+
+  const categoriasSinEntrenar = Object.keys(categoriasCount);
+  const totalSinEntrenar = categoriasSinEntrenar.length;
   const totalProductos = totalEntrenados + totalSinEntrenar;
 
   // ===== Límite del plan =====
@@ -99,8 +108,10 @@ const ProductCard = ({
           <ul className="list-disc list-inside text-sm 
                          text-gray-800 dark:text-gray-200 
                          max-h-[120px] overflow-y-auto space-y-1">
-            {productosSinEntrenarItems.map((p) => (
-              <li key={p._id}>📦 {p.title}</li>
+            {categoriasSinEntrenar.map((cat) => (
+              <li key={cat}>
+                📦 {cat} (<span className="font-bold">{categoriasCount[cat]}</span>)
+              </li>
             ))}
           </ul>
         )}

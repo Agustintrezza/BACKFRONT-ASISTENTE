@@ -1,4 +1,3 @@
-// src/pages/dashboard/SectionCard.jsx
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { Progress } from "flowbite-react";
@@ -16,7 +15,17 @@ const SectionCard = ({
     (acc, label) => acc + countSeccionesByLabel(label),
     0
   );
-  const totalSinEntrenar = seccionesSinEntrenarItems.length;
+
+  // ===== Agrupar secciones sin entrenar por categoría =====
+  const categoriasCount = {};
+  seccionesSinEntrenarItems.forEach((s) => {
+    const cat = s.category || s.key || "Sin categoría";
+    if (!categoriasCount[cat]) categoriasCount[cat] = 0;
+    categoriasCount[cat]++;
+  });
+
+  const categoriasSinEntrenar = Object.keys(categoriasCount);
+  const totalSinEntrenar = categoriasSinEntrenar.length;
   const totalSecciones = totalEntrenadas + totalSinEntrenar;
 
   // ===== Límite del plan =====
@@ -99,8 +108,10 @@ const SectionCard = ({
           <ul className="list-disc list-inside text-sm 
                          text-gray-800 dark:text-gray-200 
                          max-h-[120px] overflow-y-auto space-y-1">
-            {seccionesSinEntrenarItems.map((s) => (
-              <li key={s._id}>🧩 {s.title || "Sin título"}</li>
+            {categoriasSinEntrenar.map((cat) => (
+              <li key={cat}>
+                🧩 {cat} (<span className="font-bold">{categoriasCount[cat]}</span>)
+              </li>
             ))}
           </ul>
         )}

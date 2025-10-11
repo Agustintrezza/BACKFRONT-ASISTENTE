@@ -147,7 +147,7 @@ function DashboardContent({
 
         {/* Conversaciones */}
         <motion.div
-          onClick={() => navigate("/conversaciones")}
+          onClick={() => navigate("/chat")}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}

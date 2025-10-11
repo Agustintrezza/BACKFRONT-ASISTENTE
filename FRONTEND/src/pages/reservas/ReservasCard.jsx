@@ -121,7 +121,7 @@ function ReservaCard({
         {/* Producto con tooltip usando Tippy */}
         <div className="col-span-2 flex items-center gap-1.5">
   {/* <span className="text-[17px]">🎯</span> */}
-  <span className="font-semibold text-violet-700 dark:text-violet-300">
+  <span className="font-semibold py-1 text-violet-700 dark:text-violet-300">
     Producto:
   </span>{" "}
   {showTooltip ? (
