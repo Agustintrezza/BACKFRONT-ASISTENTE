@@ -48,8 +48,8 @@ export default function Reservas() {
       setReservas((prev) =>
         prev.map((r) => (r._id === id ? { ...r, estado: nuevoEstado } : r))
       );
-    } catch (error) {
-      Swal.fire("Error", "No se pudo actualizar el estado", error);
+    } catch {
+      Swal.fire("Error", "No se pudo actualizar el estado", "error");
     }
   };
 
@@ -167,7 +167,7 @@ export default function Reservas() {
   let alertaTexto = "";
   if (alcanzadoMaximo) {
     alertaColor = "red";
-    alertaTexto = `⚠️ Alcanzaste el máximo de ${maxReservas} reservas (${planName}). Se elimina las última creada.`;
+    alertaTexto = `⚠️ Alcanzaste el máximo de ${maxReservas} reservas (${planName}). Se eliminará la última creada.`;
   } else if (cercaDelLimite) {
     alertaColor = "yellow";
     alertaTexto = `⚠️ Solo quedan ${restantes} reservas disponibles (${planName}).`;
@@ -176,80 +176,78 @@ export default function Reservas() {
   return (
     <div className="p-4 sm:p-6 min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200">
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-3 mb-4">
-        <div className="flex-1">
-          <h1 className="text-2xl font-extrabold text-violet-800 dark:text-violet-400 mb-2">
-            📋 Reservas
-          </h1>
+      <div className="flex flex-col gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex items-center flex-wrap gap-3">
+            <h1 className="text-2xl font-extrabold text-violet-800 dark:text-violet-400">
+              📋 Reservas
+            </h1>
 
-          {alertaTexto ? (
-            <div
-              className={`px-3 py-2 border rounded-lg text-sm font-medium break-words ${
-                alertaColor === "red"
-                  ? "bg-red-100 border-red-400 text-red-700"
-                  : "bg-yellow-100 border-yellow-400 text-yellow-800"
-              }`}
+            {alertaTexto ? (
+              <div
+                className={`px-3 py-1.5 border rounded-lg text-sm font-medium break-words ${
+                  alertaColor === "red"
+                    ? "bg-red-100 border-red-400 text-red-700"
+                    : "bg-yellow-100 border-yellow-400 text-yellow-800"
+                }`}
+              >
+                {alertaTexto}
+              </div>
+            ) : (
+              <div className="px-3 py-1.5 bg-green-50 border border-green-400 text-green-700 rounded-lg text-sm font-medium">
+                📊 {reservas.length}/{maxReservas} reservas activas — Plan{" "}
+                <b>{planName}</b>
+              </div>
+            )}
+          </div>
+
+          {/* BOTONES */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+            <Button
+              onClick={descargarExcel}
+              color="blue"
+              size="sm"
+              className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 w-full sm:w-auto"
             >
-              {alertaTexto}
-            </div>
-          ) : (
-            <div className="px-3 py-2 bg-green-50 border border-green-400 text-green-700 rounded-lg text-sm font-medium">
-              📊 {reservas.length}/{maxReservas} reservas activas — Plan{" "}
-              <b>{planName}</b>
-            </div>
-          )}
-        </div>
+              <HiDownload className="text-lg" /> Descargar
+            </Button>
 
-        {/* Botones más compactos y adaptables */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-          <Button
-            onClick={descargarExcel}
-            color="blue"
-            size="sm"
-            className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 w-full sm:w-auto"
-          >
-            <HiDownload className="text-lg" /> Descargar
-          </Button>
-
-          <motion.button
-            onClick={() => navigate("/dashboard")}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
-          >
-            ⬅️ Volver
-          </motion.button>
+            <motion.button
+              onClick={() => navigate("/dashboard")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
+            >
+              ⬅️ Volver
+            </motion.button>
+          </div>
         </div>
       </div>
 
       {/* FILTROS */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-5">
-        <div className="sm:col-span-2 flex gap-2">
-          <TextInput
-            placeholder="Buscar nombre"
-            value={filtroNombre}
-            onChange={(e) => setFiltroNombre(e.target.value)}
-            className="text-sm flex-1"
-          />
-          <TextInput
-            type="date"
-            value={filtroFecha}
-            onChange={(e) => setFiltroFecha(e.target.value)}
-            className="text-sm flex-1"
-          />
-        </div>
-
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <TextInput
+          placeholder="Buscar nombre"
+          value={filtroNombre}
+          onChange={(e) => setFiltroNombre(e.target.value)}
+          className="text-sm flex-1 min-w-[180px] h-[42px] leading-none"
+        />
+        <TextInput
+          type="date"
+          value={filtroFecha}
+          onChange={(e) => setFiltroFecha(e.target.value)}
+          className="text-sm flex-1 min-w-[160px] h-[42px] leading-none"
+        />
         <Select
           value={filtroEstado}
           onChange={(e) => setFiltroEstado(e.target.value)}
-          className="text-sm"
+          className="text-sm flex-1 min-w-[140px] h-[42px] leading-none"
         >
           <option value="">Todos</option>
           <option value="pendiente">Pendiente</option>
           <option value="atendida">Atendida</option>
           <option value="cerrada">Cerrada</option>
         </Select>
-
         <Button
           color="gray"
           size="sm"
@@ -258,9 +256,9 @@ export default function Reservas() {
             setFiltroFecha("");
             setFiltroEstado("");
           }}
-          className="bg-gray-200 text-gray-800 hover:bg-gray-300 text-sm"
+          className="bg-gray-200 text-gray-800 hover:bg-gray-300 text-sm flex items-center justify-center min-w-[120px] h-[42px] leading-none"
         >
-          <HiRefresh className="mr-1" /> Limpiar
+          <HiRefresh className="mr-1 text-base" /> Limpiar
         </Button>
       </div>
 

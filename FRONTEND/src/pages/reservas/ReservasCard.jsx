@@ -91,9 +91,9 @@ function ReservaCard({
       </div>
 
       {/* CONTENIDO */}
-      <div className="grid grid-cols-2 sm:grid-cols-1 md:grid-cols-2 gap-x-2 text-[12.5px] text-gray-700 dark:text-gray-300 mb-2">
+      <div className="grid grid-cols-2 sm:grid-cols-1 md:grid-cols-2 text-[12.5px] text-gray-700 dark:text-gray-300 mb-2">
         <p className="flex items-center gap-1">
-          <span className="text-[17px]">👥</span>
+          {/* <span className="text-[17px]">👥</span> */}
           <span className="font-semibold text-violet-700 dark:text-violet-300">
             Pasajeros:
           </span>{" "}
@@ -101,16 +101,16 @@ function ReservaCard({
         </p>
 
         <p className="flex items-center gap-1.5 break-words">
-          <span className="text-[17px]">📞</span>
+          {/* <span className="text-[17px]">📞</span> */}
           <span className="font-semibold text-violet-700 dark:text-violet-300">
             Teléfono:
           </span>{" "}
-          <span className="break-all">{reserva.telefono}</span>
+          <span className="break-all text-[11px]">{reserva.telefono}</span>
         </p>
 
         {reserva.email && (
           <p className="col-span-2 flex items-center gap-1.5 truncate">
-            <span className="text-[17px]">📧</span>
+            {/* <span className="text-[17px]">📧</span> */}
             <span className="font-semibold text-violet-700 dark:text-violet-300">
               Email:
             </span>{" "}
@@ -120,7 +120,7 @@ function ReservaCard({
 
         {/* Producto con tooltip usando Tippy */}
         <div className="col-span-2 flex items-center gap-1.5">
-  <span className="text-[17px]">🎯</span>
+  {/* <span className="text-[17px]">🎯</span> */}
   <span className="font-semibold text-violet-700 dark:text-violet-300">
     Producto:
   </span>{" "}
@@ -170,7 +170,7 @@ function ReservaCard({
 
         {/* Fecha */}
         <p className="col-span-2 flex items-center gap-1.5">
-          <span className="text-[17px]">📅</span>
+          {/* <span className="text-[17px]">📅</span> */}
           <span className="font-semibold text-violet-700 dark:text-violet-300">
             Fecha:
           </span>{" "}

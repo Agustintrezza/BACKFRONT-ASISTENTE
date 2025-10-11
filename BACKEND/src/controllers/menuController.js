@@ -1,6 +1,6 @@
-// controllers/menu.controller.js
 const Producto = require('../models/Productos');
 const Seccion = require('../models/Secciones');
+const { slugify } = require('../utils/slugify');
 
 exports.getMenu = async (req, res) => {
   try {
@@ -17,8 +17,8 @@ exports.getMenu = async (req, res) => {
 
       if (!categoriasMap[key]) {
         categoriasMap[key] = {
-          key,                                        // clave estable
-          categoria: visibleName,                     // rótulo visible
+          key,
+          categoria: visibleName,
           type: "categoria_producto",
           link: null,
           children: [],
@@ -41,30 +41,39 @@ exports.getMenu = async (req, res) => {
     // Insertar categorías de productos al menú
     Object.values(categoriasMap).forEach((cat) => menuItems.push(cat));
 
-    // 🧩 Agrupar secciones por key (clave estable)
+    // 🧩 Agrupar secciones correctamente (compatibilidad con modelo viejo y nuevo)
     const seccionesMap = {};
     secciones.forEach((seccion) => {
-      const key = (seccion.key || "").trim();
-      const titulo = (seccion.title || "").trim();
+      const key =
+        (seccion.key ||
+          seccion.categoryKey ||
+          slugify(seccion.title) ||
+          "").trim();
+      const titulo =
+        (seccion.title || seccion.category || "Sin título").trim();
 
-      if (!key) return; // sanity
+      if (!key) return;
 
       if (!seccionesMap[key]) {
         seccionesMap[key] = {
           id: seccion._id,
-          key,                 // clave estable
-          title: titulo,       // rótulo visible
+          key,
+          title: titulo,
           type: "section",
-          link: seccion.link,
+          link: seccion.link || null,
           children: [],
         };
       }
 
+      // 🧠 Compatibilidad: puede venir "menuItems" o "items"
+      const items = seccion.menuItems || seccion.items || [];
+
+      // cada item debe tener title/detail/link
       seccionesMap[key].children.push(
-        ...(seccion.menuItems || []).map((item) => ({
-          title: item.title,
-          detail: item.detail,
-          link: item.link,
+        ...items.map((item) => ({
+          title: item.title || "",
+          detail: item.detail || "",
+          link: item.link || "",
         }))
       );
     });
@@ -72,9 +81,10 @@ exports.getMenu = async (req, res) => {
     // Insertar secciones agrupadas al menú
     Object.values(seccionesMap).forEach((section) => menuItems.push(section));
 
+    // ✅ Responder menú final
     res.json(menuItems);
   } catch (error) {
-    console.error("Error generando el menú:", error);
+    console.error("❌ Error generando el menú:", error);
     res.status(500).json({ error: error.message });
   }
 };
