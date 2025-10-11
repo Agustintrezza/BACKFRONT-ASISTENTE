@@ -1,3 +1,4 @@
+// context/UserContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import { getUserFromToken } from "../utils/getUserFromToken";
 
@@ -13,8 +14,15 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
+  // 🔐 Función global de logout
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    window.location.href = "/login"; // Redirige al login
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, logout }}>
       {children}
     </UserContext.Provider>
   );
